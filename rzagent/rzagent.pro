@@ -4,12 +4,19 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = rzagent
 TEMPLATE = app
+
+DEFINES += DESKTOP
+
+target.file = $${TARGET}
+target.path = /home/root
+INSTALLS += target
+
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -24,8 +31,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    logentity.cpp \
+    serverlogentities.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    logentity.h \
+    serverlogentities.h
 
 FORMS    += mainwindow.ui

@@ -1,11 +1,23 @@
-#ifndef UMXENTITIES_H
-#define UMXENTITIES_H
+#ifndef SERVERLOGENTITIES_H
+#define SERVERLOGENTITIES_H
 
+#include <QtSql/QSqlDatabase>
+#include <QList>
+#include "logentity.h"
 
-class UMXEntities
+class ServerLogEntities
 {
 public:
-    UMXEntities();
+    ServerLogEntities();
+    ~ServerLogEntities();
+    const int open();
+    void close();
+
+    QList<LogEntity *> m_logsList;
+    int logsListSize() {return m_logsList.size();}
+
+private:
+    QSqlDatabase m_db;
 };
 
-#endif // UMXENTITIES_H
+#endif // SERVERLOGENTITIES_H
