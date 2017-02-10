@@ -30,6 +30,30 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
+
+INCLUDEPATH += ../lib \
+               ../include \
+               ../lib/umxPeriDevLib/inc
+
+LIBS += \
+        -L../lib/NeoFace \
+        -lneofacem400 \
+        -L../lib/Neuro \
+        -lNBiometricClient -lNBiometrics -lNDevices -lNMedia -lNLicensing -lNCore -lNMediaProc \
+        -L../lib/libs \
+        -lumxAlgo \
+        -lumxCam \
+        -lumxNet \
+        -lumxDB \
+        -lumxCommon \
+        -L../lib/umxPeriDevLib \
+        -lumxPeriDev \
+        -L../lib/Poco -lPocoData -lPocoDataSQLite -lPocoFoundation -lPocoXML -lPocoUtil -lPocoNet \
+        -fopenmp \
+        -lopencv_core -lopencv_imgproc -lopencv_objdetect -lopencv_highgui \
+        -L../lib/mcrypt \
+        -lmcrypt
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     logentity.cpp \

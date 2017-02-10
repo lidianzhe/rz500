@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.2.1, 2017-02-08T17:50:15. -->
+<!-- Written by QtCreator 4.2.1, 2017-02-09T16:59:11. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{404f0290-4d2c-4400-867c-025d789c2230}</value>
+  <value type="QByteArray">{26e9fbe9-f0db-4ada-b173-980e03020f4c}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -66,7 +66,7 @@
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/aizhetouch/temp/build-rzagent-Desktop_Qt_5_8_0_GCC_64bit-Debug</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/lihongjun/rz500/build-rzagent-Desktop_Qt_5_8_0_GCC_64bit-Debug</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -303,14 +303,14 @@
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">rzagent</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/aizhetouch/rz500/rzagent/rzagent.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">rzagent2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/lihongjun/rz500/rzagent/rzagent.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments"></value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">rzagent.pro</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix">false</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory"></value>
-    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory.default">/home/aizhetouch/temp/build-rzagent-UMX_KIT-Debug</value>
+    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory.default">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug</value>
     <value type="uint" key="RunConfiguration.QmlDebugServerPort">3768</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
@@ -324,14 +324,14 @@
  <data>
   <variable>ProjectExplorer.Project.Target.1</variable>
   <valuemap type="QVariantMap">
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">UMX-KIT</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">UMX-KIT</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{9d074d77-00b7-497a-acff-591611015bac}</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">UMX-Kit</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">UMX-Kit</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{662aed80-303e-483d-ba23-0676d3bf2d9a}</value>
    <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/aizhetouch/temp/build-rzagent-UMX_KIT-Debug</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -391,7 +391,7 @@
     <value type="bool" key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/aizhetouch/rz500/build-rzagent-UMX_KIT-Release</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Release</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -472,19 +472,24 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteLinux.DirectUploadStep</value>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles">
-       <value type="QString">/home/aizhetouch/temp/build-rzagent-UMX_KIT-Debug/rzagent</value>
+       <value type="QString">/home/lihongjun/temp/build-rzagent-UMX_Kit-Debug/rzagent</value>
+       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts">
-       <value type="QString">192.168.0.51</value>
+       <value type="QString">192.168.0.19</value>
+       <value type="QString">192.168.0.19</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths">
+       <value type="QString">/home/root</value>
        <value type="QString">/home/root</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedSysroots">
        <value type="QString"></value>
+       <value type="QString"></value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedTimes">
-       <value type="QDateTime">2017-02-08T17:47:54</value>
+       <value type="QDateTime">2017-02-09T06:01:24</value>
+       <value type="QDateTime">2017-02-09T06:06:02</value>
       </valuelist>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.IgnoreMissingFiles">false</value>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.Incremental">true</value>
