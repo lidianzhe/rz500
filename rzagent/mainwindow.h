@@ -2,6 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStackedWidget>
+#include "statusform.h"
+
+//For 90' rotation(size : 854 X 480)
+#define UMX_DEVICE_HEIGHT 40
+#define UMX_DEVICE_WIDTH 454
 
 namespace Ui {
 class MainWindow;
@@ -15,8 +21,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void initUI(QWidget *parent);
 private:
     Ui::MainWindow *ui;
+    QStackedWidget *_pQStackedWidget;
+    StatusForm *_pStatusForm;
 };
 
 #endif // MAINWINDOW_H

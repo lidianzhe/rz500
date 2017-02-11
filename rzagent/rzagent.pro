@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql network
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -57,10 +57,13 @@ LIBS += \
 SOURCES += main.cpp\
         mainwindow.cpp \
     logentity.cpp \
-    serverlogentities.cpp
+    serverlogentities.cpp \
+    statusform.cpp
 
 HEADERS  += mainwindow.h \
     logentity.h \
-    serverlogentities.h
+    serverlogentities.h \
+    statusform.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    statusform.ui
