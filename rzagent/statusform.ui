@@ -6,63 +6,92 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>454</width>
+    <width>520</width>
     <height>40</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="mainpanel" native="true">
+  <widget class="QWidget" name="textBackground" native="true">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>461</width>
-     <height>41</height>
+     <width>520</width>
+     <height>40</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(46, 52, 54);</string>
+   <property name="font">
+    <font>
+     <family>Noto Sans CJK KR</family>
+    </font>
    </property>
-   <widget class="QSplitter" name="splitter">
+   <widget class="QWidget" name="leftTextbar" native="true">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>64</width>
-      <height>25</height>
+      <x>0</x>
+      <y>0</y>
+      <width>20</width>
+      <height>40</height>
      </rect>
     </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
+    <property name="font">
+     <font>
+      <family>Noto Sans CJK KR</family>
+     </font>
     </property>
-    <widget class="QLabel" name="label">
+   </widget>
+   <widget class="QWidget" name="centerTextbar" native="true">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>0</y>
+      <width>480</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Sans CJK KR</family>
+     </font>
+    </property>
+    <widget class="QLabel" name="infoText">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>480</width>
+       <height>40</height>
+      </rect>
+     </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <family>Noto Sans CJK KR</family>
       </font>
      </property>
-     <property name="styleSheet">
-      <string notr="true">color: rgb(136, 138, 133);</string>
-     </property>
      <property name="text">
-      <string>状态</string>
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="msglabel">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">color: rgb(136, 138, 133);</string>
-     </property>
-     <property name="text">
-      <string>状态</string>
-     </property>
-    </widget>
+   </widget>
+   <widget class="QWidget" name="rightTextbar" native="true">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>0</y>
+      <width>20</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Sans CJK KR</family>
+     </font>
+    </property>
    </widget>
   </widget>
  </widget>

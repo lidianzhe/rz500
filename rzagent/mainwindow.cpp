@@ -24,7 +24,7 @@ MainWindow::~MainWindow()
 void MainWindow::initUI(QWidget *parent)
 {
     setFixedSize(UMX_DEVICE_HEIGHT,UMX_DEVICE_WIDTH);
-    this->setGeometry(0,200,80,60);
+    this->setGeometry(0,167,80,60);
     _pQStackedWidget = new QStackedWidget();
     _pQStackedWidget->setFixedSize(UMX_DEVICE_WIDTH, UMX_DEVICE_HEIGHT);
     _pStatusForm= new StatusForm(_pQStackedWidget);
@@ -40,11 +40,8 @@ void MainWindow::initUI(QWidget *parent)
     view->setAutoFillBackground(true);
     view->setFixedWidth(UMX_DEVICE_HEIGHT);
     view->setFixedHeight(UMX_DEVICE_WIDTH);
-    view->setStyleSheet("background-color:transparent;");
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    //view->showFullScreen();
     view->rotate(90);
     view->show();
 

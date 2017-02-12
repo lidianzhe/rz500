@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/button_nor.png</file>
+        <file>images/button_press.png</file>
+        <file>images/guideline_left.png</file>
+        <file>images/guideline_right.png</file>
+        <file>images/icon_fail.png</file>
+        <file>images/icon_success.png</file>
+        <file>images/textbar_center.png</file>
+        <file>images/textbar_left.png</file>
+        <file>images/textbar_right.png</file>
+    </qresource>
+</RCC>

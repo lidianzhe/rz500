@@ -7,7 +7,7 @@
 
 //For 90' rotation(size : 854 X 480)
 #define UMX_DEVICE_HEIGHT 40
-#define UMX_DEVICE_WIDTH 454
+#define UMX_DEVICE_WIDTH 520
 
 namespace Ui {
 class MainWindow;

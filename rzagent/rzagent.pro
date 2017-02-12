@@ -4,9 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QMAKE_CXXFLAGS += -std=c++0x
 
 TARGET = rzagent
 TEMPLATE = app
@@ -67,3 +68,6 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     statusform.ui
+
+RESOURCES += \
+    images.qrc
