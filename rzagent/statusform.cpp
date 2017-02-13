@@ -13,7 +13,10 @@ using Poco::AutoPtr;
 
 #include "umxDBLib/umxDB.h"
 #include "umxCommonLib/umxCommonGlobal.h"
-
+/*
+insert into camera_configuration (id,serialNumber,Mode) values(
+1,'HC0709A000302','Recog')
+*/
 StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     QDialog(parent),_logger(Poco::Logger::get("rzagent")),
     ui(new Ui::StatusForm)
@@ -34,49 +37,54 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
 
     // config logger
-    _config = new Poco::Util::PropertyFileConfiguration("/home/root/rzagent.properties");
-    //_config->setString("umx.device.serialnumber","HC0709A000231");
-    //_config->save("/home/root/rzagent.properties");
+    _config = new Poco::Util::PropertyFileConfiguration("/usr/local/bin/umxLauncher.properties");
+    //HC0709A000231
+    _config->setString("umx.device.serialnumber","HC0709A000302");
+    _config->save("/usr/local/bin/umxLauncher.properties");
     std::string s=_config->getString("application.logger");
     std::cout<<s<<std::endl;
     std::cout<<"write serialnumber:"<<_config->getString("umx.device.serialnumber")<<std::endl;
     initlog();
 
     // umxDBLib
-    int retDB = umxDB_create(&_gUmxDBHandle, _logger.get("umxDBLib"), _config);
+    int retDB = umxDB_create(&_umxDBHandle, _logger.get("umxDBLib"), _config);
     poco_information(_logger,"open database");
     std::cout << "call umxDB_create" <<std::endl;
     ui->infoText->setText("open database");
-
     //
-    UMXCommon::CameraConfiguration *_cameraConfig = new UMXCommon::CameraConfiguration();
-    std::string sn =_cameraConfig->GetSerialNumber();
-    std::cout<<"getid" <<_cameraConfig->GetId() <<std::endl;
-    std::cout<<"sn: "<<sn<<std::endl;
-    //delete _cameraConfig;
-    ImageCapture *_imageCapture = new ImageCapture();
-    std::cout << "sn=" <<_imageCapture->GetSerialNumber()<<std::endl;
+    int lastLogId;
+    retDB = umxDB_selectLastLogID(_umxDBHandle,&lastLogId);
+    if(retDB==UMXDB_SUCCESS)
+        std::cout<<"last log id: "<<lastLogId<<std::endl;
+    LogEntry logEntry;
+    retDB = umxDB_selectLogEntryById(_umxDBHandle,lastLogId,&logEntry);
+    if(retDB==UMXDB_SUCCESS)
+    {
+        ui->infoText->setText("read last log success.");
+        std::cout<<"uuid="<<logEntry.GetUserUUID()<<" | eventtype="<<logEntry.GetEventType()<<" | additional data="<<logEntry.GetAdditionalData()<<
+                " | info="<<logEntry.GetInfo()<<std::endl;
+    }
+umxDB_selectLogEntryByPage()
 
 }
 
 StatusForm::~StatusForm()
 {
-
     // umxDBLib
-    umxDB_destroy(_gUmxDBHandle);
+    umxDB_destroy(_umxDBHandle);
 
     delete ui;
 }
-
+//
 void StatusForm::initlog()
 {
 //HC0709A000231
     AutoPtr<FileChannel> pChannel(new FileChannel);
-    pChannel->setProperty("path", _config->getString("logging.channels.file.path", "/home/root/rzagent.log"));
+    pChannel->setProperty("path", "/home/root/rzagent.log");
+    //pChannel->setProperty("path", _config->getString("logging.channels.file.path", "/home/root/rzagent.log"));
     pChannel->setProperty("rotation", _config->getString("logging.channels.file.rotation", "10M"));
     pChannel->setProperty("archive", _config->getString("logging.channels.file.archive", "number"));
     pChannel->setProperty("purgeCount", _config->getString("logging.channels.file.purgeCount", "10"));
-
 
     AutoPtr<PatternFormatter> pPF(new PatternFormatter);
     pPF->setProperty("pattern", _config->getString("logging.formatters.standard.pattern", "%L%Y-%m-%d %H:%M:%S %Z %s: [%p] %t")); // local time
@@ -84,5 +92,5 @@ void StatusForm::initlog()
     AutoPtr<FormattingChannel> pFC(new FormattingChannel(pPF, pChannel));
     _logger.setChannel(pFC);
     poco_information(_logger,"init rzagent log");
-
+    std::cout << "write log " <<std::endl;
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.2.1, 2017-02-11T13:25:56. -->
+<!-- Written by QtCreator 4.2.1, 2017-02-13T14:22:44. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -472,24 +472,29 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteLinux.DirectUploadStep</value>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles">
+       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/temp/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts">
        <value type="QString">192.168.0.19</value>
        <value type="QString">192.168.0.19</value>
+       <value type="QString">192.168.0.10</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths">
+       <value type="QString">/home/root</value>
        <value type="QString">/home/root</value>
        <value type="QString">/home/root</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedSysroots">
        <value type="QString"></value>
        <value type="QString"></value>
+       <value type="QString"></value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedTimes">
+       <value type="QDateTime">2017-02-12T18:00:29</value>
        <value type="QDateTime">2017-02-09T06:01:24</value>
-       <value type="QDateTime">2017-02-11T13:16:47</value>
+       <value type="QDateTime">2017-02-13T12:04:53</value>
       </valuelist>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.IgnoreMissingFiles">false</value>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.Incremental">true</value>

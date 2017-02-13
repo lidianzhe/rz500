@@ -35,9 +35,9 @@ private:
     Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> _config;
 
     // umxDBLib
-    UMXDB_HANDLE _gUmxDBHandle;
+    UMXDB_HANDLE _umxDBHandle;
 
-    UMXCAM_HANDLE _gUmxHandle;
+    UMXCAM_HANDLE _umxCAMHandle;
 
     void initlog();
 };
