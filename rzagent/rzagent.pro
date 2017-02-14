@@ -13,6 +13,7 @@ TARGET = rzagent
 TEMPLATE = app
 
 DEFINES += DESKTOP
+DEFINES +=POCO_NO_SOO
 
 target.file = $${TARGET}
 target.path = /home/root
@@ -60,13 +61,15 @@ SOURCES += main.cpp\
     logentity.cpp \
     serverlogentities.cpp \
     statusform.cpp \
-    httpclient.cpp
+    httpclient.cpp \
+    utilshelper.cpp
 
 HEADERS  += mainwindow.h \
     logentity.h \
     serverlogentities.h \
     statusform.h \
-    httpclient.h
+    httpclient.h \
+    utilshelper.h
 
 FORMS    += mainwindow.ui \
     statusform.ui

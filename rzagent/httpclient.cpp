@@ -1,4 +1,5 @@
 #include "httpclient.h"
+
 #include "Poco/Net/HTTPClientSession.h"
 #include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/HTTPResponse.h"
@@ -11,6 +12,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 #include <QString>
 #include "umxCamLib/umxCamGlobal.h"
 
@@ -59,14 +61,30 @@ std::string Client::Get()
 
 bool Client::Post(std::string &body)
 {
-    /*
+
     URI uri(m_strUri);
     HTTPClientSession session(uri.getHost(),uri.getPort());
     HTTPRequest request(HTTPRequest::HTTP_POST,uri.getPath(),HTTPRequest::HTTP_1_1);
+    request.setContentLength((int)body.length());
+    request.setContentType("application/json");
     session.sendRequest(request)<<body;
     HTTPResponse response;
     std::istream &isres = session.receiveResponse(response);
-    std::cout << response.getStatus() << response. << response.getReason() << std::endl;
-    */
+    std::cout << response.getStatus() << " " << response.getReason() << std::endl;
+
     return true;
+}
+
+std::string Client::BuildJSON()
+{
+    /*
+   Poco::JSON::Object jsnObj;
+   jsnObj.set("Id",3);
+   jsnObj.set("UUId",3);
+   jsnObj.set("Info","IrisOk");
+   std::stringstream ss;
+   jsnObj.stringify(ss,3);
+   return ss.str();
+   */
+   return "{\"Id\":3,\"UUId\":2,\"Info\":\"IrisOk\"}";
 }

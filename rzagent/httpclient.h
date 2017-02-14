@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <iostream>
 
+
+
 #include "umxCamLib/umxCamGlobal.h"
 
 using Poco::Net::HTTPClientSession;
@@ -31,6 +33,7 @@ public:
     bool doRequest(HTTPClientSession &session,HTTPRequest &request,HTTPResponse &response);
     std::string Get();
     bool Post(std::string &body);
+    std::string BuildJSON();
 private:
     std::string m_strUri;
 };

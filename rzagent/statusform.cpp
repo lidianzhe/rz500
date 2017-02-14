@@ -71,16 +71,12 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
     //test get
     Client *client = new Client();
-    client->Get();
+
     //test post
-    /*
-    Poco::JSON::Object jsObj;
-    //jsObj.set("Id","2");
-    //jsObj.set("UUId",2);
-    //jsObj.set("Info","Allow");
-    std::stringstream jsnStream;
-    jsObj.stringify(jsnStream,3);
-*/
+    std::string strJSON =client->BuildJSON();
+    client->Post(strJSON);
+
+        client->Get();
 }
 
 StatusForm::~StatusForm()
