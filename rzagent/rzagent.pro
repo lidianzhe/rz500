@@ -59,12 +59,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     logentity.cpp \
     serverlogentities.cpp \
-    statusform.cpp
+    statusform.cpp \
+    httpclient.cpp
 
 HEADERS  += mainwindow.h \
     logentity.h \
     serverlogentities.h \
-    statusform.h
+    statusform.h \
+    httpclient.h
 
 FORMS    += mainwindow.ui \
     statusform.ui

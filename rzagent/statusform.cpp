@@ -11,8 +11,12 @@ using Poco::FormattingChannel;
 using Poco::PatternFormatter;
 using Poco::AutoPtr;
 
+
 #include "umxDBLib/umxDB.h"
 #include "umxCommonLib/umxCommonGlobal.h"
+
+#include "httpclient.h"
+
 /*
 insert into camera_configuration (id,serialNumber,Mode) values(
 1,'HC0709A000302','Recog')
@@ -64,8 +68,19 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
         std::cout<<"uuid="<<logEntry.GetUserUUID()<<" | eventtype="<<logEntry.GetEventType()<<" | additional data="<<logEntry.GetAdditionalData()<<
                 " | info="<<logEntry.GetInfo()<<std::endl;
     }
-umxDB_selectLogEntryByPage()
 
+    //test get
+    Client *client = new Client();
+    client->Get();
+    //test post
+    /*
+    Poco::JSON::Object jsObj;
+    //jsObj.set("Id","2");
+    //jsObj.set("UUId",2);
+    //jsObj.set("Info","Allow");
+    std::stringstream jsnStream;
+    jsObj.stringify(jsnStream,3);
+*/
 }
 
 StatusForm::~StatusForm()
