@@ -30,7 +30,8 @@ class Client
 {
 public:
     Client();
-    bool doRequest(HTTPClientSession &session,HTTPRequest &request,HTTPResponse &response);
+    //body
+    bool doRequest(HTTPClientSession &session, HTTPRequest &request, HTTPResponse &response, std::string &body);
     std::string Get();
     bool Post(std::string &body);
     std::string BuildJSON();

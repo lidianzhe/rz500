@@ -30,7 +30,7 @@ Client::Client()
 
 }
 
-bool Client::doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPRequest &request, Poco::Net::HTTPResponse &response)
+bool Client::doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPRequest &request, Poco::Net::HTTPResponse &response,std::string &body)
 {
     //std::ostream &osreq =
     std::cout<<"sendReques:path="<<request.getURI()<<"|"<< session.getHost() <<std::endl;

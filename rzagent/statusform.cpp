@@ -47,6 +47,9 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     _config->save("/usr/local/bin/umxLauncher.properties");
     std::string s=_config->getString("application.logger");
     std::cout<<s<<std::endl;
+    //读取最新的配置文件
+    _config->load("/usr/local/bin/umxLauncher.properties");
+
     std::cout<<"write serialnumber:"<<_config->getString("umx.device.serialnumber")<<std::endl;
     initlog();
 
@@ -74,7 +77,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
     //test post
     std::string strJSON =client->BuildJSON();
-    client->Post(strJSON);
+    //client->Post(strJSON);
 
         client->Get();
 }
