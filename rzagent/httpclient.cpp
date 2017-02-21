@@ -9,7 +9,7 @@
 #include "Poco/Path.h"
 #include "Poco/URI.h"
 #include "Poco/Exception.h"
-
+//#include "Poco/JSON/Parser.h"
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
@@ -26,11 +26,10 @@ using Poco::URI;
 using Poco::Exception;
 Client::Client()
 {
-    m_strUri = "http://192.168.0.6:80/irisapi/api/ServiceLog";
 
 }
 
-bool Client::doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPRequest &request, Poco::Net::HTTPResponse &response)
+bool Client::doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPRequest &request, Poco::Net::HTTPResponse &response,std::string &body)
 {
     //std::ostream &osreq =
     std::cout<<"sendReques:path="<<request.getURI()<<"|"<< session.getHost() <<std::endl;
@@ -44,14 +43,13 @@ bool Client::doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPReq
 
 std::string Client::Get()
 {
-    URI uri(m_strUri);
+    URI uri("http://"+m_Server+m_LogsUri);
     std::string path=uri.getPathAndQuery();
     if (path.empty()) path="/";
     HTTPClientSession session(uri.getHost(),uri.getPort());
-    std::cout << "begin"<<std::endl;
+
     HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
     session.setTimeout(Poco::Timespan(2,0));
-
     HTTPResponse response;
     try{
         session.sendRequest(request);
@@ -64,26 +62,30 @@ std::string Client::Get()
     {
         std::cout << exc.displayText() <<std::endl;
     }
-
-    std::cout << "end"<<std::endl;
-
-
 }
 
-bool Client::Post(std::string &body)
+HTTPResponse::HTTPStatus Client::Post(std::string &body)
 {
 
-    URI uri(m_strUri);
+    URI uri("http://"+m_Server+m_LogsUri);
     HTTPClientSession session(uri.getHost(),uri.getPort());
     HTTPRequest request(HTTPRequest::HTTP_POST,uri.getPath(),HTTPRequest::HTTP_1_1);
     request.setContentLength((int)body.length());
     request.setContentType("application/json");
+    try{
     session.sendRequest(request)<<body;
     HTTPResponse response;
     std::istream &isres = session.receiveResponse(response);
     std::cout << response.getStatus() << " " << response.getReason() << std::endl;
+    //if(response.getStatus()==HTTPResponse::HTTPStatus::HTTP_CREATED)
+        //return true;
+    return response.getStatus();
+    }
+    catch(Poco::Exception &exc){
+         std::cout << "post:"<<exc.displayText() <<std::endl;
+         return HTTPResponse::HTTPStatus::HTTP_NOT_FOUND;
+    }
 
-    return true;
 }
 
 std::string Client::BuildJSON()
@@ -97,5 +99,10 @@ std::string Client::BuildJSON()
    jsnObj.stringify(ss,3);
    return ss.str();
    */
-   return "{\"Id\":3,\"UUId\":2,\"Info\":\"IrisOk\"}";
+    return "{\"Id\":3,\"UUId\":2,\"Info\":\"IrisOk\"}";
+}
+
+bool Client::DeleteLog(long id)
+{
+
 }

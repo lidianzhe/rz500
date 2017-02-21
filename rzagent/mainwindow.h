@@ -22,10 +22,13 @@ public:
     ~MainWindow();
 
     void initUI(QWidget *parent);
+private slots:
+    void setTop();
 private:
     Ui::MainWindow *ui;
     QStackedWidget *_pQStackedWidget;
     StatusForm *_pStatusForm;
+    QTimer *_timer;
 };
 
 #endif // MAINWINDOW_H

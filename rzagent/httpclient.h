@@ -30,13 +30,18 @@ class Client
 {
 public:
     Client();
+    Client(std::string server){m_Server= server;}
     //body
     bool doRequest(HTTPClientSession &session, HTTPRequest &request, HTTPResponse &response, std::string &body);
     std::string Get();
-    bool Post(std::string &body);
+    HTTPResponse::HTTPStatus Post(std::string &body);
+    void setLogsUri(std::string uri){m_LogsUri=uri;}
+    void setServer(std::string server){m_Server=server;}
     std::string BuildJSON();
 private:
-    std::string m_strUri;
+    std::string m_Server="120.27.233.3:80";
+    std::string m_LogsUri="/irisapi/api/logs";
+    bool DeleteLog(long id);
 };
 
 #endif // HTTPCLIENT_H

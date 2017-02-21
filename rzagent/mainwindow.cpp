@@ -4,7 +4,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsProxyWidget>
-
+#include <QTimer>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -14,6 +14,11 @@ MainWindow::MainWindow(QWidget *parent) :
     _pStatusForm = NULL;
 
     initUI(parent);
+
+    _timer = new QTimer(this);
+    connect(_timer,SIGNAL(timeout()),this,SLOT(setTop()));
+    _timer->start(1000*30);
+
 }
 
 MainWindow::~MainWindow()
@@ -45,6 +50,15 @@ void MainWindow::initUI(QWidget *parent)
     view->rotate(90);
     view->show();
 
+}
+
+void MainWindow::setTop()
+{
+
+    hide();
+    setWindowFlags(Qt::WindowStaysOnTopHint);
+    show();
+    _timer->stop();
 }
 
 
