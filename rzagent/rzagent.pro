@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network sql
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 QMAKE_CXXFLAGS += -std=c++0x
@@ -59,14 +59,12 @@ LIBS += \
 SOURCES += main.cpp\
         mainwindow.cpp \
     logentity.cpp \
-    serverlogentities.cpp \
     statusform.cpp \
     httpclient.cpp \
     utilshelper.cpp
 
 HEADERS  += mainwindow.h \
     logentity.h \
-    serverlogentities.h \
     statusform.h \
     httpclient.h \
     utilshelper.h

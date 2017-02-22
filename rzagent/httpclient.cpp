@@ -43,7 +43,7 @@ bool Client::doRequest(Poco::Net::HTTPClientSession &session, Poco::Net::HTTPReq
 
 std::string Client::Get()
 {
-    URI uri("http://"+m_Server+m_LogsUri);
+    URI uri("http://"+m_Server+m_Path+m_LogsUri);
     std::string path=uri.getPathAndQuery();
     if (path.empty()) path="/";
     HTTPClientSession session(uri.getHost(),uri.getPort());
@@ -67,7 +67,7 @@ std::string Client::Get()
 HTTPResponse::HTTPStatus Client::Post(std::string &body)
 {
 
-    URI uri("http://"+m_Server+m_LogsUri);
+    URI uri("http://"+m_Server+m_Path+m_LogsUri);
     HTTPClientSession session(uri.getHost(),uri.getPort());
     HTTPRequest request(HTTPRequest::HTTP_POST,uri.getPath(),HTTPRequest::HTTP_1_1);
     request.setContentLength((int)body.length());

@@ -84,6 +84,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
     m_client = new Client();
     m_client->setServer(m_config->getString("launcher.network.server.serverip","120.27.233.3")+":"+m_config->getString("launcher.network.server.port","80"));
+    m_client->setPath(m_config->getString("launcher.network.server.syncuri","/api/"));
     m_timer = new QTimer(this);
     connect(m_timer,SIGNAL(timeout()),this,SLOT(syncToServer()));
     m_timer->start(1000*3);

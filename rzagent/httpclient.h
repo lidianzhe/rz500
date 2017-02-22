@@ -37,10 +37,12 @@ public:
     HTTPResponse::HTTPStatus Post(std::string &body);
     void setLogsUri(std::string uri){m_LogsUri=uri;}
     void setServer(std::string server){m_Server=server;}
+    void setPath(std::string path){m_Path=path;}
     std::string BuildJSON();
 private:
     std::string m_Server="120.27.233.3:80";
-    std::string m_LogsUri="/irisapi/api/logs";
+    std::string m_Path="/irisapi/api/";
+    std::string m_LogsUri="logs";
     bool DeleteLog(long id);
 };
 
