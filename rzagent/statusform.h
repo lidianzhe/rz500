@@ -13,6 +13,7 @@
 //umxCam
 #include "umxCamLib/umxCam.h"
 #include "umxCamLib/umxCamGlobal.h"
+#include "stdlib.h"
 #include "httpclient.h"
 namespace Ui {
 class StatusForm;

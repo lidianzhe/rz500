@@ -18,6 +18,7 @@ using Poco::StreamCopier;
 #include <QByteArray>
 #include <QTimer>
 #include <QThread>
+#include "stdlib.h"
 
 #include "umxDBLib/umxDB.h"
 #include "umxCommonLib/umxCommonGlobal.h"
@@ -95,6 +96,8 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     //client->Post(strJSON);
 
     //client->Get();
+    //const char* command="date -s 2017.02.23-00:30:00";
+    //system(command);
 }
 
 StatusForm::~StatusForm()

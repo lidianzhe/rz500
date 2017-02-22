@@ -12,6 +12,7 @@
 #include "Poco/Exception.h"
 #include <stdio.h>
 #include <iostream>
+#include <istream>
 
 
 
