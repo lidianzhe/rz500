@@ -28,6 +28,7 @@ public:
     ~StatusForm();
 private slots:
     void syncToServer();
+    void syncTime();
 private:
     Ui::StatusForm *ui;
 
@@ -44,8 +45,8 @@ private:
     std::string m_DeviceSN;
     Client *m_client;
     QTimer *m_timer;
-
-    std::string m_useServer="1";
+    QTimer *m_timeTimer;
+    int m_useServer;
     void initlog();
 
 };

@@ -14,6 +14,7 @@
 #include <iostream>
 #include <istream>
 
+#include <QString>
 
 
 #include "umxCamLib/umxCamGlobal.h"
@@ -36,6 +37,7 @@ public:
     bool doRequest(HTTPClientSession &session, HTTPRequest &request, HTTPResponse &response, std::string &body);
     std::string Get();
     HTTPResponse::HTTPStatus Post(std::string &body);
+    std::string getDatetime();
     void setLogsUri(std::string uri){m_LogsUri=uri;}
     void setServer(std::string server){m_Server=server;}
     void setPath(std::string path){m_Path=path;}

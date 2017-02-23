@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
+
 #include <QString>
 #include "umxCamLib/umxCamGlobal.h"
 
@@ -24,6 +25,7 @@ using Poco::StreamCopier;
 using Poco::Path;
 using Poco::URI;
 using Poco::Exception;
+
 Client::Client()
 {
 
@@ -86,6 +88,31 @@ HTTPResponse::HTTPStatus Client::Post(std::string &body)
          return HTTPResponse::HTTPStatus::HTTP_NOT_FOUND;
     }
 
+}
+
+std::string Client::getDatetime()
+{
+    URI uri("http://"+m_Server+m_Path+"echo/datetime");
+    std::string path=uri.getPathAndQuery();
+    if (path.empty()) path="/";
+    HTTPClientSession session(uri.getHost(),uri.getPort());
+
+    HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
+    session.setTimeout(Poco::Timespan(2,0));
+    HTTPResponse response;
+    try{
+        session.sendRequest(request);
+        std::istream &isres =session.receiveResponse(response);
+        std::cout << response.getStatus() <<" "<< response.getReason() << std::endl;
+        std::stringstream ss;
+        StreamCopier::copyStream(isres,ss);
+        std::cout<<"set datetime="<<ss.str()<<std::endl;
+        return ss.str();
+    }
+    catch(Poco::TimeoutException &exc)
+    {
+        std::cout << exc.displayText() <<std::endl;
+    }
 }
 
 std::string Client::BuildJSON()

@@ -81,14 +81,19 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
 
     //test get
-    m_useServer=m_config->getString("launcher.network.server.useserver");
+    m_useServer=m_config->getInt("launcher.network.server.useserver");
 
     m_client = new Client();
     m_client->setServer(m_config->getString("launcher.network.server.serverip","120.27.233.3")+":"+m_config->getString("launcher.network.server.port","80"));
     m_client->setPath(m_config->getString("launcher.network.server.syncuri","/api/"));
+
+    m_timeTimer = new QTimer(this);
+    connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
+    m_timeTimer->start(1000*60);
+
     m_timer = new QTimer(this);
     connect(m_timer,SIGNAL(timeout()),this,SLOT(syncToServer()));
-    m_timer->start(1000*3);
+    m_timer->start(1000*5);
 
     //syncToServer(true);
     //test post
@@ -131,9 +136,8 @@ void StatusForm::initlog()
 
 void StatusForm::syncToServer()
 {
-    if(m_useServer!="1" )
+    if(m_useServer!=1 )
     {
-        //m_config = new Poco::Util::PropertyFileConfiguration("/usr/local/bin/umxLauncher.properties");
         return;
     }
     std::string strJson;
@@ -146,23 +150,15 @@ void StatusForm::syncToServer()
             std::cout<<log.GetId()<<"|"<<log.GetEventType()<<"|"<<log.GetTimestamp()<<"|";
             std::cout<<log.GetInfo()<<"|"<<log.GetInfo()<<"|"<<log.GetAdditionalData()<<"|";
             //Poco::Data::BLOB bb(log.GetImageData());
-            //Poco::Data::BLOBInputStream blobis(bb);
-            //std::string strBlob;
-            //Poco::UInt64 _size =StreamCopier::copyToString64(blobis,strBlob,30000);
-
-            //std::cout << "size="<<_size<< "---->"<<strBlob<<std::endl;
-
-            //StreamCopier::copyStream(blobis,std::cout);
-            //std::string str(b);
-            //QString str=QString::fromAscii(b);
             std::cout<<std::endl;
+            //becuare i can't compile with JOSN,so i use stringstream.
+            //but i don't konw how to process BLOB,so i send a null.
             std::stringstream ss;
             ss.clear();
             ss<<"{\"pId\":"<<1<<",\"deviceSN\":"<<"\""<<"HC0709A000302"<<"\",\"id\":"<<log.GetId()<<",";
             ss<<"\"eventType\":\""<<log.GetEventType()<<"\",\"timeStamp\":\""<<log.GetTimestamp()<<"\",\"userUID\":\""<<log.GetUserUUID()<<"\",";
             ss<<"\"info\":\""<<log.GetInfo()<<"\",\"additionalData\":\""<<log.GetAdditionalData()<<"\",\"imageData\":";
             ss<<"null";
-            //ss<<"\""<<strBlob<<"\"";
             ss<<"}";
             strJson=ss.str();
             std::cout<<strJson<<std::endl;
@@ -178,4 +174,14 @@ void StatusForm::syncToServer()
         }
     }
 
+}
+
+void StatusForm::syncTime()
+{
+    m_config->load("/usr/local/bin/umxLauncher.properties");
+    m_useServer=m_config->getInt("launcher.network.server.useserver");
+
+    std::string strTime= m_client->getDatetime();
+    strTime = "date -s "+strTime;
+    system(strTime.c_str());
 }
