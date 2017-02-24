@@ -54,6 +54,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     // config logger
     m_config = new Poco::Util::PropertyFileConfiguration("/usr/local/bin/umxLauncher.properties");
     //HC0709A000231
+    //读取配置
     m_DeviceSN=m_config->getString("umx.device.serialnumber");
     if(m_DeviceSN.empty()){
         m_config->setString("umx.device.serialnumber","HC0709A000302");
@@ -61,9 +62,11 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     }
 
     std::cout<<m_DeviceSN<<std::endl;
-    //读取最新的配置文件
-    m_config->load("/usr/local/bin/umxLauncher.properties");
-    std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
+
+    m_client = new Client();
+    //封装需要读取的内容
+    readConfig();
+
     initlog();
 
 
@@ -81,19 +84,19 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
 
     //test get
-    m_useServer=m_config->getInt("launcher.network.server.useserver");
 
-    m_client = new Client();
-    m_client->setServer(m_config->getString("launcher.network.server.serverip","120.27.233.3")+":"+m_config->getString("launcher.network.server.port","80"));
-    m_client->setPath(m_config->getString("launcher.network.server.syncuri","/api/"));
+
+
 
     m_timeTimer = new QTimer(this);
     connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
-    m_timeTimer->start(1000*60);
+    m_timeTimer->setInterval(1000*30);
+    m_timeTimer->start();
 
     m_timer = new QTimer(this);
     connect(m_timer,SIGNAL(timeout()),this,SLOT(syncToServer()));
-    m_timer->start(1000*5);
+    m_timer->setInterval(1000*5);
+    m_timer->start();
 
     //syncToServer(true);
     //test post
@@ -134,8 +137,22 @@ void StatusForm::initlog()
     std::cout << "write log " <<std::endl;
 }
 
+void StatusForm::readConfig()
+{
+    //读取最新的配置文件
+    m_config->load("/usr/local/bin/umxLauncher.properties");
+    m_debugMode = m_config->getInt("launcher.device.hidden.debug",0);
+    m_useServer=m_config->getInt("launcher.network.server.useserver");
+
+    //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
+    m_client->setServer(m_config->getString("launcher.network.server.serverip","120.27.233.3")+":"+m_config->getString("launcher.network.server.port","80"));
+    m_client->setPath(m_config->getString("launcher.network.server.syncuri","/irisapi/api/"));
+}
+
 void StatusForm::syncToServer()
 {
+    m_timer->stop();
+
     if(m_useServer!=1 )
     {
         return;
@@ -143,14 +160,19 @@ void StatusForm::syncToServer()
     std::string strJson;
     std::vector<LogEntry> logs;
     logs.clear();
-    int ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,2,"asc",&logs);
+    int ret=-1;
+    try{
+        ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,3,"asc",&logs);
+    }
+    catch(Poco::Exception &e){
+        poco_warning(_logger,"selectlog fail:"+e.message());
+    }
     if (ret == UMXDB_SUCCESS)
     {
         for(LogEntry log:logs){
-            std::cout<<log.GetId()<<"|"<<log.GetEventType()<<"|"<<log.GetTimestamp()<<"|";
-            std::cout<<log.GetInfo()<<"|"<<log.GetInfo()<<"|"<<log.GetAdditionalData()<<"|";
-            //Poco::Data::BLOB bb(log.GetImageData());
-            std::cout<<std::endl;
+            //std::cout<<log.GetId()<<"|"<<log.GetEventType()<<"|"<<log.GetTimestamp()<<"|";
+            //std::cout<<log.GetInfo()<<"|"<<log.GetInfo()<<"|"<<log.GetAdditionalData()<<"|";
+            //std::cout<<std::endl;
             //becuare i can't compile with JOSN,so i use stringstream.
             //but i don't konw how to process BLOB,so i send a null.
             std::stringstream ss;
@@ -162,6 +184,7 @@ void StatusForm::syncToServer()
             ss<<"}";
             strJson=ss.str();
             std::cout<<strJson<<std::endl;
+            std::cout<<"begin post"<<std::endl;
             if (m_client->Post(strJson)==HTTPResponse::HTTPStatus::HTTP_CREATED)
             {
                 ui->infoText->setText(QString("upload log Id=%1").arg(log.GetId()));
@@ -169,19 +192,30 @@ void StatusForm::syncToServer()
             }
             else
             {
+                std::cout<<"返回，待syncTime调用后，再次尝试连接。"<<std::endl;
                 ui->infoText->setText("bad request or not found....");
+                //返回，待syncTime调用后，再次尝试连接
+
+                return;
             }
         }
     }
+
+    m_timer->start();
 
 }
 
 void StatusForm::syncTime()
 {
+    m_timer->stop();
     m_config->load("/usr/local/bin/umxLauncher.properties");
-    m_useServer=m_config->getInt("launcher.network.server.useserver");
+    readConfig();
 
     std::string strTime= m_client->getDatetime();
-    strTime = "date -s "+strTime;
-    system(strTime.c_str());
+    if(strTime!="")
+    {
+        strTime = "date -s "+strTime;
+        system(strTime.c_str());
+    }
+    m_timer->start();
 }

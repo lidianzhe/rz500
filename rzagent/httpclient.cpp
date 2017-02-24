@@ -9,6 +9,7 @@
 #include "Poco/Path.h"
 #include "Poco/URI.h"
 #include "Poco/Exception.h"
+#include "Poco/Net/NetException.h"
 //#include "Poco/JSON/Parser.h"
 #include <stdio.h>
 #include <iostream>
@@ -49,20 +50,24 @@ std::string Client::Get()
     std::string path=uri.getPathAndQuery();
     if (path.empty()) path="/";
     HTTPClientSession session(uri.getHost(),uri.getPort());
-
-    HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
-    session.setTimeout(Poco::Timespan(2,0));
-    HTTPResponse response;
     try{
+        HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
+        session.setTimeout(Poco::Timespan(2,0));
+        HTTPResponse response;
+
         session.sendRequest(request);
         std::istream &isres =session.receiveResponse(response);
         std::cout << response.getStatus() <<" "<< response.getReason() << std::endl;
         StreamCopier::copyStream(isres,std::cout);
         std::cout<<std::endl;
     }
-    catch(Poco::TimeoutException &exc)
+    catch(Poco::Exception &exc)
     {
-        std::cout << exc.displayText() <<std::endl;
+        std::cout << "get request: "<<exc.displayText() <<std::endl;
+    }
+    catch(...)
+    {
+        std::cout <<"get request : other error"<<std::endl;
     }
 }
 
@@ -72,20 +77,25 @@ HTTPResponse::HTTPStatus Client::Post(std::string &body)
     URI uri("http://"+m_Server+m_Path+m_LogsUri);
     HTTPClientSession session(uri.getHost(),uri.getPort());
     HTTPRequest request(HTTPRequest::HTTP_POST,uri.getPath(),HTTPRequest::HTTP_1_1);
+    session.setTimeout(Poco::Timespan(2,0));
     request.setContentLength((int)body.length());
     request.setContentType("application/json");
     try{
-    session.sendRequest(request)<<body;
-    HTTPResponse response;
-    std::istream &isres = session.receiveResponse(response);
-    std::cout << response.getStatus() << " " << response.getReason() << std::endl;
-    //if(response.getStatus()==HTTPResponse::HTTPStatus::HTTP_CREATED)
-        //return true;
-    return response.getStatus();
+        session.sendRequest(request)<<body;
+        HTTPResponse response;
+        std::istream &isres = session.receiveResponse(response);
+        std::cout << response.getStatus() << " " << response.getReason() << std::endl;
+
+        return response.getStatus();
     }
     catch(Poco::Exception &exc){
-         std::cout << "post:"<<exc.displayText() <<std::endl;
-         return HTTPResponse::HTTPStatus::HTTP_NOT_FOUND;
+        session.reset();
+        std::cout << "post request:"<<exc.displayText() <<std::endl;
+        return HTTPResponse::HTTPStatus::HTTP_NOT_FOUND;
+    }
+    catch(...){
+        std::cout << "post request: no handle error"<<std::endl;
+        return HTTPResponse::HTTPStatus::HTTP_EXPECTATION_FAILED;
     }
 
 }
@@ -95,12 +105,13 @@ std::string Client::getDatetime()
     URI uri("http://"+m_Server+m_Path+"echo/datetime");
     std::string path=uri.getPathAndQuery();
     if (path.empty()) path="/";
-    HTTPClientSession session(uri.getHost(),uri.getPort());
 
-    HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
-    session.setTimeout(Poco::Timespan(2,0));
-    HTTPResponse response;
+    HTTPClientSession session(uri.getHost(),uri.getPort());
     try{
+        HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
+        session.setTimeout(Poco::Timespan(2,0));
+        HTTPResponse response;
+
         session.sendRequest(request);
         std::istream &isres =session.receiveResponse(response);
         std::cout << response.getStatus() <<" "<< response.getReason() << std::endl;
@@ -109,10 +120,16 @@ std::string Client::getDatetime()
         std::cout<<"set datetime="<<ss.str()<<std::endl;
         return ss.str();
     }
-    catch(Poco::TimeoutException &exc)
+    catch(Poco::Exception &exc)
     {
-        std::cout << exc.displayText() <<std::endl;
+        std::cout <<"getTime request:" <<exc.displayText() <<std::endl;
+        return "";
     }
+    catch(...)
+    {
+        std::cout <<"get request : other error"<<std::endl;
+    }
+
 }
 
 std::string Client::BuildJSON()

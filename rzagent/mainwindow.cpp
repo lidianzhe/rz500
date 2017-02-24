@@ -5,6 +5,7 @@
 #include <QGraphicsView>
 #include <QGraphicsProxyWidget>
 #include <QTimer>
+#include "statusform.h"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -17,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _timer = new QTimer(this);
     connect(_timer,SIGNAL(timeout()),this,SLOT(setTop()));
-    _timer->start(1000*30);
+    _timer->start(1000*25);
 
 }
 
@@ -55,10 +56,16 @@ void MainWindow::initUI(QWidget *parent)
 void MainWindow::setTop()
 {
 
+
     hide();
-    setWindowFlags(Qt::WindowStaysOnTopHint);
-    show();
-    _timer->stop();
+    if(_pStatusForm->getDebugMode()==1){
+        setWindowFlags(Qt::WindowStaysOnTopHint);
+        show();
+    }else
+    {
+        hide();
+    }
+    //_timer->stop();
 }
 
 
