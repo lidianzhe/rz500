@@ -37,7 +37,7 @@ INCLUDEPATH += ../lib \
                ../include \
                ../lib/umxPeriDevLib/inc\
                /opt/poky/1.8.1/sysroots/cortexa9hf-vfp-neon-poky-linux-gnueabi/usr/include \
-               #/opt/poky/1.8.1/sysroots/cortexa9hf-vfp-neon-poky-linux-gnueabi/usr/include/c++/4.9.2 \
+               /opt/poky/1.8.1/sysroots/cortexa9hf-vfp-neon-poky-linux-gnueabi/usr/include/c++/4.9.2 \
 
 
 LIBS += \

@@ -24,7 +24,7 @@ using Poco::StreamCopier;
 #include "umxCommonLib/umxCommonGlobal.h"
 
 #include "httpclient.h"
-
+#include "Poco/Base64Encoder.h"
 /*
 insert into camera_configuration (id,serialNumber,Mode) values(
 1,'HC0709A000302','Recog')
@@ -170,20 +170,32 @@ void StatusForm::syncToServer()
     if (ret == UMXDB_SUCCESS)
     {
         for(LogEntry log:logs){
-            //std::cout<<log.GetId()<<"|"<<log.GetEventType()<<"|"<<log.GetTimestamp()<<"|";
-            //std::cout<<log.GetInfo()<<"|"<<log.GetInfo()<<"|"<<log.GetAdditionalData()<<"|";
-            //std::cout<<std::endl;
-            //becuare i can't compile with JOSN,so i use stringstream.
-            //but i don't konw how to process BLOB,so i send a null.
+            //
+            Poco::Data::BLOB i(log.GetImageData());
+            std::cout<<"blob size="<<i.size()<<std::endl;
+            Poco::Data::BLOBInputStream bis(i);
+            std::ostringstream os;
+            Poco::Base64Encoder encoder(os);
+            std::string s(i.rawContent(),i.size());
+            //std::vector<char> c = log.GetImageData().content();
+            //s.insert(s.begin(),c.begin(),c.end());
+            encoder<<s;
+            encoder.close();
+            //std::cout<<"asbase64: "<<os.str()<<std::endl;
+
             std::stringstream ss;
             ss.clear();
-            ss<<"{\"pId\":"<<1<<",\"deviceSN\":"<<"\""<<"HC0709A000302"<<"\",\"id\":"<<log.GetId()<<",";
+            ss<<"{\"pId\":"<<1<<",\"deviceSN\":"<<"\""<<m_DeviceSN<<"\",\"id\":"<<log.GetId()<<",";
             ss<<"\"eventType\":\""<<log.GetEventType()<<"\",\"timeStamp\":\""<<log.GetTimestamp()<<"\",\"userUID\":\""<<log.GetUserUUID()<<"\",";
             ss<<"\"info\":\""<<log.GetInfo()<<"\",\"additionalData\":\""<<log.GetAdditionalData()<<"\",\"imageData\":";
-            ss<<"null";
+            if(os.str()=="")
+                ss<<"null";
+            else
+                ss<<"\""<<os.str()<<"\"";
             ss<<"}";
             strJson=ss.str();
-            std::cout<<strJson<<std::endl;
+            //strJson =log.AsJSONString();
+            std::cout<<"josn: "<<strJson<<std::endl;
             std::cout<<"begin post"<<std::endl;
             if (m_client->Post(strJson)==HTTPResponse::HTTPStatus::HTTP_CREATED)
             {
@@ -195,7 +207,6 @@ void StatusForm::syncToServer()
                 std::cout<<"返回，待syncTime调用后，再次尝试连接。"<<std::endl;
                 ui->infoText->setText("bad request or not found....");
                 //返回，待syncTime调用后，再次尝试连接
-
                 return;
             }
         }
