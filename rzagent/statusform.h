@@ -50,6 +50,7 @@ private:
     QTimer *m_timeTimer;
     int m_useServer;
     int m_debugMode;
+    int m_configRequestImage;
     \
     void initlog();
     void readConfig();

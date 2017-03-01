@@ -143,7 +143,7 @@ void StatusForm::readConfig()
     m_config->load("/usr/local/bin/umxLauncher.properties");
     m_debugMode = m_config->getInt("launcher.device.hidden.debug",0);
     m_useServer=m_config->getInt("launcher.network.server.useserver");
-
+    m_configRequestImage = m_config->getInt("rzagent.json.requestimage",0);
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
     m_client->setServer(m_config->getString("launcher.network.server.serverip","120.27.233.3")+":"+m_config->getString("launcher.network.server.port","80"));
     m_client->setPath(m_config->getString("launcher.network.server.syncuri","/irisapi/api/"));
@@ -188,7 +188,7 @@ void StatusForm::syncToServer()
             ss<<"{\"pId\":"<<1<<",\"deviceSN\":"<<"\""<<m_DeviceSN<<"\",\"id\":"<<log.GetId()<<",";
             ss<<"\"eventType\":\""<<log.GetEventType()<<"\",\"timeStamp\":\""<<log.GetTimestamp()<<"\",\"userUID\":\""<<log.GetUserUUID()<<"\",";
             ss<<"\"info\":\""<<log.GetInfo()<<"\",\"additionalData\":\""<<log.GetAdditionalData()<<"\",\"imageData\":";
-            if(os.str()=="")
+            if(m_configRequestImage == 0 || os.str()=="")
                 ss<<"null";
             else
                 ss<<"\""<<os.str()<<"\"";
