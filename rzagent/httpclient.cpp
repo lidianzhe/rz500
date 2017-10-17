@@ -102,12 +102,13 @@ HTTPResponse::HTTPStatus Client::Post(std::string &body)
 
 std::string Client::getDatetime()
 {
-    URI uri("http://"+m_Server+m_Path+"echo/datetime");
-    std::string path=uri.getPathAndQuery();
-    if (path.empty()) path="/";
-
-    HTTPClientSession session(uri.getHost(),uri.getPort());
     try{
+        URI uri("http://"+m_Server+m_Path+"echo/datetime");
+        std::string path=uri.getPathAndQuery();
+        if (path.empty()) path="/";
+
+        HTTPClientSession session(uri.getHost(),uri.getPort());
+
         HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
         session.setTimeout(Poco::Timespan(2,0));
         HTTPResponse response;
@@ -128,6 +129,7 @@ std::string Client::getDatetime()
     catch(...)
     {
         std::cout <<"get request : other error"<<std::endl;
+        return "";
     }
 
 }

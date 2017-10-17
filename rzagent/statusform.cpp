@@ -27,7 +27,7 @@ using Poco::StreamCopier;
 #include "Poco/Base64Encoder.h"
 /*
 insert into camera_configuration (id,serialNumber,Mode) values(
-1,'HC0709A000302','Recog')
+1,'HC0709A000303','Recog')
 */
 StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     QDialog(parent),_logger(Poco::Logger::get("rzagent")),
@@ -55,9 +55,9 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     m_config = new Poco::Util::PropertyFileConfiguration("/usr/local/bin/umxLauncher.properties");
     //HC0709A000231
     //读取配置
-    m_DeviceSN=m_config->getString("umx.device.serialnumber");
+    m_DeviceSN=m_config->getString("umx.device.serialnumber","HC0709A000303");
     if(m_DeviceSN.empty()){
-        m_config->setString("umx.device.serialnumber","HC0709A000302");
+        m_config->setString("umx.device.serialnumber","HC0709A000303");
         m_config->save("/usr/local/bin/umxLauncher.properties");
     }
 
@@ -80,12 +80,6 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     retDB = umxDB_selectLastLogID(_umxDBHandle,&lastLogId);
     if(retDB==UMXDB_SUCCESS)
         std::cout<<"last log id: "<<lastLogId<<std::endl;
-
-
-
-    //test get
-
-
 
 
     m_timeTimer = new QTimer(this);
@@ -145,8 +139,8 @@ void StatusForm::readConfig()
     m_useServer=m_config->getInt("launcher.network.server.useserver");
     m_configRequestImage = m_config->getInt("rzagent.json.requestimage",0);
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
-    m_client->setServer(m_config->getString("launcher.network.server.serverip","120.27.233.3")+":"+m_config->getString("launcher.network.server.port","80"));
-    m_client->setPath(m_config->getString("launcher.network.server.syncuri","/irisapi/api/"));
+    m_client->setServer(m_config->getString("launcher.network.server.serverip","118.31.22.44")+":"+m_config->getString("launcher.network.server.port","8080"));
+    m_client->setPath(m_config->getString("launcher.network.server.syncuri","/api/"));
 }
 
 void StatusForm::syncToServer()
@@ -155,6 +149,7 @@ void StatusForm::syncToServer()
 
     if(m_useServer!=1 )
     {
+
         return;
     }
     std::string strJson;
@@ -170,7 +165,18 @@ void StatusForm::syncToServer()
     if (ret == UMXDB_SUCCESS)
     {
         for(LogEntry log:logs){
-            //
+            std::cout<<"delete log Id="<<log.GetId()<<std::endl;
+            try{
+            ret = umxDB_deleteLogEntryById(_umxDBHandle, log.GetId());
+            }catch(Exception &e)
+            {
+                std::cout<<"delete catch"<<e.message()<<std::endl;
+            }
+        }
+        m_timer->start();
+        return;
+        //
+        for(LogEntry log:logs){
             Poco::Data::BLOB i(log.GetImageData());
             std::cout<<"blob size="<<i.size()<<std::endl;
             Poco::Data::BLOBInputStream bis(i);
@@ -200,13 +206,21 @@ void StatusForm::syncToServer()
             if (m_client->Post(strJson)==HTTPResponse::HTTPStatus::HTTP_CREATED)
             {
                 ui->infoText->setText(QString("upload log Id=%1").arg(log.GetId()));
-                umxDB_deleteLogEntryById(_umxDBHandle, log.GetId());
+                try{
+                    std::cout<<"upload log Id="<<log.GetId()<<std::endl;
+                    ret = umxDB_deleteLogEntryById(_umxDBHandle, log.GetId());
+                }
+                catch(Poco::Exception &e){
+                    poco_warning(_logger,"delete log fail:"+e.message());
+                }
+
             }
             else
             {
                 std::cout<<"返回，待syncTime调用后，再次尝试连接。"<<std::endl;
                 ui->infoText->setText("bad request or not found....");
                 //返回，待syncTime调用后，再次尝试连接
+                m_timer->start();
                 return;
             }
         }
@@ -218,7 +232,12 @@ void StatusForm::syncToServer()
 
 void StatusForm::syncTime()
 {
-    m_timer->stop();
+    m_timeTimer->stop();
+    if(m_useServer!=1 )
+    {
+        m_timeTimer->start();
+        return;
+    }
     m_config->load("/usr/local/bin/umxLauncher.properties");
     readConfig();
 
@@ -228,5 +247,5 @@ void StatusForm::syncTime()
         strTime = "date -s "+strTime;
         system(strTime.c_str());
     }
-    m_timer->start();
+    m_timeTimer->start();
 }
