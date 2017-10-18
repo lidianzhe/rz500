@@ -15,6 +15,19 @@
 #include "umxCamLib/umxCamGlobal.h"
 #include "stdlib.h"
 #include "httpclient.h"
+// umxAlgoLib
+#include "umxAlgoLib/umxAlgoGlobal.h"
+typedef struct _IRIS_INFO {
+    std::string uuid;
+    unsigned char* image;
+    std::string imagePath;
+    int width;
+    int height;
+    int centerX;
+    int centerY;
+    int radius;
+}IRIS_INFO;
+
 namespace Ui {
 class StatusForm;
 }
@@ -39,6 +52,8 @@ private:
     Poco::Logger& _logger;
     Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> m_config;
 
+    // umxAlgoLib
+    UMXALGO_HANDLE _gUmxAlgoHandle;
     // umxDBLib
     UMXDB_HANDLE _umxDBHandle;
     UMXCAM_HANDLE _umxCAMHandle;
@@ -51,9 +66,14 @@ private:
     int m_useServer;
     int m_debugMode;
     int m_configRequestImage;
-    \
+
     void initlog();
     void readConfig();
+    // umxAlgoLib
+    void clearEnrollIrisTemplate(UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* enrollIrisTemplate);
+    void clearIrisInfo(IRIS_INFO* irisInfo);
+    void setIrisInfo(IRIS_INFO* toIrisInfo, UMXCAM_EVENT* fromUmxCamEvent, std::string uuid, std::string imagePath);
+
 };
 
 #endif // STATUSFORM_H

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.2.1, 2017-10-16T10:49:59. -->
+<!-- Written by QtCreator 4.2.1, 2017-10-18T09:20:34. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -472,15 +472,15 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteLinux.DirectUploadStep</value>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles">
-       <value type="QString">/home/lihongjun/temp/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
+       <value type="QString">/home/lihongjun/temp/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts">
-       <value type="QString">192.168.0.19</value>
        <value type="QString">192.168.0.11</value>
+       <value type="QString">192.168.0.19</value>
        <value type="QString">192.168.0.10</value>
        <value type="QString">192.168.1.105</value>
        <value type="QString">192.168.0.19</value>
@@ -500,8 +500,8 @@
        <value type="QString"></value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedTimes">
+       <value type="QDateTime">2017-10-18T08:42:57</value>
        <value type="QDateTime">2017-02-09T06:01:24</value>
-       <value type="QDateTime">2017-10-16T10:41:38</value>
        <value type="QDateTime">2017-03-01T09:40:44</value>
        <value type="QDateTime">2017-02-23T00:46:51</value>
        <value type="QDateTime">2017-02-26T12:38:39</value>

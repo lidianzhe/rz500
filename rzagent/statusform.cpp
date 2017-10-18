@@ -20,11 +20,13 @@ using Poco::StreamCopier;
 #include <QThread>
 #include "stdlib.h"
 
+#include "umxAlgoLib/umxAlgo.h"
 #include "umxDBLib/umxDB.h"
 #include "umxCommonLib/umxCommonGlobal.h"
 
 #include "httpclient.h"
 #include "Poco/Base64Encoder.h"
+
 /*
 insert into camera_configuration (id,serialNumber,Mode) values(
 1,'HC0709A000303','Recog')
@@ -69,7 +71,12 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
     initlog();
 
+    // umxAlgoLib
+    //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
+    int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEUROTECH_VERILOOK_LITHUANIA);
+    //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEC_NEOFACE_JAPAN);
 
+    std::cout<<"ret="<<ret<<std::endl;
     // umxDBLib
     int retDB = umxDB_create(&_umxDBHandle, _logger.get("umxDBLib"), m_config);
     poco_information(_logger,"open database");
@@ -80,7 +87,20 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     retDB = umxDB_selectLastLogID(_umxDBHandle,&lastLogId);
     if(retDB==UMXDB_SUCCESS)
         std::cout<<"last log id: "<<lastLogId<<std::endl;
+    //test image
+    QImage dauleye;
+    dauleye.load((char*) QString("/usr/local/share/CMITECH/Images/a%1.png").arg(1).toStdString().c_str());
+    QImage righteye = dauleye.copy(152,100,768,576).scaled(640,480);
+    righteye.save("/usr/local/share/CMITECH/Images/right1.png");
+    QImage lefteye = dauleye.copy(920+100,100,768,576).scaled(640,480);
+    lefteye.save("/usr/local/share/CMITECH/Images/left1.png");
 
+//    QImage left;
+//    left.load("/usr/local/share/CMITECH/Images/matched_leftIris.bmp");
+
+//    QImage fzleft = left.mirrored(false,true);
+//    fzleft.save("/usr/local/share/CMITECH/Images/matched_leftIris.png");
+    //
 
     m_timeTimer = new QTimer(this);
     connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
@@ -106,6 +126,8 @@ StatusForm::~StatusForm()
 {
     // umxDBLib
     umxDB_destroy(_umxDBHandle);
+    // umxAlgoLib
+    umxAlgo_destroy(_gUmxAlgoHandle);
 
     delete ui;
 }
@@ -141,6 +163,26 @@ void StatusForm::readConfig()
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
     m_client->setServer(m_config->getString("launcher.network.server.serverip","118.31.22.44")+":"+m_config->getString("launcher.network.server.port","8080"));
     m_client->setPath(m_config->getString("launcher.network.server.syncuri","/api/"));
+}
+
+void StatusForm::clearEnrollIrisTemplate(UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT *enrollIrisTemplate)
+{
+
+}
+
+void StatusForm::clearIrisInfo(IRIS_INFO *irisInfo)
+{
+    irisInfo->uuid = "";
+    if(irisInfo->image != NULL) {
+        delete irisInfo->image;
+    }
+    irisInfo->image = NULL;
+    irisInfo->imagePath = "";
+    irisInfo->width = 0;
+    irisInfo->height = 0;
+    irisInfo->centerX = 0;
+    irisInfo->centerY = 0;
+    irisInfo->radius = 0;
 }
 
 void StatusForm::syncToServer()
