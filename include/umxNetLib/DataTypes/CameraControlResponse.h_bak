@@ -1,0 +1,28 @@
+/**************************************************************************************************\
+
+	Author:		Ralph
+	Created:	30.04.2014
+
+---------------------------------------------------------------------------------------------------
+
+	Copyright (c) 2014 Smartsensors Ltd.
+
+\**************************************************************************************************/
+
+#ifndef __CAMERA_CONTROL_RESPONSE_H__
+#define __CAMERA_CONTROL_RESPONSE_H__
+
+#include <string>
+
+struct CameraControlResponse
+{
+public:
+    CameraControlResponse();
+    CameraControlResponse(const bool success, const std::string& status);
+    const std::string AsJSONString() const;
+
+    bool _success;
+    std::string _status;
+};
+
+#endif // __CAMERA_CONTROL_RESPONSE_H__

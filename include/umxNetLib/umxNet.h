@@ -39,6 +39,8 @@ extern "C" {
     // minor[out]
     // revision[out]
 
+    int _UMXNET_EXPORT umxNet_create_ADR(UMXNET_HANDLE *phandle, int type, INetworkManager *iNetworkManager);
+
     int _UMXNET_EXPORT umxNet_create(UMXNET_HANDLE *phandle, Poco::Logger& logger, Poco::AutoPtr<Poco::Util::AbstractConfiguration> config, int type, INetworkManager *iNetworkManager);
     // Create umxNet. As soon as it is created, it can receive device manager event
     //

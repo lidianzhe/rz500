@@ -37,6 +37,8 @@ extern "C" {
     // minor[out]
     // revision[out]
 
+    int _UMXALGO_EXPORT umxAlgo_create_ADR(UMXALGO_HANDLE *phandle, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE);
+
     int _UMXALGO_EXPORT umxAlgo_create(UMXALGO_HANDLE *phandle, Poco::Logger& logger, Poco::AutoPtr<Poco::Util::AbstractConfiguration> config, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE);
     // Create umxAlgo.
     //
@@ -56,8 +58,18 @@ extern "C" {
     //                UMXALGO_ERROR_IN_ARGUMENTS
     //                UMXALGO_SUCCESS
 
+    int _UMXALGO_EXPORT umxAlgo_iris_setIAlgoManager(UMXALGO_HANDLE handle, UMXAlgorithm::IAlgorithm* algo);
+
     int _UMXALGO_EXPORT umxAlgo_destroy(UMXALGO_HANDLE handle);
     // Destroy umxAlgo.
+    //
+    // handle[in] - UMXALGO_HANDLE value
+    //
+    // Return value - UMXALGO_ERROR_INVALID_HANDLE
+    //                UMXALGO_SUCCESS
+
+    int _UMXALGO_EXPORT umxAlgo_validHandle(UMXALGO_HANDLE handle);
+    // check if handle is valid or not.
     //
     // handle[in] - UMXALGO_HANDLE value
     //
@@ -284,6 +296,8 @@ extern "C" {
     int _UMXALGO_EXPORT umxAlgo_face_identifyTemplate(UMXALGO_HANDLE handle, const int faceThreshold, float* retScore, unsigned char* retUuid);
     // EF-45(bkko)-28 : modify face recognition mathod of neurotech algorihtm for matching speed ^^^
 
+    int _UMXALGO_EXPORT umxAlgo_iris_getTemplate(UMXALGO_HANDLE handle, UMXALGO_IRIS_GET_TEMPLATE_INPUT* leftInput, UMXALGO_IRIS_GET_TEMPLATE_OUTPUT* leftOutput, UMXALGO_IRIS_GET_TEMPLATE_INPUT* rightInput, UMXALGO_IRIS_GET_TEMPLATE_OUTPUT* rightOutput);
+    int _UMXALGO_EXPORT umxAlgo_iris_requestMatch(UMXALGO_HANDLE handle, int timer, UMXALGO_IRIS_IDENTIFY_INFO* info);
 #ifdef __cplusplus
 } // extern "C"
 #endif

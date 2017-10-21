@@ -585,6 +585,61 @@ namespace UMXNetwork
         Poco::Mutex _mutex;
     };
 
+    class ReturnData
+    {
+    public:
+        ReturnData(){}
+        ReturnData(const int retCode, const std::string retMsg) : _retCode(retCode), _retMsg(retMsg)
+        {
+
+        }
+
+        int _retCode;
+        std::string _retMsg;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name)
+        {
+            bool hasValue = false;
+            try
+            {
+                obj.get<T>(name.c_str());
+                hasValue = true;
+            }
+            catch(cjsonpp::JSONError&)
+            {
+            }
+            return hasValue;
+        }
+
+        static ReturnData Parse(const std::string jsonString)
+        {
+            ReturnData data;
+
+            if(jsonString.length() == 0)
+            {
+                data._retCode = 0;
+                return data;
+            }
+
+        //    std::cout << jsonString << std::endl;
+            cjsonpp::JSONObject obj = cjsonpp::parse( jsonString );
+
+
+            if (HasValue<int>( obj, "resultCode" ) )
+            {
+                data._retCode = obj.get<int>("resultCode");
+            }
+            if (HasValue<std::string>( obj, "resultMsg" ) )
+            {
+                data._retMsg = obj.get<std::string>("resultMsg");
+            }
+
+            return data;
+        }
+
+    };
+
     class CryptoData
     {
     public:
@@ -623,6 +678,64 @@ namespace UMXNetwork
         std::string _ipAddr;
     };
 
+    class ServerAuthData : public CryptoData
+    {
+    public:
+        ServerAuthData();
+
+        enum {
+            IDENTIFY_IMAGE = 1,
+            IDENTIFY_FEATURE,
+            IDENTIFY_MAX
+        };
+
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+        static ServerAuthData CreateData();
+        void initData();
+        int getServerAuthKind(int restAuthMode);
+
+        std::string _macAddr;
+        int _operationMode;
+        int _identifyKind;
+
+        std::string _leftFeature;
+        std::string _rightFeature;
+        std::string _leftImgData;
+        std::string _rightImgData;
+        std::string _irisCapturedFace;
+
+        int _leftImgHeight;
+        int _leftImgWidth;
+        int _rightImgHeight;
+        int _rightImgWidth;
+        int _leftIrisCenterX;
+        int _rightIrisCenterX;
+        int _leftIrisCenterY;
+        int _rightIrisCenterY;
+        int _leftIrisRadius;
+        int _rightIrisRadius;
+        int _leftPupilRadius;
+        int _rightPupilRadius;
+        int _irisCapturedFaceImgHeight;
+        int _irisCapturedFaceImgWidth;
+        int _irisCapturedFaceImgSize;
+
+    };
+
+    class ServerEnrolData : public CryptoData
+    {
+    public:
+        ServerEnrolData();
+
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        std::string _macAddr;
+        int _operationMode;
+        int _identifyKind;
+    };
+
     class AcceptableData : public CryptoData
     {
     public:
@@ -634,23 +747,51 @@ namespace UMXNetwork
         std::string _macAddr;
     };
 
-
     class INetworkManager
     {
+    public:
+        enum : int
+        {
+            INET_MANAGER_SUCCESS =                                                                                     0,
+
+            INET_MANAGER_ERROR_SHOULD_NOT_BE_HAPPENED =                                                               -1,
+            INET_MANAGER_ERROR_DB_INVALID_HANDLE =                                                                    -2,
+
+            INET_MANAGER_EXCEPTION_VACUUM_SERVICE =                                                                 -100,
+            INET_MANAGER_EXCEPTION_VACUUM_SERVICELOG =                                                              -101,
+
+            INET_MANAGER_ERROR_ALREADY_START =                                                                      -200,
+            INET_MANAGER_ERROR_CAN_NOT_ENROLL_FOR_DB_FULL =                                                         -201,
+            INET_MANAGER_ERROR_WRONG_START_MODE =                                                                   -202,
+            INET_MANAGER_ERROR_IRIS_DB_IS_FULL =                                                                    -203,
+            INET_MANAGER_ERROR_FACE_DB_IS_FULL =                                                                    -204,
+            INET_MANAGER_ERROR_UNKNOWN_START_MODE =                                                                 -205,
+            INET_MANAGER_ERROR_IRIS_AND_FACE_DB_ALL_IS_FULL =                                                       -206,
+
+            INET_MANAGER_ERROR_RELAY_IS_DISABLE =                                                                   -300,
+            INET_MANAGER_ERROR_RELAY_UNKNOWN =                                                                      -301
+        };
+
     public:
         virtual std::string GetUMXLauncherVersion()=0;
         virtual Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> GetPropertiesFilePointer()=0;
         virtual std::string GetUMXMode()=0;
         virtual bool SetUMXMode(std::string mode)=0;
         virtual int CurDoorStatus()=0;
+        virtual int GetDoorStatus()=0;
+        virtual int relay(bool forced, int duration)=0;
         virtual CameraControlResponse ControlStatus()=0;
-        virtual bool StartEnrolCamera(bool faceMode = false, bool glassesMode = false, bool bothEyeMode = false, bool eitherEyeMode = false, bool streamingMode = false)=0;
+        virtual int StartEnrolCamera(bool faceMode = false, bool glassesMode = false, bool bothEyeMode = false, bool eitherEyeMode = false, bool streamingMode = false, bool recogMode = false,  std::string addr = "")=0;
         virtual bool StopEnrolCamera()=0;
         virtual bool CaptureWideViewImage()=0;
         virtual bool GetPreviewData(PreviewData& previewData)=0;
         virtual std::shared_ptr<BiometricDataCache> GetBiometricDataCache()=0;
         virtual std::shared_ptr<SelectedDataCache> GetSelectedDataCache()=0;
         virtual std::shared_ptr<SelectedFacePreviewDataCache> GetSelectedFacePreviewDataCache()=0;
+        virtual int vacuumService()=0;
+        virtual int vacuumServiceLog()=0;
+        virtual int getUserList(std::vector<UserSimpleData> *userList)=0;
+        virtual int isExistTemplate(SubjectData* subjectData, std::string* duplicateUUID)=0;
         virtual int insertIris(SubjectData *subjectData)=0;
         virtual SubjectData selectIrisByUUID(const std::string uuid)=0;
         virtual int selectIrisesByPage(const int page, const int pageSize, std::vector<SubjectData> *retIrises)=0;
@@ -663,33 +804,61 @@ namespace UMXNetwork
         virtual int updateFaceByUuIdAndSubId(const std::string& uuid, const int subId, FaceData& faceData)=0;
         virtual int deleteFaceByUuIdAndSubId(const std::string uuid, const int subId)=0;
         virtual int insertUserInfo(const std::string uuid, const std::string card, const std::string pin,
-                                    const int admin, const int groupIndex, const int byPassCard, const int indivisual)=0;
+                                    const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed)=0;
         virtual int selectUserInfoByUUID(const std::string uuid, UserInfoData *userInfo)=0;
         virtual int selectUserInfoByCard(const std::string card, UserInfoData *userInfo)=0;
-        virtual int selectAllUserInfoByPage(const int page, const int pageSize, std::vector<UserInfoData> *retAllUserInfo)=0;
+        virtual int selectUserInfoByPage(const int page, const int pageSize, std::vector<UserInfoData> *retAllUserInfo)=0;
         virtual int updateUserInfoByUUID(const std::string uuid, const std::string card, const std::string pin,
-                                                 const int admin, const int groupIndex, const int byPassCard, const int indivisual)=0;
+                                                 const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed)=0;
         virtual int deleteUserInfoByUUID(const std::string uuid)=0;
+        virtual int selectLogEntryFromToByPage(const int pageNumber, const int pageSize, const int fromId, const int toId, std::vector<LogEntry> *retLogEntry)=0;
         virtual int selectLogEntryByPage(const int pageNumber, const int pageSize, const std::string& order, std::vector<LogEntry> *retLogEntry)=0;
         virtual LogEntry selectLogEntryById(const int id)=0;
         virtual bool deleteLogEntryFromTo(const int fromId, const int toId)=0;
         virtual bool deleteLogEntryById(const int id)=0;
         virtual std::vector<ImageCapture> selectImageCapture()=0;
         virtual void saveIrisAndFaceImage(const std::string uuid)=0;
+        virtual void deleteIrisAndFaceImage(const std::string uuid)=0;
+        virtual void deleteIrisImageByUUID(const std::string uuid)=0;
+        virtual void deleteFaceImageByUUID(const std::string uuid)=0;
+        virtual void deleteFaceImageBySubId(const std::string uuid, const int subId)=0;
         virtual void saveBMP8Image(std::string filename, unsigned char* image, int width, int height)=0;
         virtual void saveBMP24Image(std::string filename, unsigned char* image, int width, int height)=0;
+        virtual void saveFile(std::string filename, unsigned char* file, int size)=0;
+        virtual void loadFile(std::string filename, std::vector<unsigned char>* file)=0;
+        virtual void save8bitToJPG(char* szPathName, void* lpBits, int w, int h, int targetW, int targetH)=0;
+        virtual void save24bitToJPG(char* szPathName, void* lpBits, int w, int h, int targetW, int targetH)=0;
         virtual void setRestData(CommuteData& data)=0;
         virtual std::vector<UMXNetwork::CommuteData>* getRestData()=0;
+        virtual std::vector<UMXNetwork::ServerAuthData>* getRestServerAuthData()=0;
         virtual Poco::Mutex* getCommuteMutex()=0;
+        virtual Poco::Mutex* getServerAuthDataMutex()=0;
+        virtual Poco::Mutex* getServerEnrolMutex()=0;
         virtual void setSendToRest(bool flag)=0;
         virtual bool getSendToRest()=0;
+        virtual bool getServerAuthDataSendToRest()=0;
+        virtual void setServerAuthDataSendToRest(bool flag)=0;
+        virtual bool getSendToRestForEnrol()=0;
+        virtual bool setSendToRestForEnrol(bool flag)=0;
         virtual void* getDbManagerPtr()=0;
+        virtual void* getAlgoMangerPtr()=0;
         virtual int getLastLogId()=0;
         virtual void getLogEntryByFromTo(const int fromId, const int toId, std::vector<LogEntry> *retLogEntry)=0;
         virtual void getSubjectDataByUuid(const std::string uuid, SubjectData *retIris)=0;
         virtual void getLogEntryById(const int id, LogEntry *retLogEntry)=0;
         virtual bool RestContorl(ControlData data)=0;
+        virtual int updateFirmware(char* filePath, char* fileName, bool forcedFlag)=0;
+        virtual void setPreivewStartFlag(bool previewStart)=0;
+        virtual bool getPreivewStartFlag()=0;
+        virtual void setPreivewReqFlag(bool previewReq)=0;
+        virtual bool getPreviewReqFlag()=0;
+        virtual bool getFaceRaw(char** data, int* size)=0;
+        virtual std::string getRequestIPAddress()=0;
+        virtual void setRequestIPAddress(std::string addr)=0;
 
+        //- update firmware
+        virtual int GetUpdateFirmwareSize()=0;
+        virtual void SetUpdateFirmwareSize(int nUpdateFirmwarSize)=0;
     };
 }
 

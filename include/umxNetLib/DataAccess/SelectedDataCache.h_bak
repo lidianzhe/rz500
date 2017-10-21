@@ -1,0 +1,37 @@
+/**************************************************************************************************\
+
+    Author:		UK
+    Created:	2015.07.21
+
+---------------------------------------------------------------------------------------------------
+
+    Copyright (c) 2015 CMITech Ltd.
+
+\**************************************************************************************************/
+
+#ifndef __SELECTED_DATA_CACHE_H__
+#define __SELECTED_DATA_CACHE_H__
+
+#include <deque>
+#include <string>
+
+#include <Poco/Mutex.h>
+
+#include <DataTypes/SelectedData.h>
+
+class SelectedDataCache
+{
+public:
+    SelectedDataCache(const int cacheSize);
+    ~SelectedDataCache();
+
+    void Insert(const SelectedData& selectedData);
+    std::deque<SelectedData> Select();
+    bool Delete(const std::string& encounterId);
+private:
+    std::deque<SelectedData> _selectedData;
+    const int _cacheSize;
+    Poco::Mutex _mutex;
+};
+
+#endif // __SELECTED_DATA_CACHE_H__

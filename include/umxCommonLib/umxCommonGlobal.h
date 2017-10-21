@@ -58,7 +58,7 @@ namespace UMXCommon {
     {
         UserInfoData();
         UserInfoData(const std::string uuid, const std::string card, const std::string pin,
-                     const int admin, const int groupIndex, const int byPassCard, const int indivisual);
+                     const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed);
         static UserInfoData Parse(const std::string jsonString);
         const std::string AsJSONString() const;
         const cjsonpp::JSONObject AsJSONObject() const;
@@ -73,6 +73,23 @@ namespace UMXCommon {
         int _groupIndex;
         int _byPassCard;
         int _indivisual;
+
+        int _threeOutStatus;
+        int _threeOutAccessAllowed;
+    };
+
+    struct UserInfoData_ADR
+    {
+        char _userUUID[100];
+        char _card[100];
+        char _pin[100];
+        int _admin;
+        int _groupIndex;
+        int _byPassCard;
+        int _indivisual;
+
+        int _threeOutStatus;
+        int _threeOutAccessAllowed;
     };
 
     struct SubjectData
@@ -108,6 +125,49 @@ namespace UMXCommon {
 
         std::string _insertTime;
         std::string _updateTime;
+    };
+
+    struct SubjectData_ADR
+    {
+        char _userUUID[100];
+        int _recordVersion;
+        char _firstName[100];
+        char _lastName[100];
+        bool _accessAllowed;
+        char _matchUntil[100];
+
+        int _wiegandFacility;
+        int _wiegandSite;
+        int _wiegandCode;
+        char _wiegandCustom[100];
+
+        Poco::Data::BLOB _leftTemplate;
+        Poco::Data::BLOB _rightTemplate;
+
+        char _leftImagePath[100];
+        char _rightImagePath[100];
+
+        char _insertTime[100];
+        char _updateTime[100];
+    };
+
+    struct UserSimpleData
+    {
+        std::string _userUUID;
+        std::string _userName;
+
+        const std::string AsJSONString() const
+        {
+            return AsJSONObject().print(false);
+        }
+
+        const cjsonpp::JSONObject AsJSONObject() const
+        {
+            cjsonpp::JSONObject obj;
+            obj.set<std::string>("user_uuid", _userUUID);
+            obj.set<std::string>("user_name", _userName);
+            return obj;
+        }
     };
 
     struct ImageToSaveData
@@ -156,6 +216,17 @@ namespace UMXCommon {
         Poco::Data::BLOB _imageData;
     };
 
+    struct LogEntry_ADR
+    {
+        int _id;
+        char _eventType[100];
+        char _timestamp[100];
+        char _userUUID[100];
+        char _info[100];
+        char _additionalData[100];
+        Poco::Data::BLOB _imageData;
+    };
+
     class ImageCapture
     {
     public:
@@ -179,6 +250,15 @@ namespace UMXCommon {
         std::string _imageCaptureUUID;
         std::string _timestamp;
         std::string _serialNumber;
+        bool _enrol;
+    };
+
+    struct ImageCapture_ADR
+    {
+        int _id;
+        char _imageCaptureUUID[100];
+        char _timestamp[100];
+        char _serialNumber[100];
         bool _enrol;
     };
 
@@ -238,6 +318,24 @@ namespace UMXCommon {
         std::string _imagePath;
         std::string _insertTime;
         std::string _updateTime;
+    };
+
+    struct FaceData_ADR
+    {
+        char _userUUID[100];
+        int _subId;
+        int _faceEyeWidth;
+        int64_t _faceFeatureSize;
+        float _faceFrontalScore;
+        int _faceLeftEyeX;
+        int _faceRightEyeX;
+        float _faceRoll;
+        float _faceScore;
+        int _faceLEDState;
+        Poco::Data::BLOB _faceFeature;
+        char _imagePath[100];
+        char _insertTime[100];
+        char _updateTime[100];
     };
 
     namespace CameraDefaults
@@ -399,7 +497,8 @@ namespace UMXCommon {
     {
     public:
         ControlData();
-        ControlData(const bool result, const bool recogStart, const std::string& wavPath);
+        ControlData(const bool result, const bool recogStart, const std::string& wavPath, const std::string& uuid, const std::string& lastName, const std::string& card,
+                    const int wiegandFacility, const int wiegandCode, const std::string& wiegandCustom, const int touchEnableStart, const int cameraInitPos, const int launcherShow);
 
         static ControlData Parse(const std::string jsonString);
         static ControlData Parse(cjsonpp::JSONObject& obj);
@@ -409,9 +508,18 @@ namespace UMXCommon {
         template<class T>
         static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
     public:
+        std::string _uuid;
         bool _result;
         bool _recogStart;
         std::string _wavPath;
+        std::string _lastName;
+        std::string _card;
+        int _wiegandFacility;
+        int _wiegandCode;
+        std::string _wiegandCustom;
+        int _touchEnableStart = 0;
+        int _cameraInitPos = 0;
+        int _launcherShow = 0;
     };
 }
 

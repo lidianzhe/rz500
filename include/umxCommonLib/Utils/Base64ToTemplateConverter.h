@@ -20,6 +20,18 @@
 
 namespace TemplateConverter
 {
+    inline void ConvertToTemplateVector( const std::string& base64Template, std::vector<unsigned char>& lTemplate )
+    {
+        std::istringstream is(base64Template);
+        Poco::Base64Decoder decoder(is);
+        std::istreambuf_iterator<char> isIt(decoder);
+        while(isIt != std::istreambuf_iterator<char>())
+        {
+            lTemplate.push_back( static_cast<unsigned char>(*isIt) );
+            ++isIt;
+        }
+    }
+
     inline void ConvertToTemplate( const std::string& base64Template, unsigned char* pTemplate )
     {
         std::istringstream is(base64Template);

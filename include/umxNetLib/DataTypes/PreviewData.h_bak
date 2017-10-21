@@ -1,0 +1,37 @@
+/**************************************************************************************************\
+
+    Author:		UK
+    Created:	2015.06.19
+
+---------------------------------------------------------------------------------------------------
+
+    Copyright (c) 2015 CMITech Ltd.
+
+\**************************************************************************************************/
+
+#ifndef __PREVIEW_DATA_H__
+#define __PREVIEW_DATA_H__
+
+#include <string>
+
+class PreviewData
+{
+public:
+    PreviewData();
+    PreviewData(const std::string& leftEye, const std::string& rightEye, const std::string& faceImage);
+    const std::string GetLeftEye() const;
+    const std::string GetRightEye() const;
+    const std::string GetFaceImage() const;
+    void SetLeftEye(const std::string& leftEye);
+    void SetRightEye(const std::string& rightEye);
+    void SetFaceImage(const std::string& faceImage);
+    const std::string AsJSONString() const;
+    const bool IsValid() const;
+private:
+    bool _valid;
+    std::string _leftEye;
+    std::string _rightEye;
+    std::string _faceImage;
+};
+
+#endif // __PREVIEW_DATA_H__

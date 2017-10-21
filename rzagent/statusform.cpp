@@ -102,6 +102,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 //    fzleft.save("/usr/local/share/CMITECH/Images/matched_leftIris.png");
     //
 
+    //--
     m_timeTimer = new QTimer(this);
     connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
     m_timeTimer->setInterval(1000*30);
@@ -112,14 +113,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     m_timer->setInterval(1000*5);
     m_timer->start();
 
-    //syncToServer(true);
-    //test post
-    //std::string strJSON =client->BuildJSON();
-    //client->Post(strJSON);
 
-    //client->Get();
-    //const char* command="date -s 2017.02.23-00:30:00";
-    //system(command);
 }
 
 StatusForm::~StatusForm()
@@ -207,18 +201,6 @@ void StatusForm::syncToServer()
     if (ret == UMXDB_SUCCESS)
     {
         for(LogEntry log:logs){
-            std::cout<<"delete log Id="<<log.GetId()<<std::endl;
-            try{
-            ret = umxDB_deleteLogEntryById(_umxDBHandle, log.GetId());
-            }catch(Exception &e)
-            {
-                std::cout<<"delete catch"<<e.message()<<std::endl;
-            }
-        }
-        m_timer->start();
-        return;
-        //
-        for(LogEntry log:logs){
             Poco::Data::BLOB i(log.GetImageData());
             std::cout<<"blob size="<<i.size()<<std::endl;
             Poco::Data::BLOBInputStream bis(i);
@@ -250,7 +232,8 @@ void StatusForm::syncToServer()
                 ui->infoText->setText(QString("upload log Id=%1").arg(log.GetId()));
                 try{
                     std::cout<<"upload log Id="<<log.GetId()<<std::endl;
-                    ret = umxDB_deleteLogEntryById(_umxDBHandle, log.GetId());
+                    bool isimage=true;
+                    ret = umxDB_deleteLogEntryById(_umxDBHandle, log.GetId(),&isimage);
                 }
                 catch(Poco::Exception &e){
                     poco_warning(_logger,"delete log fail:"+e.message());

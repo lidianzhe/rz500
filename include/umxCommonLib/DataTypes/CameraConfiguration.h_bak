@@ -1,0 +1,44 @@
+/**************************************************************************************************\
+
+	Author:		Ralph
+	Created:	23.04.2014
+
+---------------------------------------------------------------------------------------------------
+
+	Copyright (c) 2014 Smartsensors Ltd.
+
+\**************************************************************************************************/
+
+#ifndef __CAMERA_CONFIGURATION_H__
+#define __CAMERA_CONFIGURATION_H__
+
+#include <memory>
+#include <string>
+
+#include "CameraMode.h"
+
+class CameraConfiguration
+{
+public:
+    CameraConfiguration();
+    CameraConfiguration(const std::string& serialNumber, const bool audioEnabled);
+	CameraConfiguration(const std::string& serialNumber, const std::shared_ptr<CameraMode>& cameraMode, const bool audioEnabled);
+    const int GetId() const;
+    const std::string GetSerialNumber() const;
+    const std::shared_ptr<CameraMode> GetCameraMode() const;
+    const bool GetAudioEnabled() const;
+    void SetId(const int id);
+    void SetSerialNumber(const std::string& serialNumer);
+    void SetCameraMode(const std::shared_ptr<CameraMode>& cameraMode);
+    void SetCameraConfigure(const std::string& serialNumber, const std::string& cameraMode, const bool audioEnabled);
+    void SetAudioEnabled(const bool audioEnabled);
+    const std::string AsJSONString() const;
+    static CameraConfiguration Parse(const std::string jsonString);
+private:
+    int _id;
+    std::string _serialNumber;
+    std::shared_ptr<CameraMode> _cameraMode;
+    bool _audioEnabled;
+};
+
+#endif // __CAMERA_CONFIGURATION_H__

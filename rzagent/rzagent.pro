@@ -64,13 +64,19 @@ SOURCES += main.cpp\
     logentity.cpp \
     statusform.cpp \
     httpclient.cpp \
-    utilshelper.cpp
+    utilshelper.cpp \
+    myserver.cpp \
+    myrequesthandler.cpp \
+    myrequesthandlerfactory.cpp
 
 HEADERS  += mainwindow.h \
     logentity.h \
     statusform.h \
     httpclient.h \
-    utilshelper.h
+    utilshelper.h \
+    myserver.h \
+    myrequesthandler.h \
+    myrequesthandlerfactory.h
 
 FORMS    += mainwindow.ui \
     statusform.ui

@@ -1,0 +1,56 @@
+/**************************************************************************************************\
+
+	Author:		Ralph
+	Created:	24.04.2014
+
+---------------------------------------------------------------------------------------------------
+
+	Copyright (c) 2014 Smartsensors Ltd.
+
+\**************************************************************************************************/
+
+#ifndef __SUBJECT_DATA_H__
+#define __SUBJECT_DATA_H__
+
+#include <string>
+
+#include "JSONHelper.h"
+
+#include <Poco/Data/BLOB.h>
+
+struct SubjectData
+{
+    SubjectData();
+    SubjectData(const std::string& userUUID, const int& recordVersion, const std::string& firstName, const std::string& lastName, const bool& accessAllowed, 
+        const std::string& matchUntil, const int& wiegandFacility, const int& wiegandSite, const int& wiegandCode, const std::string& wiegandCustom,
+        const Poco::Data::BLOB& leftTemplate, const Poco::Data::BLOB& rightTemplate, const std::string& leftImagePath, const std::string& rightImagePath);
+    static SubjectData Parse(const std::string jsonString);
+    const std::string AsJSONString() const;
+    const cjsonpp::JSONObject AsJSONObject() const;
+
+    template<class T>
+    static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+    std::string _userUUID;
+    int _recordVersion;
+    std::string _firstName;
+    std::string _lastName;
+    bool _accessAllowed;
+    std::string _matchUntil;
+
+    int _wiegandFacility;
+    int _wiegandSite;
+    int _wiegandCode;
+    std::string _wiegandCustom;
+
+    Poco::Data::BLOB _leftTemplate;
+    Poco::Data::BLOB _rightTemplate;
+
+    std::string _leftImagePath;
+    std::string _rightImagePath;
+
+    std::string _insertTime;
+    std::string _updateTime;
+};
+
+#endif // __SUBJECT_DATA_H__

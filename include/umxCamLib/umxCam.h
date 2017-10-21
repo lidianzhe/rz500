@@ -57,7 +57,7 @@ extern "C" {
 #endif
 
     void _UMXCAM_EXPORT umxCam_getVersion(unsigned int *major, unsigned int *minor, unsigned int *revision);
-	// Get umxCam version and revision number for compatibility.
+    // Get umxCam version and revision number for compatibility.
     // Application should check if major version number is consistent.
     //
     // major[out]
@@ -154,7 +154,7 @@ extern "C" {
     // buffer[in] - working buffer allocated by application
     //
     // UMXCAM_START_PARA *startPara:
-	//
+    //
     // 		startMode[in] - UMXCAM_NORMAL_START_MODE
     //                 		UMXCAM_RETRY_START_MODE
     // 		faceCaptureEnabled[in] - UMXCAM_TRUE : face capture mode
@@ -173,6 +173,10 @@ extern "C" {
     //                          	 UMXCAM_FALSE : return cropped face image for enrollment
     // 		faceImageInterval[in] - face image minimum interval in frames. 30 frames in 1 second.
     //                         		min: 10, max: 60, default: 10
+    //      checkFakeFace[in] - UMXCAM_TRUE : Check fake face for face enrollment and recognition
+    //                          UMXCAM_FALSE : Do not heck fake face for face enrollment and recognition
+    //      faceColorCorrection[in] - UMXCAM_TRUE : Face color correction
+    //                                UMXCAM_FALSE : No Face color correction
     //
     // Return value - UMXCAM_ERROR_INVALID_HANDLE
     //                UMXCAM_ERROR_IN_ARGUMENTS
@@ -253,6 +257,8 @@ extern "C" {
     //                UMXCAM_ERROR_DEVICE_ALREADY_STOPPED
     //                UMXCAM_ERROR_FAIL_TO_SEND_COMMAND
     //                UMXCAM_SUCCESS
+
+    bool _UMXCAM_EXPORT umxCam_saveAllImages_ADR(UMXCAM_HANDLE handle, const char* dirName);
 
     bool _UMXCAM_EXPORT umxCam_saveAllImages(UMXCAM_HANDLE handle, const std::string &dirName);
     // Save debug images

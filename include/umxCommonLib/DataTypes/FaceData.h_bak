@@ -1,0 +1,48 @@
+/**************************************************************************************************\
+
+    Author:		UK
+    Created:	2015.06.19
+
+---------------------------------------------------------------------------------------------------
+
+    Copyright (c) 2015 CMITech Ltd.
+
+\**************************************************************************************************/
+
+#ifndef __FACE_DATA_H__
+#define __FACE_DATA_H__
+
+#include <string>
+
+#include "JSONHelper.h"
+
+#include <Poco/Data/BLOB.h>
+
+struct FaceData
+{
+    FaceData();
+    FaceData(const std::string& userUUID, const int& subId, const Poco::Data::BLOB& faceFeature);
+    static FaceData Parse(const std::string jsonString);
+    const std::string AsJSONString() const;
+    const cjsonpp::JSONObject AsJSONObject() const;
+
+    template<class T>
+    static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+    std::string _userUUID;
+    int _subId;
+    int _faceEyeWidth;
+    int64_t _faceFeatureSize;
+    float _faceFrontalScore;
+    int _faceLeftEyeX;
+    int _faceRightEyeX;
+    float _faceRoll;
+    float _faceScore;
+    int _faceLEDState;
+    Poco::Data::BLOB _faceFeature;
+    std::string _imagePath;
+    std::string _insertTime;
+    std::string _updateTime;
+};
+
+#endif // __FACE_DATA_H__

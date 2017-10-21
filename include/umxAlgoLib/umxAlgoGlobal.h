@@ -27,6 +27,8 @@
 
 typedef void *UMXALGO_HANDLE;
 
+#include "umxCommonLib/umxCommonGlobal.h"
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // boolean type information
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -118,6 +120,13 @@ typedef void *UMXALGO_HANDLE;
 #define UMXALGO_FACE_NEUROTECH_VERILOOK                         "verilook"
 #define UMXALGO_FACE_NEC_NEOFACE                                "neoface"
 
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Threads
+////////////////////////////////////////////////////////////////////////////////////////
+#define ALGO_SUB_THREADS_MAX        128
+#define ALGO_SUB_THREADS_CNT        4
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // structs
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +167,11 @@ typedef struct _UMXALGO_IRIS_GET_TEMPLATE_OUTPUT {
     double qualityScore;
 } UMXALGO_IRIS_GET_TEMPLATE_OUTPUT;
 
+typedef struct _UMXALGO_IRIS_GET_TEMPLATE {
+    UMXALGO_IRIS_GET_TEMPLATE_INPUT*    input;
+    UMXALGO_IRIS_GET_TEMPLATE_OUTPUT*   output;
+} UMXALGO_IRIS_GET_TEMPLATE;
+
 typedef struct _UMXALGO_IRIS_COMPARE_TEMPLATE_INPUT {
     int cbSize;                   // size of this struct
     unsigned char *enrolTemplate;
@@ -171,6 +185,22 @@ typedef struct _UMXALGO_IRIS_COMPARE_TEMPLATE_OUTPUT {
     double coOcclusion;
 } UMXALGO_IRIS_COMPARE_TEMPLATE_OUTPUT;
 
+typedef struct _UMXALGO_IRIS_IDENTIFY_INFO {
+    UMXALGO_IRIS_GET_TEMPLATE    left;
+    UMXALGO_IRIS_GET_TEMPLATE    right;
+    int eitherEyeEnabledStatus;
+    double matchThreshlod;
+    char uuid[256];    // 1:1
+//    UMXALGO_IRIS_COMPARE_TEMPLATE_INPUT* left_verificationData;  // 1:1
+//    UMXALGO_IRIS_COMPARE_TEMPLATE_INPUT* right_verificationData;  // 1:1
+    // return value
+    char retUuid[ALGO_SUB_THREADS_MAX][256];
+    double retLeftScore[ALGO_SUB_THREADS_MAX];
+    double retRightScore[ALGO_SUB_THREADS_MAX];
+    double retMergedScore[ALGO_SUB_THREADS_MAX];
+    int retBestArray;
+    bool duplicate;
+} UMXALGO_IRIS_IDENTIFY_INFO;
 
 // Face : Global
 typedef struct _UMXALGO_POINT_XY
@@ -220,7 +250,12 @@ typedef struct _UMXALGO_FACE_GET_TEMPLATE_OUTPUT {
     int size;        // typically 579 and shall not be bigger than 1024
 }UMXALGO_FACE_GET_TEMPLATE_OUTPUT;
 
-
+enum
+{
+    SUB_T_IDLE = 10,
+    SUB_T_BUSY,
+    SUB_T_COMPLETE
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Return values - errors
@@ -288,5 +323,15 @@ typedef struct _UMXALGO_FACE_GET_TEMPLATE_OUTPUT {
 #define UMXALGO_FACE_NEO_ERROR_INSUFFICIENT_FACEROLL                -5011       // insufficient face roll
 
 #define UMXALGO_FACE_NEO_ERROR_INSUFFICIENT_FACETILT                -5012       // insufficient face tilt
+
+namespace UMXAlgorithm
+{
+    class IAlgorithm
+    {
+    public:
+        virtual std::vector<UMXCommon::SubjectData>* getIrisSubjectData()=0;
+        virtual Poco::Mutex* getIrisSubjectMutex()=0;
+    };
+}
 
 #endif // UMXALGOGLOBAL_H

@@ -142,6 +142,10 @@ typedef struct _UMXCAM_START_PARA {
     int faceFullResolution; // UMXCAM_TRUE or UMXCAM_FALSE. Face Full Resolution is 720x960
     int faceImageInterval;  // face image minimum interval in frames. 30 frames in 1 second.
                             // min: 3, max: 30, default: 10
+    int checkFakeFace;      // UMXCAM_TRUE or UMXCAM_FALSE
+    int faceColorCorrection;// UMXCAM_TRUE or UMXCAM_FALSE
+    int coverGlassTrans;    // IR Transmission coefficient of additional cover glass in percentage
+                            // The value between 50% and 100% is only allowed.
 } UMXCAM_START_PARA;
 
 ////////////////////////////////////////////////////////////////////////////////////////
