@@ -1,6 +1,6 @@
 #include "myserver.h"
 
-myserver::myserver()
+MyServer::MyServer()
 {
 
 }

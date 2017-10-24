@@ -17,6 +17,8 @@
 #include "httpclient.h"
 // umxAlgoLib
 #include "umxAlgoLib/umxAlgoGlobal.h"
+#include "algoutils.h"
+
 typedef struct _IRIS_INFO {
     std::string uuid;
     unsigned char* image;
@@ -57,6 +59,9 @@ private:
     // umxDBLib
     UMXDB_HANDLE _umxDBHandle;
     UMXCAM_HANDLE _umxCAMHandle;
+
+    //algoutils
+    AlgoUtils* m_utils;
 
     //
     std::string m_DeviceSN;

@@ -67,7 +67,8 @@ SOURCES += main.cpp\
     utilshelper.cpp \
     myserver.cpp \
     myrequesthandler.cpp \
-    myrequesthandlerfactory.cpp
+    myrequesthandlerfactory.cpp \
+    algoutils.cpp
 
 HEADERS  += mainwindow.h \
     logentity.h \
@@ -76,7 +77,8 @@ HEADERS  += mainwindow.h \
     utilshelper.h \
     myserver.h \
     myrequesthandler.h \
-    myrequesthandlerfactory.h
+    myrequesthandlerfactory.h \
+    algoutils.h
 
 FORMS    += mainwindow.ui \
     statusform.ui

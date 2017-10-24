@@ -26,6 +26,7 @@ using Poco::StreamCopier;
 
 #include "httpclient.h"
 #include "Poco/Base64Encoder.h"
+#include "algoutils.h"
 
 /*
 insert into camera_configuration (id,serialNumber,Mode) values(
@@ -72,8 +73,8 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     initlog();
 
     // umxAlgoLib
-    //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
-    int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEUROTECH_VERILOOK_LITHUANIA);
+    int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
+    //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEUROTECH_VERILOOK_LITHUANIA);
     //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEC_NEOFACE_JAPAN);
 
     std::cout<<"ret="<<ret<<std::endl;
@@ -88,21 +89,16 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     if(retDB==UMXDB_SUCCESS)
         std::cout<<"last log id: "<<lastLogId<<std::endl;
     //test image
-    QImage dauleye;
-    dauleye.load((char*) QString("/usr/local/share/CMITECH/Images/a%1.png").arg(1).toStdString().c_str());
-    QImage righteye = dauleye.copy(152,100,768,576).scaled(640,480);
-    righteye.save("/usr/local/share/CMITECH/Images/right1.png");
-    QImage lefteye = dauleye.copy(920+100,100,768,576).scaled(640,480);
-    lefteye.save("/usr/local/share/CMITECH/Images/left1.png");
-
-//    QImage left;
-//    left.load("/usr/local/share/CMITECH/Images/matched_leftIris.bmp");
-
-//    QImage fzleft = left.mirrored(false,true);
-//    fzleft.save("/usr/local/share/CMITECH/Images/matched_leftIris.png");
-    //
 
     //--
+    m_utils = new AlgoUtils();
+    //test
+    std::string id( "201410266");
+    m_utils->getTemplates(_gUmxAlgoHandle,id);
+    //------
+    exit;
+
+
     m_timeTimer = new QTimer(this);
     connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
     m_timeTimer->setInterval(1000*30);

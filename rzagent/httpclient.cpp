@@ -17,7 +17,7 @@
 
 #include <QString>
 #include "umxCamLib/umxCamGlobal.h"
-
+#include "algoutils.h"
 using Poco::Net::HTTPClientSession;
 using Poco::Net::HTTPRequest;
 using Poco::Net::HTTPResponse;

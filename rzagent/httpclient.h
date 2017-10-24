@@ -18,7 +18,7 @@
 
 
 #include "umxCamLib/umxCamGlobal.h"
-
+#include "algoutils.h"
 using Poco::Net::HTTPClientSession;
 using Poco::Net::HTTPRequest;
 using Poco::Net::HTTPResponse;
@@ -46,7 +46,12 @@ private:
     std::string m_Server="120.27.233.3:80";
     std::string m_Path="/irisapi/api/";
     std::string m_LogsUri="logs";
+    //algo
+    AlgoUtils *m_utils;
+
     bool DeleteLog(long id);
+
+
 };
 
 #endif // HTTPCLIENT_H
