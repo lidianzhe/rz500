@@ -147,24 +147,6 @@ void AlgoUtils::saveSmallImage(string imagePath, string destPath, double score)
 {
     QImage image(QString::fromStdString(imagePath));
     QImage img=image.scaled(240,180);
-//    QPainter painter(&img); //为这个QImage构造一个QPainter
-//    //painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
-//    //设置画刷的组合模式CompositionMode_SourceOut这个模式为目标图像在上。
-//    //改变组合模式和上面的填充方式可以画出透明的图片。
-
-//    //改变画笔和字体
-////    QPen pen = painter.pen();
-////    pen.setColor(Qt::blue);
-////    QFont font = painter.font();
-////    font.setBold(true);//加粗
-////    font.setPixelSize(20);//改变字体大小
-
-////    painter.setPen(pen);
-////    painter.setFont(font);
-
-//    //painter.drawText(img.rect(),Qt::AlignCenter,"88");
-//    painter.drawText(110,160,QString::number(score));
-//    int n = 100;//这个为图片的压缩度。0/100
     img.save(QString::fromStdString(destPath));
 
 
