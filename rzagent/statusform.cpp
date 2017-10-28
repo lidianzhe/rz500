@@ -98,24 +98,25 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     dzrun.umxdb_Handle = _umxDBHandle;
     //test
     //m_utils = new AlgoUtils(_gUmxAlgoHandle);
-    //std::string id( "201410266");
+
     //m_utils->getTemplates(_gUmxAlgoHandle,id);
     //------
 
 
     m_serverThread = new ServerThread(this);
     m_serverThread->start();
+    if(m_useServer)
+    {
+        m_timeTimer = new QTimer(this);
+        connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
+        m_timeTimer->setInterval(1000*30);
+        m_timeTimer->start();
 
-//    m_timeTimer = new QTimer(this);
-//    connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
-//    m_timeTimer->setInterval(1000*30);
-//    m_timeTimer->start();
-
-//    m_timer = new QTimer(this);
-//    connect(m_timer,SIGNAL(timeout()),this,SLOT(syncToServer()));
-//    m_timer->setInterval(1000*5);
-//    m_timer->start();
-
+        m_timer = new QTimer(this);
+        connect(m_timer,SIGNAL(timeout()),this,SLOT(syncToServer()));
+        m_timer->setInterval(1000*5);
+        m_timer->start();
+    }
 
 }
 
@@ -133,7 +134,7 @@ StatusForm::~StatusForm()
 //
 void StatusForm::initlog()
 {
-//HC0709A000231
+
     AutoPtr<FileChannel> pChannel(new FileChannel);
     pChannel->setProperty("path", "/home/root/rzagent.log");
     pChannel->setProperty("rotation", m_config->getString("logging.channels.file.rotation", "10M"));

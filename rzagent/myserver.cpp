@@ -10,7 +10,7 @@ MyServer::MyServer()
 
 void MyServer::StartServer()
 {
-    Poco::UInt16 port = 9999;
+    Poco::UInt16 port = 80;
     HTTPServerParams* pParams = new HTTPServerParams;
     pParams->setMaxQueued(100);
     pParams->setMaxThreads(16);
