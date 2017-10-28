@@ -4,14 +4,41 @@
 #include <QImage>
 #include <QByteArray>
 #include <QPainter>
-
+#include "Poco/Logger.h"
+#include "Poco/FileChannel.h"
+#include "Poco/AutoPtr.h"
+#include "Poco/PatternFormatter.h"
+#include "Poco/FormattingChannel.h"
 using Poco::DirectoryIterator;
 using Poco::Path;
 using Poco::File;
+using Poco::Logger;
+using Poco::FileChannel;
+using Poco::AutoPtr;
+using Poco::PatternFormatter;
+using Poco::FormattingChannel;
 #include "umxAlgoLib/umxAlgo.h"
 using namespace std;
-AlgoUtils::AlgoUtils()
+AlgoUtils::AlgoUtils(): m_logger(Logger::get("algo"))
 {
+
+}
+
+AlgoUtils::AlgoUtils(UMXALGO_HANDLE handle):
+    m_logger(Logger::get("algo"))
+{
+    algoHandle = handle;
+
+    AutoPtr<FileChannel> pChannel(new FileChannel);
+    pChannel->setProperty("path", "algoutils.log");
+    pChannel->setProperty("rotation", "2 K");
+    pChannel->setProperty("archive", "timestamp");
+//    m_logger.setChannel(pChannel);
+
+    AutoPtr<PatternFormatter> pPF(new PatternFormatter);
+    pPF->setProperty("pattern", "%m-%d %H:%M:%S %s: [%p] %t"); // local time
+    AutoPtr<FormattingChannel> pFC(new FormattingChannel(pPF, pChannel));
+    m_logger.setChannel(pFC);
 
 }
 
@@ -46,8 +73,13 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
     string bestLeftEyeImage;
     string bestRightEyeImage;
 
+    File f(path);
+    if(!f.exists())
+        return -1;
     DirectoryIterator it(path);
     DirectoryIterator end;
+    if(it==end)
+        return -1;
     while (it!=end) {
         if(it->isFile()){
             std::cout<< it.name()<<std::endl;
@@ -70,7 +102,7 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
             if(bestRightTemplate.usableIrisArea<irisGetEnrolTemplateOutput.usableIrisArea)
             {
                 bestRightTemplate = irisGetEnrolTemplateOutput;
-                bestRightEyeImage = lefteyefile;
+                bestRightEyeImage = righteyefile;
             }
         }
         ++it;
@@ -78,15 +110,33 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
     cout<<"best leftimage: "<<bestLeftEyeImage<< "  high score: "<<bestLeftTemplate.usableIrisArea<<endl;
     cout<<"best rightimage: "<<bestRightEyeImage<< "  high score: "<<bestRightTemplate.usableIrisArea<<endl;
     //save eye images
-    //string smallpath="/usr/local/share/CMITECH/Images/"
+
+    QString leftname =QString::fromStdString(Path(bestLeftEyeImage).getFileName());
+    QString rightname=QString::fromStdString(Path(bestRightEyeImage).getFileName());
+    QString logtext=QString("id=%0,best %1, score=%2,best %3,score=%4")
+            .arg(QString::fromStdString(id),leftname,
+                 QString::number(bestLeftTemplate.usableIrisArea),rightname,
+                 QString::number(bestRightTemplate.usableIrisArea));
+    if(bestLeftTemplate.usableIrisArea<70 || bestRightTemplate.usableIrisArea<70)
+        m_logger.warning(logtext.toStdString());
+    else
+        m_logger.information(logtext.toStdString());
+
+    //string smallpath="/usr/local/share/CMITECH/Images/";
     saveSmallImage(bestLeftEyeImage,"/usr/local/share/CMITECH/Images/"+id+"_lefteye.jpg",bestLeftTemplate.usableIrisArea);
+    saveSmallImage(bestRightEyeImage,"/usr/local/share/CMITECH/Images/"+id+"_righteye.jpg",bestRightTemplate.usableIrisArea);
 
     return 0;
 }
 
+int AlgoUtils::getTemplates(std::string &id)
+{
+    this->getTemplates(this->algoHandle,id);
+}
+
 int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, std::string &imagepath, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT *output)
 {
-    std::cout<<"dd"<<std::endl;
+
     int tempSize = umxAlgo_iris_template_size(handle, UMXALGO_IRIS_TYPE_ENROL_TEMPLATE);
 
     UMXALGO_IRIS_GET_TEMPLATE_INPUT irisGetTemplateInput;
@@ -102,9 +152,6 @@ int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, std::string &imagepath, 
     irisGetTemplateInput.radius = 0;
     irisGetTemplateInput.templateSize = tempSize;
     irisGetTemplateInput.showSegmentation = UMXALGO_IRIS_MIR_DO_NOT_SHOW_SEGMENTATION;
-
-    //UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT irisGetEnrolTemplateOutput;
-    //clearEnrollIrisTemplate(&irisGetEnrolTemplateOutput);
 
     int retGetEnroll= umxAlgo_iris_getEnrollTemplate(handle, &irisGetTemplateInput, output);
 
@@ -148,9 +195,9 @@ void AlgoUtils::saveSmallImage(string imagePath, string destPath, double score)
     QImage image(QString::fromStdString(imagePath));
     QImage img=image.scaled(240,180);
     img.save(QString::fromStdString(destPath));
-
-
 }
+
+
 
 //-------------
 //    int tempSize = umxAlgo_iris_template_size(_gUmxAlgoHandle, UMXALGO_IRIS_TYPE_ENROL_TEMPLATE);

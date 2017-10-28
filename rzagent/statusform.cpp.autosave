@@ -98,7 +98,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     dzrun.umxdb_Handle = _umxDBHandle;
     //test
     //m_utils = new AlgoUtils(_gUmxAlgoHandle);
-    //std::string id( "201410266");
+
     //m_utils->getTemplates(_gUmxAlgoHandle,id);
     //------
 

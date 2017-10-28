@@ -13,12 +13,13 @@
 #include "Poco/Stopwatch.h"
 #include <iostream>
 #include <iomanip>
-
+#include "algoutils.h"
 class utilsHelper
 {
 public:
     utilsHelper();
     std::string BuildJSON();
+    static AlgoUtils* m_agloUtils;
 };
 
 #endif // UTILSHELPER_H

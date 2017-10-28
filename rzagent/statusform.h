@@ -19,6 +19,8 @@
 #include "umxAlgoLib/umxAlgoGlobal.h"
 #include "algoutils.h"
 
+#include "serverthread.h"
+
 typedef struct _IRIS_INFO {
     std::string uuid;
     unsigned char* image;
@@ -43,6 +45,7 @@ public:
     ~StatusForm();
     //返回设备是否为调试模式
     int getDebugMode(){return m_debugMode;}
+
 private slots:
     void syncToServer();
     void syncTime();
@@ -63,6 +66,7 @@ private:
     //algoutils
     AlgoUtils* m_utils;
 
+    ServerThread* m_serverThread;
     //
     std::string m_DeviceSN;
     Client *m_client;

@@ -9,6 +9,7 @@
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Util/ServerApplication.h>
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,10 +18,16 @@ using namespace Poco::Net;
 using namespace Poco::Util;
 using namespace std;
 
-class MyServer
+class MyServer:public ServerApplication
 {
 public:
     MyServer();
+    void StartServer();
+    void StopServer();
+
+private:
+    HTTPServer *m_server;
+
 };
 
 #endif // MYSERVER_H
