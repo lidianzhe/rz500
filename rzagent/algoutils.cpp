@@ -125,7 +125,9 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
     //string smallpath="/usr/local/share/CMITECH/Images/";
     saveSmallImage(bestLeftEyeImage,"/usr/local/share/CMITECH/Images/"+id+"_lefteye.jpg",bestLeftTemplate.usableIrisArea);
     saveSmallImage(bestRightEyeImage,"/usr/local/share/CMITECH/Images/"+id+"_righteye.jpg",bestRightTemplate.usableIrisArea);
-
+    //
+    leftscore = bestLeftTemplate.usableIrisArea;
+    rightscore = bestRightTemplate.usableIrisArea;
     return 0;
 }
 

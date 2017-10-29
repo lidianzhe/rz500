@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _timer = new QTimer(this);
     connect(_timer,SIGNAL(timeout()),this,SLOT(setTop()));
-    _timer->start(1000*25);
+    _timer->start(1000*20);
 
 }
 
@@ -55,8 +55,6 @@ void MainWindow::initUI(QWidget *parent)
 
 void MainWindow::setTop()
 {
-
-    return;
     hide();
     if(_pStatusForm->getDebugMode()==1){
         setWindowFlags(Qt::WindowStaysOnTopHint);

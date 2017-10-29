@@ -14,7 +14,8 @@ public:
     MyRequestHandler();
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse &response);
 private:
-    void api_Templates(HTTPServerRequest& request, HTTPServerResponse &response);
+    void api_Persons(HTTPServerRequest& request, HTTPServerResponse &response);
+
 };
 
 #endif // MYREQUESTHANDLER_H

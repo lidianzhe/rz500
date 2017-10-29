@@ -21,10 +21,12 @@ public:
     void saveSmallImage(string imagePath,string destPath,double score);
 
     void setHandle(UMXALGO_HANDLE handle){this->algoHandle=handle;}
-
+    double leftscore;
+    double rightscore;
 private:
     UMXALGO_HANDLE algoHandle;
     Poco::Logger& m_logger;
+
 };
 
 #endif // ALGOUTILS_H

@@ -25,8 +25,8 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
 //    std::cout << qPrintable(path.first()) <<endl;
 //    std::cout <<qPrintable(path.at(1))<<endl;
 //    std::cout <<qPrintable(path.at(2))<<endl;
-    if(path.value(1) =="templates"){
-        api_Templates(request,response);
+    if(path.value(1) =="persons"){
+        api_Persons(request,response);
         return;
     }
 
@@ -41,7 +41,7 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
     response.redirect(request.getURI(),HTTPResponse::HTTPStatus::HTTP_CREATED);
 }
 
-void MyRequestHandler::api_Templates(HTTPServerRequest &request, HTTPServerResponse &response)
+void MyRequestHandler::api_Persons(HTTPServerRequest &request, HTTPServerResponse &response)
 {
     try{
 
@@ -58,7 +58,19 @@ void MyRequestHandler::api_Templates(HTTPServerRequest &request, HTTPServerRespo
             AlgoUtils *algo = new AlgoUtils(dzrun.umxalgo_Handle);
             int ret=algo->getTemplates(id);
             if(ret>=0)
-                response.redirect(request.getURI(),HTTPResponse::HTTPStatus::HTTP_OK);
+            {
+                //response.redirect(request.getURI(),HTTPResponse::HTTPStatus::HTTP_OK);
+                response.setChunkedTransferEncoding(true);
+                response.setContentType("application/json");
+                std::ostream& ostr = response.send();
+                ostr << "{";
+                ostr << "\"Id\":\""<<id<<"\",";
+                ostr << "\"LeftEyeScore\":\""<<algo->leftscore<<"\",";
+                ostr << "\"RightEyeScore\":\""<<algo->rightscore<<"\"";
+                ostr <<"}";
+                ostr<<endl;
+                response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
+            }
             else
                 response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_NOT_FOUND);
 
