@@ -35,7 +35,7 @@ AlgoUtils::AlgoUtils(UMXALGO_HANDLE handle):
     algoHandle = handle;
 
     AutoPtr<FileChannel> pChannel(new FileChannel);
-    pChannel->setProperty("path", "algoutils.log");
+    pChannel->setProperty("path", "/home/root/algoutils.log");
     pChannel->setProperty("rotation", "2 K");
     pChannel->setProperty("archive", "timestamp");
 //    m_logger.setChannel(pChannel);
