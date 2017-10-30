@@ -18,7 +18,7 @@ public:
     int getEnrollTemplate(UMXALGO_HANDLE handle,std::string& imagepath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output);
     void splitEyes(std::string &filename);
     void clearEnrollIrisTemplate(UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* enrollIrisTemplate);
-    void saveSmallImage(string imagePath,string destPath,double score);
+    void saveSmallImage(string imagePath,string destPath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output);
 
     void setHandle(UMXALGO_HANDLE handle){this->algoHandle=handle;}
     double leftscore;

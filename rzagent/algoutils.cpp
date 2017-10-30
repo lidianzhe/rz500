@@ -18,7 +18,12 @@ using Poco::AutoPtr;
 using Poco::PatternFormatter;
 using Poco::FormattingChannel;
 #include "umxAlgoLib/umxAlgo.h"
+#include "umxDBLib/umxDBGlobal.h"
+#include "umxCommonLib/umxCommonGlobal.h"
+#include "umxDBLib/umxDB.h"
+#include "runtime.h"
 using namespace std;
+using namespace UMXCommon;
 AlgoUtils::AlgoUtils(): m_logger(Logger::get("algo"))
 {
 
@@ -122,12 +127,28 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
     else
         m_logger.information(logtext.toStdString());
 
-    //string smallpath="/usr/local/share/CMITECH/Images/";
-    saveSmallImage(bestLeftEyeImage,"/usr/local/share/CMITECH/Images/"+id+"_lefteye.jpg",bestLeftTemplate.usableIrisArea);
-    saveSmallImage(bestRightEyeImage,"/usr/local/share/CMITECH/Images/"+id+"_righteye.jpg",bestRightTemplate.usableIrisArea);
+    string smallleft="/usr/local/share/CMITECH/Images/"+id+"_lefteye.jpg";
+    string smallright="/usr/local/share/CMITECH/Images/"+id+"_righteye.jpg";
+    saveSmallImage(bestLeftEyeImage,smallleft,&bestLeftTemplate);
+    saveSmallImage(bestRightEyeImage,smallright,&bestRightTemplate);
     //
     leftscore = bestLeftTemplate.usableIrisArea;
     rightscore = bestRightTemplate.usableIrisArea;
+    //
+    SubjectData subjectData;
+    subjectData._userUUID = id;
+    subjectData._lastName = id;
+    subjectData._leftTemplate=Poco::Data::BLOB((char *)bestLeftTemplate.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
+    subjectData._rightTemplate=Poco::Data::BLOB((char *)bestRightTemplate.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
+    subjectData._leftImagePath=smallleft;
+    subjectData._rightImagePath=smallright;
+
+    umxDB_updateSubject(dzrun.umxdb_Handle,subjectData);
+//    umxDB_updateIrisByUUID2(dzrun.umxdb_Handle,id,subjectData);
+//        subjectData._userUUID=id;
+//        subjectData._lastName=id;
+//        umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
+//        umxDB_insertUserInfo(dzrun.umxdb_Handle,id,"","",0,0,0,0,0,0);
     return 0;
 }
 
@@ -192,11 +213,13 @@ void AlgoUtils::clearEnrollIrisTemplate(UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* 
     enrollIrisTemplate->qualityScore = 0.0;
 }
 
-void AlgoUtils::saveSmallImage(string imagePath, string destPath, double score)
+void AlgoUtils::saveSmallImage(string imagePath, string destPath, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT *output)
 {
+
     QImage image(QString::fromStdString(imagePath));
-    QImage img=image.scaled(240,180);
-    img.save(QString::fromStdString(destPath));
+    QImage img=image.copy(output->irisCenterX-160,output->irisCenterY-120,320,240).scaled(120,110);
+    //QImage img=image.scaled(120,110);
+    img.save(QString::fromStdString(destPath));    
 }
 
 

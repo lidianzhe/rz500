@@ -14,6 +14,8 @@ void MyServer::StartServer()
     HTTPServerParams* pParams = new HTTPServerParams;
     pParams->setMaxQueued(100);
     pParams->setMaxThreads(16);
+    //Poco::Timespan ts=Poco::Timespan(200,200000);
+    //pParams->setTimeout(ts);
     ServerSocket svs(port); // set-up a server socket
     MyRequestHandlerFactory* reqFactor = new MyRequestHandlerFactory();
 
