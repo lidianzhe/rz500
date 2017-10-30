@@ -5,6 +5,7 @@
 #include "Poco/Net/HTTPRequest.h"
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
+#include "entities.h"
 using namespace Poco;
 using namespace Net;
 

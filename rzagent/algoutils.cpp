@@ -47,10 +47,10 @@ AlgoUtils::AlgoUtils(UMXALGO_HANDLE handle):
 
 }
 
-int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
+int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
 {
     string homePath = Path::home();
-    std::string path(homePath+id);
+    std::string path(homePath+person.Id);
     /*test
     Path p(path+"/ee.png");
     Path p1(p.parent().toString());
@@ -119,7 +119,7 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
     QString leftname =QString::fromStdString(Path(bestLeftEyeImage).getFileName());
     QString rightname=QString::fromStdString(Path(bestRightEyeImage).getFileName());
     QString logtext=QString("id=%0,best %1, score=%2,best %3,score=%4")
-            .arg(QString::fromStdString(id),leftname,
+            .arg(QString::fromStdString(person.Id),leftname,
                  QString::number(bestLeftTemplate.usableIrisArea),rightname,
                  QString::number(bestRightTemplate.usableIrisArea));
     if(bestLeftTemplate.usableIrisArea<70 || bestRightTemplate.usableIrisArea<70)
@@ -127,8 +127,8 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
     else
         m_logger.information(logtext.toStdString());
 
-    string smallleft="/usr/local/share/CMITECH/Images/"+id+"_lefteye.jpg";
-    string smallright="/usr/local/share/CMITECH/Images/"+id+"_righteye.jpg";
+    string smallleft="/usr/local/share/CMITECH/Images/"+person.Id+"_lefteye.jpg";
+    string smallright="/usr/local/share/CMITECH/Images/"+person.Id+"_righteye.jpg";
     saveSmallImage(bestLeftEyeImage,smallleft,&bestLeftTemplate);
     saveSmallImage(bestRightEyeImage,smallright,&bestRightTemplate);
     //
@@ -136,25 +136,27 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, std::string &id)
     rightscore = bestRightTemplate.usableIrisArea;
     //
     SubjectData subjectData;
-    subjectData._userUUID = id;
-    subjectData._lastName = id;
+    subjectData._userUUID = person.Id;
+    subjectData._lastName = person.Name;
     subjectData._leftTemplate=Poco::Data::BLOB((char *)bestLeftTemplate.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
     subjectData._rightTemplate=Poco::Data::BLOB((char *)bestRightTemplate.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
     subjectData._leftImagePath=smallleft;
     subjectData._rightImagePath=smallright;
+    UserInfoData retUserinfo;
+    umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,person.Id,&retUserinfo);
+    if(retUserinfo._userUUID=="")
+    {
+        umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
+        umxDB_insertUserInfo(dzrun.umxdb_Handle,person.Id,person.Card,"",0,0,0,0,0,0);
+    }else
+        umxDB_updateSubject(dzrun.umxdb_Handle,subjectData);
 
-    umxDB_updateSubject(dzrun.umxdb_Handle,subjectData);
-//    umxDB_updateIrisByUUID2(dzrun.umxdb_Handle,id,subjectData);
-//        subjectData._userUUID=id;
-//        subjectData._lastName=id;
-//        umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
-//        umxDB_insertUserInfo(dzrun.umxdb_Handle,id,"","",0,0,0,0,0,0);
     return 0;
 }
 
-int AlgoUtils::getTemplates(std::string &id)
+int AlgoUtils::getTemplates(Person &person)
 {
-    this->getTemplates(this->algoHandle,id);
+    this->getTemplates(this->algoHandle,person);
 }
 
 int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, std::string &imagepath, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT *output)
@@ -196,10 +198,12 @@ void AlgoUtils::splitEyes(std::string &filename)
     string homepath=Path::home();
     QImage dauleye;
     dauleye.load((char*) filename.c_str());
-    QImage righteye = dauleye.copy(152,100,768,576).scaled(640,480);
+    QImage righteye = dauleye.copy(0,220,960,720).scaled(640,480);
+    //QImage righteye = dauleye.copy(152,220,768,576).scaled(640,480);
     righteye.save(QString::fromStdString(homepath+"righteye_"+Path(filename).getFileName()));
 
-    QImage lefteye = dauleye.copy(920+100,100,768,576).scaled(640,480);
+    QImage lefteye = dauleye.copy(960,220,960,720).scaled(640,480);
+    //QImage lefteye = dauleye.copy(920+100,220,768,576).scaled(640,480);
     lefteye.save(QString::fromStdString(homepath+"lefteye_"+Path(filename).getFileName()));
 }
 

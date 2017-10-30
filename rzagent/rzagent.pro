@@ -71,7 +71,8 @@ SOURCES += main.cpp\
     myrequesthandler.cpp \
     myrequesthandlerfactory.cpp \
     serverthread.cpp \
-    runtime.cpp
+    runtime.cpp \
+    entities.cpp
 
 HEADERS  += mainwindow.h \
     logentity.h \
@@ -84,7 +85,8 @@ HEADERS  += mainwindow.h \
     myrequesthandler.h \
     myrequesthandlerfactory.h \
     serverthread.h \
-    runtime.h
+    runtime.h \
+    entities.h
 
 FORMS    += mainwindow.ui \
     statusform.ui
