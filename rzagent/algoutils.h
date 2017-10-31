@@ -15,7 +15,7 @@ public:
     AlgoUtils(UMXALGO_HANDLE handle);
     int getTemplates(UMXALGO_HANDLE handle,Person &person);
     int getTemplates(Person &person);
-    int getEnrollTemplate(UMXALGO_HANDLE handle,std::string& imagepath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output);
+    int getEnrollTemplate(UMXALGO_HANDLE handle,std::string& imagepath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT& output);
     void splitEyes(std::string &filename);
     void clearEnrollIrisTemplate(UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* enrollIrisTemplate);
     void saveSmallImage(string imagePath,string destPath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output);
@@ -23,6 +23,7 @@ public:
     void setHandle(UMXALGO_HANDLE handle){this->algoHandle=handle;}
     double leftscore;
     double rightscore;
+    void algotest();
 private:
     UMXALGO_HANDLE algoHandle;
     Poco::Logger& m_logger;

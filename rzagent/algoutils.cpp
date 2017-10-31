@@ -85,28 +85,37 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
     DirectoryIterator end;
     if(it==end)
         return -1;
+             UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT irisLeftOutput;
+                                     UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT irisRightOutput;
     while (it!=end) {
         if(it->isFile()){
             std::cout<< it.name()<<std::endl;
             //
             string fullname=path+"/"+it.name();
             this->splitEyes(fullname);
-            UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT irisGetEnrolTemplateOutput;
-            clearEnrollIrisTemplate(&irisGetEnrolTemplateOutput);
+            //
+            //
+            clearEnrollIrisTemplate(&irisLeftOutput);
             string lefteyefile = homePath+"lefteye_"+it.name();
-            this->getEnrollTemplate(handle,lefteyefile,&irisGetEnrolTemplateOutput);
-            if(bestLeftTemplate.usableIrisArea<irisGetEnrolTemplateOutput.usableIrisArea)
+            //string lefteyefile="/usr/local/share/CMITECH/Images/matched_leftIris_0.bmp";
+
+            this->getEnrollTemplate(handle,lefteyefile,irisLeftOutput);
+            if(bestLeftTemplate.usableIrisArea<irisLeftOutput.usableIrisArea)
             {
-                bestLeftTemplate = irisGetEnrolTemplateOutput;
+                bestLeftTemplate = irisLeftOutput;
+                memcpy(bestLeftTemplate.temPlate,irisLeftOutput.temPlate,irisLeftOutput.size);
                 bestLeftEyeImage = lefteyefile;
             }
             //
-            clearEnrollIrisTemplate(&irisGetEnrolTemplateOutput);
+
+            clearEnrollIrisTemplate(&irisRightOutput);
             string righteyefile = homePath+"righteye_"+it.name();
-            this->getEnrollTemplate(handle,righteyefile,&irisGetEnrolTemplateOutput);
-            if(bestRightTemplate.usableIrisArea<irisGetEnrolTemplateOutput.usableIrisArea)
+            //string righteyefile="/usr/local/share/CMITECH/Images/matched_rightIris_0.bmp";
+            this->getEnrollTemplate(handle,righteyefile,irisRightOutput);
+            if(bestRightTemplate.usableIrisArea<irisRightOutput.usableIrisArea)
             {
-                bestRightTemplate = irisGetEnrolTemplateOutput;
+                bestRightTemplate = irisRightOutput;
+                memcpy(bestRightTemplate.temPlate,irisRightOutput.temPlate,irisRightOutput.size);
                 bestRightEyeImage = righteyefile;
             }
         }
@@ -159,7 +168,7 @@ int AlgoUtils::getTemplates(Person &person)
     this->getTemplates(this->algoHandle,person);
 }
 
-int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, std::string &imagepath, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT *output)
+int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, std::string &imagepath, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT &output)
 {
 
     int tempSize = umxAlgo_iris_template_size(handle, UMXALGO_IRIS_TYPE_ENROL_TEMPLATE);
@@ -178,16 +187,16 @@ int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, std::string &imagepath, 
     irisGetTemplateInput.templateSize = tempSize;
     irisGetTemplateInput.showSegmentation = UMXALGO_IRIS_MIR_DO_NOT_SHOW_SEGMENTATION;
 
-    int retGetEnroll= umxAlgo_iris_getEnrollTemplate(handle, &irisGetTemplateInput, output);
+    int retGetEnroll= umxAlgo_iris_getEnrollTemplate(handle, &irisGetTemplateInput, &output);
 
     if(retGetEnroll != UMXALGO_SUCCESS)
     {
         std::cout << "Fail to get enroll template: ret " << retGetEnroll << std::endl;
         return -1;
     }
-    if(output->usableIrisArea < 70.0)
+    if(output.usableIrisArea < 70.0)
     {
-        std::cout << "Enroll iris small usable area: " << output->usableIrisArea << "/70.0" << std::endl;
+        std::cout << "Enroll iris small usable area: " << output.usableIrisArea << "/70.0" << std::endl;
         return -1;
     }
     return 0;
@@ -198,11 +207,22 @@ void AlgoUtils::splitEyes(std::string &filename)
     string homepath=Path::home();
     QImage dauleye;
     dauleye.load((char*) filename.c_str());
-    QImage righteye = dauleye.copy(0,220,960,720).scaled(640,480);
-    //QImage righteye = dauleye.copy(152,220,768,576).scaled(640,480);
+    QImage righteye;
+    if(dauleye.width()==1920 && dauleye.height()==1080)
+        righteye = dauleye.copy(0,220,960,720).scaled(640,480);
+    else if(dauleye.width()==2560 && dauleye.height()==720)
+        righteye = dauleye.copy(160,0,960,720).scaled(640,480);
+    else
+        righteye = dauleye.scaled(640,480);
     righteye.save(QString::fromStdString(homepath+"righteye_"+Path(filename).getFileName()));
+    QImage lefteye;
+    if(dauleye.width()==1920 && dauleye.height()==1080)
+        lefteye = dauleye.copy(960,220,960,720).scaled(640,480);
+    else if(dauleye.width()==2560 && dauleye.height()==720)
+        lefteye = dauleye.copy(1440,0,960,720).scaled(640,480);
+    else
+        lefteye = dauleye.scaled(640,480);
 
-    QImage lefteye = dauleye.copy(960,220,960,720).scaled(640,480);
     //QImage lefteye = dauleye.copy(920+100,220,768,576).scaled(640,480);
     lefteye.save(QString::fromStdString(homepath+"lefteye_"+Path(filename).getFileName()));
 }
@@ -223,7 +243,66 @@ void AlgoUtils::saveSmallImage(string imagePath, string destPath, UMXALGO_IRIS_G
     QImage image(QString::fromStdString(imagePath));
     QImage img=image.copy(output->irisCenterX-160,output->irisCenterY-120,320,240).scaled(120,110);
     //QImage img=image.scaled(120,110);
-    img.save(QString::fromStdString(destPath));    
+    img.save(QString::fromStdString(destPath));
+}
+
+void AlgoUtils::algotest()
+{
+    //                QImage r1;
+    //                r1.load("/usr/local/share/CMITECH/Images/matched_rightIris.bmp");
+    //                QImage r0=r1.mirrored(false,true);
+    //                r0.save("/usr/local/share/CMITECH/Images/matched_rightIris_0.bmp");
+    //                QImage l1;
+    //                l1.load("/usr/local/share/CMITECH/Images/matched_leftIris.bmp");
+    //                QImage l0=l1.mirrored(false,true);
+    //                l0.save("/usr/local/share/CMITECH/Images/matched_leftIris_0.bmp");
+    //-------------
+        int tempSize = umxAlgo_iris_template_size(dzrun.umxalgo_Handle, UMXALGO_IRIS_TYPE_ENROL_TEMPLATE);
+
+        UMXALGO_IRIS_GET_TEMPLATE_INPUT irisGetTemplateInput;
+        irisGetTemplateInput.cbSize = sizeof(UMXALGO_IRIS_GET_TEMPLATE_INPUT);
+
+//        QImage lefto;
+//        lefto.load("/usr/local/share/CMITECH/Images/matched_rightIris_0.bmp");
+//        QImage left=lefto.mirrored(false,true);
+
+        QImage left;
+        left.load("/usr/local/share/CMITECH/Images/matched_rightIris_0.bmp");
+        irisGetTemplateInput.image = left.bits();
+        irisGetTemplateInput.width = left.width();
+        irisGetTemplateInput.height = left.height();
+        irisGetTemplateInput.centerX = 0;
+        irisGetTemplateInput.centerY = 0;
+        irisGetTemplateInput.radius = 0;
+        irisGetTemplateInput.templateSize = tempSize;
+        irisGetTemplateInput.showSegmentation = UMXALGO_IRIS_MIR_DO_NOT_SHOW_SEGMENTATION;
+
+        UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT irisGetEnrolTemplateOutput;
+        clearEnrollIrisTemplate(&irisGetEnrolTemplateOutput);
+
+        int retGetEnroll = umxAlgo_iris_getEnrollTemplate(dzrun.umxalgo_Handle, &irisGetTemplateInput, &irisGetEnrolTemplateOutput);
+        if(retGetEnroll != UMXALGO_SUCCESS)
+        {
+            std::cout << "Fail to get enroll template: ret " << retGetEnroll << std::endl;
+            return;
+        }
+        if(irisGetEnrolTemplateOutput.usableIrisArea < 70.0)
+        {
+            std::cout << "Enroll iris small usable area: " << irisGetEnrolTemplateOutput.usableIrisArea << "/70.0" << std::endl;
+            return;
+        }
+        SubjectData subjectData;
+        subjectData._leftTemplate=Poco::Data::BLOB((char *)irisGetEnrolTemplateOutput.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
+        subjectData._rightTemplate=Poco::Data::BLOB((char *)irisGetEnrolTemplateOutput.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
+        subjectData._userUUID="1";
+        subjectData._lastName="lhj";
+        umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
+        umxDB_insertUserInfo(dzrun.umxdb_Handle,"1","","",0,0,0,0,0,0);
+
+    //-------------
+
+
+
 }
 
 
