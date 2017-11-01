@@ -6,6 +6,7 @@
 #include <vector>
 #include "entities.h"
 #include "umxAlgoLib/umxAlgoGlobal.h"
+#include <QString>
 using namespace std;
 using Poco::Logger;
 class AlgoUtils
@@ -24,6 +25,8 @@ public:
     double leftscore;
     double rightscore;
     void algotest();
+    void algotest2(QString filepath, string uuid, string name);
+
 private:
     UMXALGO_HANDLE algoHandle;
     Poco::Logger& m_logger;

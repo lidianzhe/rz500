@@ -97,7 +97,8 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     dzrun.umxalgo_Handle = _gUmxAlgoHandle;
     dzrun.umxdb_Handle = _umxDBHandle;
     //test
-    m_utils->algotest();
+    //m_utils->algotest();
+    //m_utils->algotest2("/home/root/right_vista.bmp","4","algovista");
     //------
 
 

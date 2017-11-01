@@ -145,6 +145,7 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
     rightscore = bestRightTemplate.usableIrisArea;
     //
     SubjectData subjectData;
+    subjectData._recordVersion = 8976;
     subjectData._userUUID = person.Id;
     subjectData._lastName = person.Name;
     subjectData._leftTemplate=Poco::Data::BLOB((char *)bestLeftTemplate.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
@@ -155,11 +156,22 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
     umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,person.Id,&retUserinfo);
     if(retUserinfo._userUUID=="")
     {
+        std::cout << "insert "<<person.Id<<" name="<<subjectData._lastName<<std::endl;
+        subjectData._recordVersion = 8976;
+        subjectData._firstName = "";
+        subjectData._accessAllowed = true;
+        subjectData._matchUntil ="";
+        subjectData._wiegandFacility = -1;
+        subjectData._wiegandSite = -1;
+        subjectData._wiegandCode = -1;
+        subjectData._wiegandCustom = "";
         umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
         umxDB_insertUserInfo(dzrun.umxdb_Handle,person.Id,person.Card,"",0,0,0,0,0,0);
     }else
+    {
+        std::cout << "update "<<person.Id <<" name="<<person.Name<<endl;
         umxDB_updateSubject(dzrun.umxdb_Handle,subjectData);
-
+    }
     return 0;
 }
 
@@ -241,7 +253,7 @@ void AlgoUtils::saveSmallImage(string imagePath, string destPath, UMXALGO_IRIS_G
 {
 
     QImage image(QString::fromStdString(imagePath));
-    QImage img=image.copy(output->irisCenterX-160,output->irisCenterY-120,320,240).scaled(120,110);
+    QImage img=image.copy(output->irisCenterX-160,output->irisCenterY-120,320,240).scaled(160,120);
     //QImage img=image.scaled(120,110);
     img.save(QString::fromStdString(destPath));
 }
@@ -267,7 +279,7 @@ void AlgoUtils::algotest()
 //        QImage left=lefto.mirrored(false,true);
 
         QImage left;
-        left.load("/usr/local/share/CMITECH/Images/matched_rightIris_0.bmp");
+        left.load("/usr/local/share/CMITECH/Images/matched_rightIris_mirror.bmp");
         irisGetTemplateInput.image = left.bits();
         irisGetTemplateInput.width = left.width();
         irisGetTemplateInput.height = left.height();
@@ -292,15 +304,82 @@ void AlgoUtils::algotest()
             return;
         }
         SubjectData subjectData;
+        //subjectData._userUUID = _enrolIris.uuid;
+        subjectData._recordVersion = 8976;
+        subjectData._firstName = "";
+        //subjectData._lastName = "uk";
+        subjectData._accessAllowed = true;
+        subjectData._matchUntil ="";
+        subjectData._wiegandFacility = -1;
+        subjectData._wiegandSite = -1;
+        subjectData._wiegandCode = -1;
+        subjectData._wiegandCustom = "";
         subjectData._leftTemplate=Poco::Data::BLOB((char *)irisGetEnrolTemplateOutput.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
         subjectData._rightTemplate=Poco::Data::BLOB((char *)irisGetEnrolTemplateOutput.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
-        subjectData._userUUID="1";
-        subjectData._lastName="lhj";
+        subjectData._userUUID="3";
+        subjectData._lastName="lhjalgo";
         umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
-        umxDB_insertUserInfo(dzrun.umxdb_Handle,"1","","",0,0,0,0,0,0);
+        umxDB_insertUserInfo(dzrun.umxdb_Handle,"3","","",0,0,0,0,0,0);
 
     //-------------
 
+
+
+}
+
+void AlgoUtils::algotest2(QString filepath, string uuid, string name)
+{
+    int tempSize = umxAlgo_iris_template_size(dzrun.umxalgo_Handle, UMXALGO_IRIS_TYPE_ENROL_TEMPLATE);
+
+    UMXALGO_IRIS_GET_TEMPLATE_INPUT irisGetTemplateInput;
+    irisGetTemplateInput.cbSize = sizeof(UMXALGO_IRIS_GET_TEMPLATE_INPUT);
+
+//        QImage lefto;
+//        lefto.load("/usr/local/share/CMITECH/Images/matched_rightIris_0.bmp");
+//        QImage left=lefto.mirrored(false,true);
+
+    QImage left;
+    left.load(filepath);
+    irisGetTemplateInput.image = left.bits();
+    irisGetTemplateInput.width = left.width();
+    irisGetTemplateInput.height = left.height();
+    irisGetTemplateInput.centerX = 0;
+    irisGetTemplateInput.centerY = 0;
+    irisGetTemplateInput.radius = 0;
+    irisGetTemplateInput.templateSize = tempSize;
+    irisGetTemplateInput.showSegmentation = UMXALGO_IRIS_MIR_DO_NOT_SHOW_SEGMENTATION;
+
+    UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT irisGetEnrolTemplateOutput;
+    clearEnrollIrisTemplate(&irisGetEnrolTemplateOutput);
+
+    int retGetEnroll = umxAlgo_iris_getEnrollTemplate(dzrun.umxalgo_Handle, &irisGetTemplateInput, &irisGetEnrolTemplateOutput);
+    if(retGetEnroll != UMXALGO_SUCCESS)
+    {
+        std::cout << "Fail to get enroll template: ret " << retGetEnroll << std::endl;
+        return;
+    }
+    if(irisGetEnrolTemplateOutput.usableIrisArea < 70.0)
+    {
+        std::cout << "Enroll iris small usable area: " << irisGetEnrolTemplateOutput.usableIrisArea << "/70.0" << std::endl;
+        return;
+    }
+    SubjectData subjectData;
+    //subjectData._userUUID = _enrolIris.uuid;
+    subjectData._recordVersion = 8976;
+    subjectData._firstName = "";
+    //subjectData._lastName = "uk";
+    subjectData._accessAllowed = true;
+    subjectData._matchUntil ="";
+    subjectData._wiegandFacility = -1;
+    subjectData._wiegandSite = -1;
+    subjectData._wiegandCode = -1;
+    subjectData._wiegandCustom = "";
+    subjectData._leftTemplate=Poco::Data::BLOB((char *)irisGetEnrolTemplateOutput.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
+    subjectData._rightTemplate=Poco::Data::BLOB((char *)irisGetEnrolTemplateOutput.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
+    subjectData._userUUID=uuid;
+    subjectData._lastName=name;
+    umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
+    umxDB_insertUserInfo(dzrun.umxdb_Handle,uuid,"","",0,0,0,0,0,0);
 
 
 }
