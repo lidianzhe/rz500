@@ -6,6 +6,7 @@
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include "entities.h"
+#include <QString>
 using namespace Poco;
 using namespace Net;
 
@@ -16,6 +17,9 @@ public:
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse &response);
 private:
     void api_Persons(HTTPServerRequest& request, HTTPServerResponse &response);
+    void api_GetPersonsCount(HTTPServerRequest& request, HTTPServerResponse &response);
+    void api_GetPersons(HTTPServerRequest& request, HTTPServerResponse &response);
+
 
 };
 
