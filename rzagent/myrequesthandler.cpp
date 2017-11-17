@@ -6,6 +6,8 @@
 #include "Poco/Net/HTTPResponse.h"
 #include "Poco/URI.h"
 #include "Poco/Path.h"
+#include "Poco/Base64Encoder.h"
+#include "Poco/Base64Decoder.h"
 #include "umxCommonLib/cjson/cJSONpp.h"
 //
 #include <vector>
@@ -14,6 +16,7 @@
 #include "umxCommonLib/umxCommonGlobal.h"
 #include "umxDBLib/umxDB.h"
 #include "algoutils.h"
+#include "utilshelper.h"
 #include <QByteArray>
 using namespace std;
 using namespace Poco;
@@ -45,14 +48,18 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
             api_GetPersons(request,response);
         return;
     }
-
+    //post /persons
+    if(path.value(1) =="persons" && request.getMethod()=="POST"){
+            api_PostPersons(request,response);
+        return;
+    }
     if(path.value(1) =="persons" && request.getMethod()=="PUT"){
             api_Persons(request,response);
         return;
     }
 
     response.setContentType("application/json");
-    response.redirect(request.getURI(),HTTPResponse::HTTPStatus::HTTP_OK);
+    response.redirect(request.getURI(),HTTPResponse::HTTPStatus::HTTP_NOT_IMPLEMENTED);
 }
 
 void MyRequestHandler::api_Persons(HTTPServerRequest &request, HTTPServerResponse &response)
@@ -187,6 +194,7 @@ void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResp
         UserInfoData ui;
         umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,&ui);
         JSONObject sdObj = sd.AsJSONObject();
+
         item.set("staff_no",sd._userUUID);
         item.set("name",sd._lastName);
         item.set("card_no",ui._card);
@@ -203,9 +211,76 @@ void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResp
         item.set("bypasscard",ui._byPassCard);
         r.add(item);
     }
-    obj.set("sfaff_list",r);
+    obj.set("staff_list",r);
     ostr<<obj.print();
 
     response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
 
+}
+
+void MyRequestHandler::api_PostPersons(HTTPServerRequest &request, HTTPServerResponse &response)
+{
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+    int suc_flag=0;
+    //read json
+    std::istream &i = request.stream();
+    int len = request.getContentLength();
+    char* buffer = new char[len];
+    i.read(buffer, len);
+    //std::cout<<buffer<<std::endl;
+    QString s=QString(buffer);
+    cjsonpp::JSONObject jobj=cjsonpp::parse(s.toStdString());
+    std::cout<<jobj.get<int>("count")<<std::endl;
+    std::vector<JSONObject> stafflist= jobj.get("staff_list").asArray<JSONObject>();
+    std::cout<<"size:"<<stafflist.size()<<std::endl;
+    JSONObject objstaff= stafflist[0];
+    //std::cout<<objstaff.print()<<std::endl;
+    std::cout<<objstaff.get<string>("staff_no")<<std::endl;
+    Staff ys;
+
+
+    //qDebug()<<objstaff.get<int>("staff_no");
+    ys.staff_no=objstaff.get<string>("staff_no");
+    ys.name = objstaff.get<string>("name");
+    ys.card_no = objstaff.get<string>("card_no");
+    ys.password=objstaff.get<string>("password");
+    ys.face_feature=objstaff.get<string>("face_feature");
+    ys.left_feature=objstaff.get<string>("left_feature");
+    ys.right_feature=objstaff.get<string>("right_feature");
+    ys.is_admin=objstaff.get<int>("is_admin");
+    ys.enable_flag=objstaff.get<int>("enable_flag");
+    ys.create_time=objstaff.get<string>("create_time");
+    ys.expired_time=objstaff.get<string>("expired_time");
+    ys.verify_type=objstaff.get<int>("verify_type");
+    ys.bypasscard=objstaff.get<int>("bypasscard");
+    //
+    istringstream istr(ys.left_feature);
+    ostringstream osstr;
+    Poco::Base64Decoder b64(istr);
+    std::copy(std::istreambuf_iterator<char>(b64),
+              std::istreambuf_iterator<char>(),
+              std::ostreambuf_iterator<char>(osstr)
+              );
+    std::string os=osstr.str();
+    ys.left_feature = os;
+    utilsHelper *util = new utilsHelper();
+    ys.right_feature = util->fromBase64(ys.right_feature);
+
+    //write json
+    std::ostream& ostr = response.send();
+    JSONObject obj;
+    obj.set("suc_flag",suc_flag);
+    obj.set("error_msg","");
+    JSONObject objlist=cjsonpp::arrayObject();
+    JSONObject objerr;
+    objerr.set("staff_no",10);
+    objerr.set("error_msg","重复Id");
+    objlist.add(objerr);
+
+
+    obj.set("error_staff_list",objlist);
+    ostr<<obj.print();
+
+    response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_CREATED);
 }

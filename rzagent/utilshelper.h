@@ -19,7 +19,9 @@ class utilsHelper
 public:
     utilsHelper();
     std::string BuildJSON();
-    static AlgoUtils* m_agloUtils;
+    //static AlgoUtils* m_agloUtils;
+    std::string toBase64 (const std::string &source);
+    std::string fromBase64 (const std::string &source);
 };
 
 #endif // UTILSHELPER_H

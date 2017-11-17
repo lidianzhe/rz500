@@ -19,6 +19,7 @@ private:
     void api_Persons(HTTPServerRequest& request, HTTPServerResponse &response);
     void api_GetPersonsCount(HTTPServerRequest& request, HTTPServerResponse &response);
     void api_GetPersons(HTTPServerRequest& request, HTTPServerResponse &response);
+    void api_PostPersons(HTTPServerRequest& request, HTTPServerResponse &response);
 
 
 };
