@@ -22,7 +22,8 @@ struct Staff{
     std::string name;
     std::string card_no;
     std::string password;
-    std::string face_feature;
+    std::string face_faroff;
+    std::string face_faron;
     std::string left_feature;
     std::string right_feature;
     std::string create_time;

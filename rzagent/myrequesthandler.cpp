@@ -53,6 +53,12 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
             api_PostPersons(request,response);
         return;
     }
+
+    if(path.value(1) =="persons" && request.getMethod()=="DELETE"){
+            api_DeletePersons(request,response);
+        return;
+    }
+
     if(path.value(1) =="persons" && request.getMethod()=="PUT"){
             api_Persons(request,response);
         return;
@@ -194,12 +200,18 @@ void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResp
         UserInfoData ui;
         umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,&ui);
         JSONObject sdObj = sd.AsJSONObject();
+        std::vector<FaceData> allface;
+        umxDB_selectAllFaces(dzrun.umxdb_Handle,&allface);
+
+        FaceData faroff=allface[0];
+        FaceData faron=allface[1];
 
         item.set("staff_no",sd._userUUID);
         item.set("name",sd._lastName);
         item.set("card_no",ui._card);
-        item.set("password","");
-        item.set("face_feature","");
+        item.set("password",ui._pin);
+        item.set("face_faroff",faroff.AsJSONString());
+        item.set("face_faron",faron.AsJSONString());
         //std::cout<<sdObj.get("left_eye_template").as<string>()<<std::endl;
         item.set("left_feature",sdObj.get("left_eye_template").as<string>());
         item.set("right_feature",sdObj.get("right_eye_template").as<string>());
@@ -231,56 +243,155 @@ void MyRequestHandler::api_PostPersons(HTTPServerRequest &request, HTTPServerRes
     //std::cout<<buffer<<std::endl;
     QString s=QString(buffer);
     cjsonpp::JSONObject jobj=cjsonpp::parse(s.toStdString());
-    std::cout<<jobj.get<int>("count")<<std::endl;
+    //std::cout<<jobj.get<int>("count")<<std::endl;
     std::vector<JSONObject> stafflist= jobj.get("staff_list").asArray<JSONObject>();
     std::cout<<"size:"<<stafflist.size()<<std::endl;
-    JSONObject objstaff= stafflist[0];
-    //std::cout<<objstaff.print()<<std::endl;
-    std::cout<<objstaff.get<string>("staff_no")<<std::endl;
-    Staff ys;
-
-
-    //qDebug()<<objstaff.get<int>("staff_no");
-    ys.staff_no=objstaff.get<string>("staff_no");
-    ys.name = objstaff.get<string>("name");
-    ys.card_no = objstaff.get<string>("card_no");
-    ys.password=objstaff.get<string>("password");
-    ys.face_feature=objstaff.get<string>("face_feature");
-    ys.left_feature=objstaff.get<string>("left_feature");
-    ys.right_feature=objstaff.get<string>("right_feature");
-    ys.is_admin=objstaff.get<int>("is_admin");
-    ys.enable_flag=objstaff.get<int>("enable_flag");
-    ys.create_time=objstaff.get<string>("create_time");
-    ys.expired_time=objstaff.get<string>("expired_time");
-    ys.verify_type=objstaff.get<int>("verify_type");
-    ys.bypasscard=objstaff.get<int>("bypasscard");
-    //
-    istringstream istr(ys.left_feature);
-    ostringstream osstr;
-    Poco::Base64Decoder b64(istr);
-    std::copy(std::istreambuf_iterator<char>(b64),
-              std::istreambuf_iterator<char>(),
-              std::ostreambuf_iterator<char>(osstr)
-              );
-    std::string os=osstr.str();
-    ys.left_feature = os;
     utilsHelper *util = new utilsHelper();
-    ys.right_feature = util->fromBase64(ys.right_feature);
+
+    JSONObject objlist=cjsonpp::arrayObject();
+    for(int i=0;i<stafflist.size();i++){
+        JSONObject objstaff= stafflist[i];
+        std::cout<<objstaff.get<string>("staff_no")<<std::endl;
+        Staff ys;
+        ys.staff_no=objstaff.get<string>("staff_no");
+        ys.name = objstaff.get<string>("name");
+        ys.card_no = objstaff.get<string>("card_no");
+        ys.password=objstaff.get<string>("password");
+        ys.face_faroff=objstaff.get<string>("face_faroff");
+        ys.face_faron=objstaff.get<string>("face_faron");
+        ys.left_feature=util->fromBase64(objstaff.get<string>("left_feature"));
+        ys.right_feature=util->fromBase64(objstaff.get<string>("right_feature"));
+        ys.is_admin=objstaff.get<int>("is_admin");
+        ys.enable_flag=objstaff.get<int>("enable_flag");
+        ys.create_time=objstaff.get<string>("create_time");
+        ys.expired_time=objstaff.get<string>("expired_time");
+        ys.verify_type=objstaff.get<int>("verify_type");
+        ys.bypasscard=objstaff.get<int>("bypasscard");
+        //
+        int ret=saveStaff(ys);
+        if(ret!=0){
+            stringstream stream;
+            stream<<ret;
+            string string_ret=stream.str();
+
+            JSONObject objerr;
+            objerr.set("staff_no",ys.staff_no);
+            objerr.set("error_msg",string_ret);
+            objlist.add(objerr);
+        }
+        //
+    }
+    delete util;
 
     //write json
     std::ostream& ostr = response.send();
     JSONObject obj;
     obj.set("suc_flag",suc_flag);
     obj.set("error_msg","");
-    JSONObject objlist=cjsonpp::arrayObject();
-    JSONObject objerr;
-    objerr.set("staff_no",10);
-    objerr.set("error_msg","重复Id");
-    objlist.add(objerr);
-
-
     obj.set("error_staff_list",objlist);
     ostr<<obj.print();
 
     response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_CREATED);
+}
+
+void MyRequestHandler::api_DeletePersons(HTTPServerRequest &request, HTTPServerResponse &response)
+{
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+    int suc_flag=0;
+    //read json
+    std::istream &i = request.stream();
+    int len = request.getContentLength();
+    char* buffer = new char[len];
+    i.read(buffer, len);
+    //std::cout<<buffer<<std::endl;
+    QString s=QString(buffer);
+    cjsonpp::JSONObject jobj=cjsonpp::parse(s.toStdString());
+    //std::cout<<jobj.get<int>("count")<<std::endl;
+    std::vector<JSONObject> stafflist= jobj.get("staff_list").asArray<JSONObject>();
+    std::cout<<"size:"<<stafflist.size()<<std::endl;
+    utilsHelper *util = new utilsHelper();
+
+    JSONObject objlist=cjsonpp::arrayObject();
+    for(int i=0;i<stafflist.size();i++){
+        JSONObject objstaff= stafflist[i];
+        std::cout<<objstaff.get<string>("staff_no")<<std::endl;
+        string staff_no=objstaff.get<string>("staff_no");
+        //
+        int ret=umxDB_deleteUserByUUID(dzrun.umxdb_Handle,staff_no);
+        if(ret!=0 && ret!=-401){
+            stringstream stream;
+            stream<<ret;
+            string string_ret=stream.str();
+            if(ret=-201)
+                string_ret="STAFF_UUID_NO_EXIST";
+
+            JSONObject objerr;
+            objerr.set("staff_no",staff_no);
+            objerr.set("error_msg",string_ret);
+            objlist.add(objerr);
+        }
+        //
+    }
+    delete util;
+
+    //write json
+    std::ostream& ostr = response.send();
+    JSONObject obj;
+    obj.set("suc_flag",suc_flag);
+    obj.set("error_msg","");
+    obj.set("error_staff_list",objlist);
+    ostr<<obj.print();
+
+    response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
+}
+
+int MyRequestHandler::saveStaff(Staff &staff)
+{
+    SubjectData sd;
+    sd._recordVersion = 8976;
+    sd._accessAllowed = true;
+    sd._wiegandFacility = -1;
+    sd._wiegandSite = -1;
+    sd._wiegandCode = -1;
+    sd._wiegandCustom = "";
+
+    sd._userUUID = staff.staff_no;
+    sd._lastName = staff.name;
+    sd._leftTemplate=Poco::Data::BLOB(staff.left_feature);
+    sd._rightTemplate=Poco::Data::BLOB(staff.right_feature);
+    sd._leftImagePath="/usr/local/share/CMITECH/Images/"+sd._userUUID+"_lefteye.jpg";
+    sd._rightImagePath="/usr/local/share/CMITECH/Images/"+sd._userUUID+"_righteye.jpg";
+    FaceData faroff=FaceData::Parse(staff.face_faroff);
+    FaceData faron=FaceData::Parse(staff.face_faron);
+    faroff._imagePath = "/usr/local/share/CMITECH/Images/"+faroff._userUUID+"_faroff.jpg";
+    faron._imagePath = "/usr/local/share/CMITECH/Images/"+faron._userUUID+"_faron.jpg";
+    UserInfoData retUserinfo;
+    umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,&retUserinfo);
+    int ret;
+    try{
+
+        if(retUserinfo._userUUID=="")
+        {
+            sd._firstName = "";
+            sd._matchUntil ="";
+            ret=umxDB_insertSubject(dzrun.umxdb_Handle,sd);
+            ret=umxDB_insertUserInfo(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0);
+            umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
+            umxDB_insertFace2(dzrun.umxdb_Handle,&faron);
+        }else
+        {
+            std::cout << "update "<<sd._userUUID <<" name="<<sd._lastName<<endl;
+            ret=umxDB_updateSubject(dzrun.umxdb_Handle,sd);
+            ret=umxDB_updateUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0);
+            umxDB_deleteFacesByUUID(dzrun.umxdb_Handle,sd._userUUID);
+            umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
+            umxDB_insertFace2(dzrun.umxdb_Handle,&faron);
+        }
+    }
+    catch(Exception e)
+    {
+        std::cout<<"saveStaff error:"<<e.message()<<std::endl;
+    }
+    return ret;
 }

@@ -20,7 +20,8 @@ private:
     void api_GetPersonsCount(HTTPServerRequest& request, HTTPServerResponse &response);
     void api_GetPersons(HTTPServerRequest& request, HTTPServerResponse &response);
     void api_PostPersons(HTTPServerRequest& request, HTTPServerResponse &response);
-
+    void api_DeletePersons(HTTPServerRequest& request, HTTPServerResponse &response);
+    int saveStaff(Staff &staff);
 
 };
 

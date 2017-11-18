@@ -17,7 +17,7 @@ void RootHandler::handleRequest(HTTPServerRequest &request, HTTPServerResponse &
     response.setContentType("application/json");
     std::ostream& ostr = response.send();
     ostr << "{";
-    ostr << "\"versin\":\"1.6.0\"";
+    ostr << "\"version\":\"1.6.1\"";
     ostr <<"}";
     ostr<<endl;
 
