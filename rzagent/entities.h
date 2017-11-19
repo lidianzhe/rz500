@@ -16,6 +16,7 @@ struct Person{
     std::string Card;
     int LeftEyeScore;
     int RightEyeScore;
+    int WiegandCode;
 };
 
 struct Staff{
@@ -33,6 +34,7 @@ struct Staff{
     int enable_flag;
     int verify_type;
     int bypasscard;
+    int wiegandcode;
 };
 
 #endif // ENTITIES_H

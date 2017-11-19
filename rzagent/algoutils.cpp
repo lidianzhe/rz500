@@ -148,6 +148,7 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
     subjectData._recordVersion = 8976;
     subjectData._userUUID = person.Id;
     subjectData._lastName = person.Name;
+    subjectData._wiegandCode = person.WiegandCode;
     subjectData._leftTemplate=Poco::Data::BLOB((char *)bestLeftTemplate.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
     subjectData._rightTemplate=Poco::Data::BLOB((char *)bestRightTemplate.temPlate,UMXALGO_IRIS_MAX_TEMPLATE_SIZE);
     subjectData._leftImagePath=smallleft;
@@ -163,7 +164,7 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
         subjectData._matchUntil ="";
         subjectData._wiegandFacility = -1;
         subjectData._wiegandSite = -1;
-        subjectData._wiegandCode = -1;
+        subjectData._wiegandCode = person.WiegandCode;
         subjectData._wiegandCustom = "";
         umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
         umxDB_insertUserInfo(dzrun.umxdb_Handle,person.Id,person.Card,"",0,0,0,0,0,0);

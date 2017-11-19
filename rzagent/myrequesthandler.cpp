@@ -96,6 +96,7 @@ void MyRequestHandler::api_Persons(HTTPServerRequest &request, HTTPServerRespons
                 person.Id = obj.get<JSONObject>("Id").as<string>();
                 person.Name =obj.get<string>("Name");
                 person.Card = obj.get<string>("Card");
+                person.WiegandCode = obj.get<int>("WiegandCode");
             } catch (const cjsonpp::JSONError& e) {
                 std::cerr << e.what() << '\n';
             }
@@ -111,15 +112,10 @@ void MyRequestHandler::api_Persons(HTTPServerRequest &request, HTTPServerRespons
                 obj.set("Id",person.Id);
                 obj.set("Name",person.Name);
                 obj.set("Card",person.Card);
+                obj.set("WeigandCode",person.WiegandCode);
                 obj.set("LeftEyeScore",algo->leftscore);
                 obj.set("RightEyeScore",algo->rightscore);
                 ostr<<obj.print();
-//                ostr << "{";
-//                ostr << "\"Id\":\""<<id<<"\",";
-//                ostr << "\"LeftEyeScore\":\""<<algo->leftscore<<"\",";
-//                ostr << "\"RightEyeScore\":\""<<algo->rightscore<<"\"";
-//                ostr <<"}";
-//                ostr<<endl;
                 response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
             }
             else
@@ -201,18 +197,26 @@ void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResp
         umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,&ui);
         JSONObject sdObj = sd.AsJSONObject();
         std::vector<FaceData> allface;
-        umxDB_selectAllFaces(dzrun.umxdb_Handle,&allface);
-
-        FaceData faroff=allface[0];
-        FaceData faron=allface[1];
 
         item.set("staff_no",sd._userUUID);
         item.set("name",sd._lastName);
         item.set("card_no",ui._card);
         item.set("password",ui._pin);
-        item.set("face_faroff",faroff.AsJSONString());
-        item.set("face_faron",faron.AsJSONString());
-        //std::cout<<sdObj.get("left_eye_template").as<string>()<<std::endl;
+        //
+        FaceData faroff;
+        FaceData faron;
+        umxDB_selectAllFaces(dzrun.umxdb_Handle,&allface);
+        if(allface.size()==2){
+            faroff=allface[0];
+            faron=allface[1];
+            item.set("face_faroff",faroff.AsJSONString());
+            item.set("face_faron",faron.AsJSONString());
+        }else
+        {
+            item.set("face_faroff","");
+            item.set("face_faron","");
+        }
+        //
         item.set("left_feature",sdObj.get("left_eye_template").as<string>());
         item.set("right_feature",sdObj.get("right_eye_template").as<string>());
         item.set("is_admin",ui._admin);
@@ -221,6 +225,7 @@ void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResp
         item.set("expired_time","");
         item.set("verify_type",ui._indivisual);
         item.set("bypasscard",ui._byPassCard);
+        item.set("wiegandcode",sd._wiegandCode);
         r.add(item);
     }
     obj.set("staff_list",r);
@@ -267,6 +272,7 @@ void MyRequestHandler::api_PostPersons(HTTPServerRequest &request, HTTPServerRes
         ys.expired_time=objstaff.get<string>("expired_time");
         ys.verify_type=objstaff.get<int>("verify_type");
         ys.bypasscard=objstaff.get<int>("bypasscard");
+        ys.wiegandcode = objstaff.get<int>("wiegandcode");
         //
         int ret=saveStaff(ys);
         if(ret!=0){
@@ -353,7 +359,7 @@ int MyRequestHandler::saveStaff(Staff &staff)
     sd._accessAllowed = true;
     sd._wiegandFacility = -1;
     sd._wiegandSite = -1;
-    sd._wiegandCode = -1;
+    sd._wiegandCode = (uint)staff.wiegandcode;
     sd._wiegandCustom = "";
 
     sd._userUUID = staff.staff_no;
