@@ -54,7 +54,7 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
         return;
     }
 
-    if(path.value(1) =="persons" && request.getMethod()=="DELETE"){
+    if(path.value(1) =="deletepersons" && request.getMethod()=="POST"){
             api_DeletePersons(request,response);
         return;
     }
@@ -196,16 +196,16 @@ void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResp
         UserInfoData ui;
         umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,&ui);
         JSONObject sdObj = sd.AsJSONObject();
-        std::vector<FaceData> allface;
 
         item.set("staff_no",sd._userUUID);
         item.set("name",sd._lastName);
         item.set("card_no",ui._card);
         item.set("password",ui._pin);
         //
+        std::vector<FaceData> allface;
         FaceData faroff;
         FaceData faron;
-        umxDB_selectAllFaces(dzrun.umxdb_Handle,&allface);
+        umxDB_selectFacesByUUID(dzrun.umxdb_Handle,sd._userUUID,&allface);
         if(allface.size()==2){
             faroff=allface[0];
             faron=allface[1];
@@ -256,14 +256,12 @@ void MyRequestHandler::api_PostPersons(HTTPServerRequest &request, HTTPServerRes
     JSONObject objlist=cjsonpp::arrayObject();
     for(int i=0;i<stafflist.size();i++){
         JSONObject objstaff= stafflist[i];
-        std::cout<<objstaff.get<string>("staff_no")<<std::endl;
+        //std::cout<<objstaff.get<string>("staff_no")<<std::endl;
         Staff ys;
         ys.staff_no=objstaff.get<string>("staff_no");
         ys.name = objstaff.get<string>("name");
         ys.card_no = objstaff.get<string>("card_no");
         ys.password=objstaff.get<string>("password");
-        ys.face_faroff=objstaff.get<string>("face_faroff");
-        ys.face_faron=objstaff.get<string>("face_faron");
         ys.left_feature=util->fromBase64(objstaff.get<string>("left_feature"));
         ys.right_feature=util->fromBase64(objstaff.get<string>("right_feature"));
         ys.is_admin=objstaff.get<int>("is_admin");
@@ -272,7 +270,23 @@ void MyRequestHandler::api_PostPersons(HTTPServerRequest &request, HTTPServerRes
         ys.expired_time=objstaff.get<string>("expired_time");
         ys.verify_type=objstaff.get<int>("verify_type");
         ys.bypasscard=objstaff.get<int>("bypasscard");
-        ys.wiegandcode = objstaff.get<int>("wiegandcode");
+        try{
+
+            ys.face_faroff=objstaff.get<string>("face_faroff");
+            ys.face_faron=objstaff.get<string>("face_faron");
+        }
+        catch (const JSONError& e) {
+            //std::cerr << e.what() << '\n';
+            ys.face_faroff="";
+            ys.face_faron="";
+        }
+        try{
+            ys.wiegandcode = objstaff.get<int>("wiegandcode");
+        }catch (const JSONError& e) {
+            //std::cerr << e.what() << '\n';
+            ys.wiegandcode=-1;
+        }
+
         //
         int ret=saveStaff(ys);
         if(ret!=0){
@@ -310,7 +324,7 @@ void MyRequestHandler::api_DeletePersons(HTTPServerRequest &request, HTTPServerR
     int len = request.getContentLength();
     char* buffer = new char[len];
     i.read(buffer, len);
-    //std::cout<<buffer<<std::endl;
+    std::cout<<buffer<<std::endl;
     QString s=QString(buffer);
     cjsonpp::JSONObject jobj=cjsonpp::parse(s.toStdString());
     //std::cout<<jobj.get<int>("count")<<std::endl;
@@ -368,10 +382,16 @@ int MyRequestHandler::saveStaff(Staff &staff)
     sd._rightTemplate=Poco::Data::BLOB(staff.right_feature);
     sd._leftImagePath="/usr/local/share/CMITECH/Images/"+sd._userUUID+"_lefteye.jpg";
     sd._rightImagePath="/usr/local/share/CMITECH/Images/"+sd._userUUID+"_righteye.jpg";
-    FaceData faroff=FaceData::Parse(staff.face_faroff);
-    FaceData faron=FaceData::Parse(staff.face_faron);
-    faroff._imagePath = "/usr/local/share/CMITECH/Images/"+faroff._userUUID+"_faroff.jpg";
-    faron._imagePath = "/usr/local/share/CMITECH/Images/"+faron._userUUID+"_faron.jpg";
+
+    FaceData faroff;
+    FaceData faron;
+    if(staff.face_faroff!="")
+    {
+        faroff=FaceData::Parse(staff.face_faroff);
+        faron=FaceData::Parse(staff.face_faron);
+        faroff._imagePath = "/usr/local/share/CMITECH/Images/"+faroff._userUUID+"_faroff.jpg";
+        faron._imagePath = "/usr/local/share/CMITECH/Images/"+faron._userUUID+"_faron.jpg";
+    }
     UserInfoData retUserinfo;
     umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,&retUserinfo);
     int ret;
@@ -383,16 +403,20 @@ int MyRequestHandler::saveStaff(Staff &staff)
             sd._matchUntil ="";
             ret=umxDB_insertSubject(dzrun.umxdb_Handle,sd);
             ret=umxDB_insertUserInfo(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0);
-            umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
-            umxDB_insertFace2(dzrun.umxdb_Handle,&faron);
+            if(staff.face_faroff!="")
+                umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
+            if(staff.face_faron!="")
+                umxDB_insertFace2(dzrun.umxdb_Handle,&faron);
         }else
         {
             std::cout << "update "<<sd._userUUID <<" name="<<sd._lastName<<endl;
             ret=umxDB_updateSubject(dzrun.umxdb_Handle,sd);
             ret=umxDB_updateUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0);
             umxDB_deleteFacesByUUID(dzrun.umxdb_Handle,sd._userUUID);
-            umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
-            umxDB_insertFace2(dzrun.umxdb_Handle,&faron);
+            if(staff.face_faroff!="")
+                umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
+            if(staff.face_faron!="")
+                umxDB_insertFace2(dzrun.umxdb_Handle,&faron);
         }
     }
     catch(Exception e)
