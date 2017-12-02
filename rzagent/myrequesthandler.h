@@ -22,7 +22,10 @@ private:
     void api_PostPersons(HTTPServerRequest& request, HTTPServerResponse &response);
     void api_DeletePersons(HTTPServerRequest& request, HTTPServerResponse &response);
     int saveStaff(Staff &staff);
+    void api_Logs(HTTPServerRequest& request, HTTPServerResponse &response);
 
+    void api_GetLogs(HTTPServerRequest& request, HTTPServerResponse &response);
+    void api_DeleteLogs(HTTPServerRequest& request, HTTPServerResponse &response);
 };
 
 #endif // MYREQUESTHANDLER_H

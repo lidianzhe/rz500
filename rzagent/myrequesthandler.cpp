@@ -63,6 +63,18 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
             api_Persons(request,response);
         return;
     }
+    //get logs
+    if(uri.getPath()=="/logs")
+    {
+        api_GetLogs(request,response);
+        return;
+    }
+    //get logs
+    if(uri.getPath()=="/deletelogs")
+    {
+        api_DeleteLogs(request,response);
+        return;
+    }
 
     response.setContentType("application/json");
     response.redirect(request.getURI(),HTTPResponse::HTTPStatus::HTTP_NOT_IMPLEMENTED);
@@ -424,4 +436,126 @@ int MyRequestHandler::saveStaff(Staff &staff)
         std::cout<<"saveStaff error:"<<e.message()<<std::endl;
     }
     return ret;
+}
+
+void MyRequestHandler::api_Logs(HTTPServerRequest &request, HTTPServerResponse &response)
+{
+    if(request.getMethod()=="GET")
+        api_GetLogs(request,response);
+
+    //if(request.getMethod()=="POST") //delete
+
+}
+
+void MyRequestHandler::api_GetLogs(HTTPServerRequest &request, HTTPServerResponse &response)
+{
+    Poco::URI uri(request.getURI());
+    QStringList path=QString::fromStdString(uri.getPath()).split("/");
+    QStringList query=QString::fromStdString(uri.getQuery()).split("&");
+    int page_no=1;
+    int page_count=10;
+    try{
+        for(int i=0;i<query.count();i++){
+            QStringList kv=query[i].split("=");
+            if(kv.at(0)=="page_no")
+                page_no=kv.at(1).toInt();
+            if(kv.at(0)=="page_count")
+                page_count=kv.at(1).toInt();
+        }
+    }
+    catch(Exception)
+    {
+
+    }
+
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+
+
+            std::vector<LogEntry> result;
+            int ret= umxDB_selectLogEntryByPage(dzrun.umxdb_Handle,page_no,page_count,"asc",&result);
+            int suc_flag=1;
+            if(ret==UMXDB_SUCCESS)
+                suc_flag=0;
+            int count=result.size();
+            std::ostream& ostr = response.send();
+            JSONObject obj;
+            obj.set("suc_flag",suc_flag);
+            obj.set("error_msg","");
+            obj.set("page",page_no);
+            obj.set("pagesize",page_count);
+            obj.set("count",count);
+            JSONObject r=cjsonpp::arrayObject();
+            for(int i=0;i<result.size();i++){
+                JSONObject item ;
+                LogEntry log=result[i];
+
+                //
+                item.set("staff_no",log.GetUserUUID());
+                item.set("swing_card_time",log.GetTimestamp());
+                item.set("verify_type",log.GetEventType());
+                item.set("additional",log.GetAdditionalData());
+                item.set("info",log.GetInfo());
+                item.set("id",log.GetId());
+                //
+                r.add(item);
+            }
+            obj.set("staff_list",r);
+            ostr<<obj.print();
+
+            response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
+
+
+}
+
+void MyRequestHandler::api_DeleteLogs(HTTPServerRequest &request, HTTPServerResponse &response)
+{
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+    int suc_flag=0;
+    //read json
+    std::istream &i = request.stream();
+    int len = request.getContentLength();
+    char* buffer = new char[len];
+    i.read(buffer, len);
+    std::cout<<buffer<<std::endl;
+    QString s=QString(buffer);
+    cjsonpp::JSONObject jobj=cjsonpp::parse(s.toStdString());
+    std::vector<JSONObject> stafflist= jobj.get("staff_list").asArray<JSONObject>();
+    std::cout<<"size:"<<stafflist.size()<<std::endl;
+    utilsHelper *util = new utilsHelper();
+
+    JSONObject objlist=cjsonpp::arrayObject();
+    for(int i=0;i<stafflist.size();i++){
+        JSONObject objstaff= stafflist[i];
+        std::cout<<objstaff.get<int>("id")<<std::endl;
+        int id=objstaff.get<int>("id");
+        //
+        bool isImage=true;
+        int ret=umxDB_deleteLogEntryById(dzrun.umxdb_Handle,id,&isImage);
+        if(ret!=0 && ret!=-401){
+            stringstream stream;
+            stream<<ret;
+            string string_ret=stream.str();
+            if(ret=-201)
+                string_ret="ID_NO_EXIST";
+
+            JSONObject objerr;
+            objerr.set("id",id);
+            objerr.set("error_msg",string_ret);
+            objlist.add(objerr);
+        }
+        //
+    }
+    delete util;
+
+    //write json
+    std::ostream& ostr = response.send();
+    JSONObject obj;
+    obj.set("suc_flag",suc_flag);
+    obj.set("error_msg","");
+    obj.set("error_staff_list",objlist);
+    ostr<<obj.print();
+
+    response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
 }
