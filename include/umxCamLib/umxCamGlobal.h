@@ -127,6 +127,7 @@ typedef struct _UMXCAM_DEVICE_INFO {
 #define UMXCAM_MESSAGE_MOVE_UP                         2
 #define UMXCAM_MESSAGE_OPEN_EYES_WIDE                  3
 #define UMXCAM_MESSAGE_TAKE_OFF_GLASSES                4
+#define UMXCAM_MESSAGE_DO_NOT_MOVE                     5
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Message to GUI in UMXCAM_IMAGE_INFO
@@ -258,6 +259,21 @@ typedef struct _UMXCAM_IMAGE_INFO {
 
     void *additionalInfo;        // for future use only
 
+    // Added for fast image transfer JJC 20171006
+    // faceWidth and faceheight indicates targetW and targetH
+    // The image size is faceWidth*faceheight*1 bytes. Need interpolation
+    unsigned char *faceImageYUVSub2;
+
+    int irisTemplateSize;
+    unsigned char *leftIrisTemplate;
+    unsigned char *rightIrisTemplate;
+
+    int leftPupilCenterX, rightPupilCenterX;
+    int leftPupilCenterY, rightPupilCenterY;
+
+    double leftUsableIrisArea, rightUsableIrisArea;
+    bool leftQualityOk, rightQualityOk;
+    double leftQualityScore, rightQualityScore;
 } UMXCAM_IMAGE_INFO;
 
 typedef struct _UMXCAM_EVENT {

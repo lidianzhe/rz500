@@ -74,7 +74,8 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     initlog();
 
     // umxAlgoLib
-    int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
+    int ret = umxAlgo_create(&_gUmxAlgoHandle, m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
+    //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
     //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEUROTECH_VERILOOK_LITHUANIA);
     //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEC_NEOFACE_JAPAN);
 

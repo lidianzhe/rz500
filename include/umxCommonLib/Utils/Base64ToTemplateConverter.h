@@ -25,10 +25,13 @@ namespace TemplateConverter
         std::istringstream is(base64Template);
         Poco::Base64Decoder decoder(is);
         std::istreambuf_iterator<char> isIt(decoder);
+        int cnt = 0;
         while(isIt != std::istreambuf_iterator<char>())
         {
             lTemplate.push_back( static_cast<unsigned char>(*isIt) );
             ++isIt;
+            ++cnt;
+            if(cnt >= 2048) break;
         }
     }
 

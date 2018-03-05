@@ -23,6 +23,7 @@
 
 #include <Poco/Util/PropertyFileConfiguration.h>
 #include <Poco/AutoPtr.h>
+#include <Poco/Logger.h>
 
 typedef void *UMXNET_HANDLE;
 
@@ -734,6 +735,7 @@ namespace UMXNetwork
         std::string _macAddr;
         int _operationMode;
         int _identifyKind;
+        std::string _userId;
     };
 
     class AcceptableData : public CryptoData
@@ -767,6 +769,8 @@ namespace UMXNetwork
             INET_MANAGER_ERROR_FACE_DB_IS_FULL =                                                                    -204,
             INET_MANAGER_ERROR_UNKNOWN_START_MODE =                                                                 -205,
             INET_MANAGER_ERROR_IRIS_AND_FACE_DB_ALL_IS_FULL =                                                       -206,
+            INET_MANAGER_ERROR_NOT_LAUNCHER_MODE =                                                                  -207,
+            INET_MANAGER_ERROR_NOT_SLAVE_MODE =                                                                     -208,
 
             INET_MANAGER_ERROR_RELAY_IS_DISABLE =                                                                   -300,
             INET_MANAGER_ERROR_RELAY_UNKNOWN =                                                                      -301
@@ -774,6 +778,7 @@ namespace UMXNetwork
 
     public:
         virtual std::string GetUMXLauncherVersion()=0;
+        virtual Poco::Logger& GetLogger()=0;
         virtual Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> GetPropertiesFilePointer()=0;
         virtual std::string GetUMXMode()=0;
         virtual bool SetUMXMode(std::string mode)=0;
@@ -782,7 +787,10 @@ namespace UMXNetwork
         virtual int relay(bool forced, int duration)=0;
         virtual CameraControlResponse ControlStatus()=0;
         virtual int StartEnrolCamera(bool faceMode = false, bool glassesMode = false, bool bothEyeMode = false, bool eitherEyeMode = false, bool streamingMode = false, bool recogMode = false,  std::string addr = "")=0;
+        virtual int MatchTemplate(std::string seqUID, SubjectData subjectData)=0;
         virtual bool StopEnrolCamera()=0;
+        virtual void StartReadCard()=0;
+        virtual void StopReadCard()=0;
         virtual bool CaptureWideViewImage()=0;
         virtual bool GetPreviewData(PreviewData& previewData)=0;
         virtual std::shared_ptr<BiometricDataCache> GetBiometricDataCache()=0;
@@ -804,18 +812,23 @@ namespace UMXNetwork
         virtual int updateFaceByUuIdAndSubId(const std::string& uuid, const int subId, FaceData& faceData)=0;
         virtual int deleteFaceByUuIdAndSubId(const std::string uuid, const int subId)=0;
         virtual int insertUserInfo(const std::string uuid, const std::string card, const std::string pin,
-                                    const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed)=0;
+                                    const int admin, const int groupIndex, const int byPassCard, const int indivisual,
+                                    const int threeOutStatus, const int threeOutAccessAllowed, const int jobCode, const int timeScheduleCode,
+                                    const int apbStatus, const std::string message)=0;
         virtual int selectUserInfoByUUID(const std::string uuid, UserInfoData *userInfo)=0;
         virtual int selectUserInfoByCard(const std::string card, UserInfoData *userInfo)=0;
         virtual int selectUserInfoByPage(const int page, const int pageSize, std::vector<UserInfoData> *retAllUserInfo)=0;
         virtual int updateUserInfoByUUID(const std::string uuid, const std::string card, const std::string pin,
-                                                 const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed)=0;
+                                                 const int admin, const int groupIndex, const int byPassCard, const int indivisual,
+                                                 const int threeOutStatus, const int threeOutAccessAllowed, const int jobCode, const int timeScheduleCode,
+                                                 const int apbStatus, const std::string message)=0;
         virtual int deleteUserInfoByUUID(const std::string uuid)=0;
         virtual int selectLogEntryFromToByPage(const int pageNumber, const int pageSize, const int fromId, const int toId, std::vector<LogEntry> *retLogEntry)=0;
         virtual int selectLogEntryByPage(const int pageNumber, const int pageSize, const std::string& order, std::vector<LogEntry> *retLogEntry)=0;
         virtual LogEntry selectLogEntryById(const int id)=0;
         virtual bool deleteLogEntryFromTo(const int fromId, const int toId)=0;
         virtual bool deleteLogEntryById(const int id)=0;
+        virtual void deleteServiceLogDB()=0;
         virtual std::vector<ImageCapture> selectImageCapture()=0;
         virtual void saveIrisAndFaceImage(const std::string uuid)=0;
         virtual void deleteIrisAndFaceImage(const std::string uuid)=0;
@@ -829,8 +842,10 @@ namespace UMXNetwork
         virtual void save8bitToJPG(char* szPathName, void* lpBits, int w, int h, int targetW, int targetH)=0;
         virtual void save24bitToJPG(char* szPathName, void* lpBits, int w, int h, int targetW, int targetH)=0;
         virtual void setRestData(CommuteData& data)=0;
+        virtual void setRestServerEnrolData(UMXNetwork::ServerEnrolData& data)=0;
         virtual std::vector<UMXNetwork::CommuteData>* getRestData()=0;
         virtual std::vector<UMXNetwork::ServerAuthData>* getRestServerAuthData()=0;
+        virtual std::vector<UMXNetwork::ServerEnrolData>* getRestServerEnrolData()=0;
         virtual Poco::Mutex* getCommuteMutex()=0;
         virtual Poco::Mutex* getServerAuthDataMutex()=0;
         virtual Poco::Mutex* getServerEnrolMutex()=0;
@@ -852,13 +867,19 @@ namespace UMXNetwork
         virtual bool getPreivewStartFlag()=0;
         virtual void setPreivewReqFlag(bool previewReq)=0;
         virtual bool getPreviewReqFlag()=0;
+        virtual std::string getCard()=0;
+        virtual void setCard(std::string card)=0;
         virtual bool getFaceRaw(char** data, int* size)=0;
         virtual std::string getRequestIPAddress()=0;
         virtual void setRequestIPAddress(std::string addr)=0;
+        virtual void heartBeat()=0;
 
         //- update firmware
         virtual int GetUpdateFirmwareSize()=0;
         virtual void SetUpdateFirmwareSize(int nUpdateFirmwarSize)=0;
+
+        virtual void setAPBMode(int enable)=0;
+        virtual void clearAPBStatus(std::string uuid = "", bool all = true)=0;
     };
 }
 

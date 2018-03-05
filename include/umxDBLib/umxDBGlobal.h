@@ -157,6 +157,17 @@ typedef void *UMXDB_HANDLE;
 #define UMXDB_EXCEPTION_USERINFO_DELETE                                                          -709
 #define UMXDB_EXCEPTION_USERINFO_SELECT_BY_CARD                                                  -710
 
+#define UMXDB_ERROR_CARDINFO_COUNT_UUID                                                          -740
+#define UMXDB_ERROR_CARDINFO_COUNT_UUID_NO_EXIST                                                 -741
+#define UMXDB_ERROR_CARDINFO_DELETE_ALL                                                          -742
+#define UMXDB_ERROR_CARDINFO_DELETE_BY_UUID                                                      -743
+
+#define UMXDB_EXCEPTION_CARDINFO_SELECT_BY_UUID                                                  -750
+#define UMXDB_EXCEPTION_CARDINFO_INSERT_BY_UUID                                                  -751
+#define UMXDB_EXCEPTION_CARDINFO_COUNT_UUID_AND_SUBID                                            -752
+#define UMXDB_EXCEPTION_CARDINFO_DELETE_ALL                                                      -753
+#define UMXDB_EXCEPTION_CARDINFO_DELETE_BY_UUID                                                  -754
+
 #define UMXDB_ERROR_EVENTLOG_SELECT_BY_LAST_LOGID                                                -800
 #define UMXDB_ERROR_EVENTLOG_DELETE_BY_LOGID                                                     -801
 #define UMXDB_ERROR_EVENTLOG_DELETE_BY_LOGID_FROM_TO                                             -802
@@ -183,8 +194,12 @@ typedef void *UMXDB_HANDLE;
 
 #define UMXDB_EXCEPTION_IMAGECAPTURE_SELECT_ALL                                                 -1000
 
+#define DB_NEUROTECH_FEATURE_VERSION_6_0                                                        0x3600
+#define DB_NEUROTECH_FEATURE_VERSION_10_0                                                       0x3A00
+
 #define DB_DEFAULT_FEATURE_VERSION                                                              DB_DELTAID_FEATURE_VERSION
 #define DB_DELTAID_FEATURE_VERSION                                                              0x2310
+#define DB_NEUROTECH_FEATURE_VERSION                                                            DB_NEUROTECH_FEATURE_VERSION_6_0
 #define DB_ENCRYPT_VERSIONDATA_ID                                                               1   // 0: DB_Version 1: Is it encrypted or not?
 #define DB_ENCRYPT_VERSIONDATA_VERSION                                                          1   // 1:encrypted
 

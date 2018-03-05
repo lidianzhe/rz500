@@ -69,6 +69,10 @@ typedef void *UMXALGO_HANDLE;
 
 #define UMXALGO_FACE_OPENCV                                         5
 
+#define UMXALGO_FACE_EYE_DLIB                                           6
+//#define UMXALGO_FACE_DLIB											6 //by dhkim
+//#define UMXALGO_EYE_DLIB                                          7 //by dhkim
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // template type (Enrol or Recog)
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -81,13 +85,21 @@ typedef void *UMXALGO_HANDLE;
 // Iris : Global
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define UMXALGO_IRIS_MAX_TEMPLATE_SIZE                          2048
+//#define UMXALGO_IRIS_MAX_TEMPLATE_SIZE                          2048
+#define UMXALGO_IRIS_MAX_TEMPLATE_SIZE                          4096
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Iris : ActiveIris (DeltaID)
 ////////////////////////////////////////////////////////////////////////////////////////
 
 #define UMXALGO_IRIS_IRE_TEMPLATE_SIZE                          2048
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Iris : VeriEye (Neurotechnology)
+////////////////////////////////////////////////////////////////////////////////////////
+
+#define UMXALGO_IRIS_NT_TEMPLATE_SIZE                          4096
+#define UMXALGO_IRIS_NT_MINIUM_MATCH_SCORE                          48
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Iris : Mirlin (Fotonation)
@@ -119,13 +131,25 @@ typedef void *UMXALGO_HANDLE;
 
 #define UMXALGO_FACE_NEUROTECH_VERILOOK                         "verilook"
 #define UMXALGO_FACE_NEC_NEOFACE                                "neoface"
-
+#define UMXALGO_FACE_DLIB 										"dlib" 	   //by dhkim
+#define UMXALGO_FACE_DLIBFACE									"dlibface" //by dhkim
+#define UMXALGO_FACE_DLIBEYE									"dlibeye" //by dhkim
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Threads
 ////////////////////////////////////////////////////////////////////////////////////////
 #define ALGO_SUB_THREADS_MAX        128
 #define ALGO_SUB_THREADS_CNT        4
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Image format
+////////////////////////////////////////////////////////////////////////////////////////
+#define CMID_IRIS_BMP_FORMAT                                        1
+#define CMID_IRIS_RAW_FORMAT                                        2
+
+#define CMID_LEFT_EYE               1
+#define CMID_RIGHT_EYE              2
+#define CMID_BOTH_EYE               3
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // structs
@@ -165,11 +189,19 @@ typedef struct _UMXALGO_IRIS_GET_TEMPLATE_OUTPUT {
     double usableIrisArea;
     bool qualityOk;
     double qualityScore;
+    // added by UK 20170928
+    int irisCenterX;
+    int irisCenterY;
+    int irisDiameter;
+    int pupilCenterX;
+    int pupilCenterY;
+    int pupilDiameter;
 } UMXALGO_IRIS_GET_TEMPLATE_OUTPUT;
 
 typedef struct _UMXALGO_IRIS_GET_TEMPLATE {
     UMXALGO_IRIS_GET_TEMPLATE_INPUT*    input;
     UMXALGO_IRIS_GET_TEMPLATE_OUTPUT*   output;
+    UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* outputEnroll;
 } UMXALGO_IRIS_GET_TEMPLATE;
 
 typedef struct _UMXALGO_IRIS_COMPARE_TEMPLATE_INPUT {

@@ -57,7 +57,7 @@ extern "C" {
 #endif
 
     void _UMXCAM_EXPORT umxCam_getVersion(unsigned int *major, unsigned int *minor, unsigned int *revision);
-    // Get umxCam version and revision number for compatibility.
+	// Get umxCam version and revision number for compatibility.
     // Application should check if major version number is consistent.
     //
     // major[out]
@@ -154,7 +154,7 @@ extern "C" {
     // buffer[in] - working buffer allocated by application
     //
     // UMXCAM_START_PARA *startPara:
-    //
+	//
     // 		startMode[in] - UMXCAM_NORMAL_START_MODE
     //                 		UMXCAM_RETRY_START_MODE
     // 		faceCaptureEnabled[in] - UMXCAM_TRUE : face capture mode
@@ -168,6 +168,7 @@ extern "C" {
     //                      	 UMXCAM_FAST_RECOG_MODE
     // 		minUsableIrisArea[in] - Minmum usable iris area (1 ~ 99).
     //                         		It only applies to enrollment mode.
+    //                              In recognition mode, it is 40.
     //
     // 		faceFullResolution[in] - UMXCAM_TRUE : returns face image with full resolution 720x960 for enrollment
     //                          	 UMXCAM_FALSE : return cropped face image for enrollment
@@ -310,6 +311,20 @@ extern "C" {
     // Return value - UMXCAM_ERROR_INVALID_HANDLE
     //                UMXCAM_ERROR_IN_ARGUMENTS
     //                UMXCAM_SUCCESS
+
+    int _UMXCAM_EXPORT umxCam_openDevice_simul(UMXCAM_HANDLE handle, int mode, const char* dirName);
+    // Open the device for simul.
+
+    int _UMXCAM_EXPORT umxCam_clear_simul(UMXCAM_HANDLE handle);
+    // clear processDeque for simul.
+
+#ifdef APP_CALIB
+    #ifdef DEVICE_EF55
+        int _UMXCAM_EXPORT umxCam_motMove(UMXCAM_HANDLE handle, unsigned char Movetype, unsigned char MoveDir, unsigned short MoveStep, unsigned char LiquidEnable, unsigned short LiquidVoltage, int SleepTime = 500);
+    #else
+        int _UMXCAM_EXPORT umxCam_motMove(UMXCAM_HANDLE handle, unsigned char Movetype, unsigned char MoveDir, unsigned short MoveStep);
+    #endif
+#endif
 
 #ifdef __cplusplus
 } // extern "C"

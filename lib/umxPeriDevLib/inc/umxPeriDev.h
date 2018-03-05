@@ -194,6 +194,10 @@ int UMXPERIDEVLIB_EXPORT umxPeriDev_writeRs232(const char *data, const int data_
 // Param: void (*rs485_recv_cb_f)(char*,int,int)
 // Return: 0 is success, other values is linux errno
 int UMXPERIDEVLIB_EXPORT umxPeriDev_setRs485RecvCB(rs485_recv_cb_f);
+// Desc.: Set RS485 baudrate and others(later)
+// Param: baudrate=baudrate
+// Return:
+void umxPeriDev_setupRs485(int baudrate);
 // Desc.: Read data from RS485 port
 // Param: buffer=data buffer to read, buffer_size=buffer size, *read_size=Return real read size
 // Return: 0 is success, other values is linux errno 
@@ -207,6 +211,7 @@ int UMXPERIDEVLIB_EXPORT umxPeriDev_writeRs485(const char *data, const int data_
 // Desc.: Get fatory-reset button status
 // Param: Status value 1 means factory-reset's button clicked, 0 means factory-reset's button not clicked 
 // Return: 0 is success, other values is linux errno 
+// * Caustion: Not supported on Android
 int UMXPERIDEVLIB_EXPORT umxPeriDev_getFactoryReset(int *value);
 // Desc.: Set factory-reset callback function to sense to change button status
 // Param: void (*factoryreset_cb_f)(int)
@@ -214,6 +219,7 @@ int UMXPERIDEVLIB_EXPORT umxPeriDev_getFactoryReset(int *value);
 int UMXPERIDEVLIB_EXPORT umxPeriDev_setFactoryResetCB(factoryreset_cb_f);
 
 /*-------------------- Netwrok(WiFi) --------------------*/
+// * Caustion: Not supported on Android
 // Desc.: Register network event callback function. It will working until to set NULL to cb.
 // Param: void (*network_cb_f)(int)
 // Return: PERIDEV_NET_ERROR
@@ -264,6 +270,7 @@ PERIDEV_NET_ERROR UMXPERIDEVLIB_EXPORT umxPeriDev_setNetIPv4(const char* deviceN
 
 
 /*-------------------- Backlight(LCD) --------------------*/
+// * Caustion: Not supported on Android
 // Desc.: Get LCD backlight brightness
 // Param: value(Buffer of brightness)
 // Return: 0 is success, other values is linux errno 
@@ -275,6 +282,7 @@ int UMXPERIDEVLIB_EXPORT umxPeriDev_setBacklightBrightness(const unsigned char v
 
 
 /*-------------------- USB --------------------*/
+// * Caustion: Not prepared on Android yet...
 // Desc.: Set USB status callback function to know readable data or error
 // Param: void (*usb_status_cb_f)(int,int)
 // Return: 0 is success, other values is linux errno

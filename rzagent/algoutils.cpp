@@ -167,7 +167,7 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
         subjectData._wiegandCode = person.WiegandCode;
         subjectData._wiegandCustom = "";
         umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
-        umxDB_insertUserInfo(dzrun.umxdb_Handle,person.Id,person.Card,"",0,0,0,0,0,0);
+        umxDB_insertUserInfo(dzrun.umxdb_Handle,person.Id,person.Card,"",0,0,0,0,0,0,0,0,0,"");
     }else
     {
         std::cout << "update "<<person.Id <<" name="<<person.Name<<endl;
@@ -320,7 +320,7 @@ void AlgoUtils::algotest()
         subjectData._userUUID="3";
         subjectData._lastName="lhjalgo";
         umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
-        umxDB_insertUserInfo(dzrun.umxdb_Handle,"3","","",0,0,0,0,0,0);
+        umxDB_insertUserInfo(dzrun.umxdb_Handle,"3","","",0,0,0,0,0,0,0,0,0,"");
 
     //-------------
 
@@ -380,7 +380,7 @@ void AlgoUtils::algotest2(QString filepath, string uuid, string name)
     subjectData._userUUID=uuid;
     subjectData._lastName=name;
     umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
-    umxDB_insertUserInfo(dzrun.umxdb_Handle,uuid,"","",0,0,0,0,0,0);
+    umxDB_insertUserInfo(dzrun.umxdb_Handle,uuid,"","",0,0,0,0,0,0,0,0,0,"");
 
 
 }

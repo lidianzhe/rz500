@@ -434,6 +434,66 @@ namespace TemplateConverter
         encoder.close();
         return os.str();
     }
+
+    inline std::string ConvertToBase64YUVSub2( const unsigned char* pImage, const int width, const int height )
+    {
+        std::ostringstream os;
+        Poco::Base64Encoder encoder(os);
+        std::ostream_iterator<unsigned char> osIt(encoder);
+        std::copy(pImage, pImage + ( width * height ), osIt);
+
+
+        // bmp header
+        std::vector<unsigned char> bitmap;
+        int byteCounter = 0;
+        // Write the header(s) using little-endian byte order
+        const Poco::Int32 File_Hdr_Size  = 14;
+        const Poco::Int32 Bmp_Hdr_Size   = 40;
+        const Poco::Int32 Pal_Hdr_Size   = 4 * 256;
+        const Poco::Int32 Total_Hdr_Size = File_Hdr_Size + Bmp_Hdr_Size; // + Pal_Hdr_Size;
+
+        Poco::Int32 Row_Size       = ( ( width % 4 ) == 0 ) ? width : ( ( width | 4 ) & ( ~3 ) );
+        Poco::Int32 Data_Size      = Row_Size * height * 3;
+        Poco::Int32 File_Size      = Total_Hdr_Size + Data_Size;
+        const Poco::Int32 Reserved       = 0;
+
+        const Poco::Int32 Color_Planes   = 1;
+        const Poco::Int32 Bits_Per_Pixel = 24;
+        const Poco::Int32 Compression    = 0;
+        const Poco::Int32 H_Resolution   = 1000;
+        const Poco::Int32 V_Resolution   = 1000;
+        const Poco::Int32 Num_Colors     = 0;
+        const Poco::Int32 Num_Important  = 0;
+
+        bitmap.push_back(static_cast<Poco::UInt8>('B'));byteCounter++;
+        bitmap.push_back(static_cast<Poco::UInt8>('M'));byteCounter++;
+        write_INT32_LE( File_Size,bitmap);byteCounter +=4;
+        write_INT32_LE( Reserved,bitmap);byteCounter +=4;
+        write_INT32_LE( Total_Hdr_Size,bitmap);byteCounter +=4;
+        write_INT32_LE( Bmp_Hdr_Size,bitmap);byteCounter +=4;
+        write_INT32_LE( width,bitmap);byteCounter +=4;
+        write_INT32_LE( height,bitmap);byteCounter +=4;
+        write_UINT16_LE((Poco::UInt16)   Color_Planes,bitmap);byteCounter +=2;
+        write_UINT16_LE((Poco::UInt16) Bits_Per_Pixel,bitmap);byteCounter +=2;
+        write_INT32_LE( Compression,bitmap);byteCounter +=4;
+        write_INT32_LE( Data_Size,bitmap);byteCounter +=4;
+        write_INT32_LE( H_Resolution,bitmap);byteCounter +=4;
+        write_INT32_LE( V_Resolution,bitmap);byteCounter +=4;
+        write_INT32_LE( Num_Colors,bitmap);byteCounter +=4;
+        write_INT32_LE( Num_Important,bitmap);byteCounter +=4;
+
+        std::copy(bitmap.data(), bitmap.data() + Total_Hdr_Size, osIt);
+
+        // cmi header
+        unsigned char header[2];
+        header[0] = 'Y';
+        header[1] = 'U';
+        std::copy(header, header + 2, osIt);
+
+
+        encoder.close();
+        return os.str();
+    }
 }
 
 #endif // __TEMPLATE_TO_BASE64_CONVERTER_H__

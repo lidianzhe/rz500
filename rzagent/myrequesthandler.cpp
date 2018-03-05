@@ -414,7 +414,7 @@ int MyRequestHandler::saveStaff(Staff &staff)
             sd._firstName = "";
             sd._matchUntil ="";
             ret=umxDB_insertSubject(dzrun.umxdb_Handle,sd);
-            ret=umxDB_insertUserInfo(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0);
+            ret=umxDB_insertUserInfo(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0,0,0,0,"");
             if(staff.face_faroff!="")
                 umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
             if(staff.face_faron!="")
@@ -423,7 +423,7 @@ int MyRequestHandler::saveStaff(Staff &staff)
         {
             std::cout << "update "<<sd._userUUID <<" name="<<sd._lastName<<endl;
             ret=umxDB_updateSubject(dzrun.umxdb_Handle,sd);
-            ret=umxDB_updateUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0);
+            ret=umxDB_updateUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0,0,0,0,"");
             umxDB_deleteFacesByUUID(dzrun.umxdb_Handle,sd._userUUID);
             if(staff.face_faroff!="")
                 umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);

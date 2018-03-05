@@ -575,10 +575,22 @@ extern "C" {
     /// vvvv "/usr/local/share/CMITECH/Service.db" - userinfo table vvvv
 
     int _UMXDB_EXPORT umxDB_insertUserInfo_ADR(UMXDB_HANDLE handle, const char* uuid, const char* card, const char* pin,
-                                                     const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed);
+                                                     const int admin, const int groupIndex, const int byPassCard, const int indivisual,
+                                                     const int threeOutStatus, const int threeOutAccessAllowed, const int jobCode, const int timeScheduleCode,
+                                                     const int apbStatus, const std::string message);
 
     int _UMXDB_EXPORT umxDB_insertUserInfo(UMXDB_HANDLE handle, const std::string uuid, const std::string card, const std::string pin,
-                                                     const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed);
+                                                     const int admin, const int groupIndex, const int byPassCard, const int indivisual,
+                                                     const int threeOutStatus, const int threeOutAccessAllowed, const int jobCode, const int timeScheduleCode,
+                                                     const int apbStatus, const std::string message);
+
+    int _UMXDB_EXPORT umxDB_selectCardInfoByUUID(UMXDB_HANDLE handle, const std::string uuid, std::vector<CardInfoData> *retCardInfo);
+    int _UMXDB_EXPORT umxDB_selectCardInfoByCard(UMXDB_HANDLE handle, const std::string card, CardInfoData *retCardInfo);
+    int _UMXDB_EXPORT umxDB_selectCardNumberByUUIDandSubId(UMXDB_HANDLE handle, const std::string uuid, const int subId, CardInfoData *card);
+    int _UMXDB_EXPORT umxDB_updateCardNumberByUUIDandSubId(UMXDB_HANDLE handle, const std::string uuid, const int subId, const std::string card);
+    int _UMXDB_EXPORT umxDB_insertCard(UMXDB_HANDLE handle, const CardInfoData card_info);
+    int _UMXDB_EXPORT umxDB_deleteCardByUUIDandSubId(UMXDB_HANDLE handle, const std::string uuid, const int subId);
+    int _UMXDB_EXPORT umxDB_delete_Table_then_insert_CardinfoByUUID(UMXDB_HANDLE handle, const std::string uuid, std::vector<CardInfoData> *retCardInfo);
     // Insert user info.
     //
     // handle[in] - UMXDB_HANDLE value
@@ -664,10 +676,14 @@ extern "C" {
     //                UMXDB_SUCCESS
 
     int _UMXDB_EXPORT umxDB_updateUserInfoByUUID_ADR(UMXDB_HANDLE handle, const char* uuid, const char* card, const char* pin,
-                                                           const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed);
+                                                           const int admin, const int groupIndex, const int byPassCard, const int indivisual,
+                                                           const int threeOutStatus, const int threeOutAccessAllowed, const int jobCode, const int timeScheduleCode,
+                                                           const int apbStatus, const std::string message);
 
     int _UMXDB_EXPORT umxDB_updateUserInfoByUUID(UMXDB_HANDLE handle, const std::string uuid, const std::string card, const std::string pin,
-                                                           const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed);
+                                                           const int admin, const int groupIndex, const int byPassCard, const int indivisual,
+                                                           const int threeOutStatus, const int threeOutAccessAllowed, const int jobCode, const int timeScheduleCode,
+                                                           const int apbStatus, const std::string message);
     // Update userinfo by uuid.
     //
     // handle[in] - UMXDB_HANDLE value
@@ -1244,6 +1260,24 @@ extern "C" {
     // insert transaction database for version info.
     //
     // handle[in] - UMXDB_HANDLE value
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_setIrisAlgoType(UMXDB_HANDLE handle, const int type);
+    // insert iris algorithm type info.
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // type[in] - algorithm type
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_setFaceAlgoType(UMXDB_HANDLE handle, const int type);
+    // insert face algorithm type info.
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // type[in] - algorithm type
     //
     // Return value - UMXDB_ERROR_INVALID_HANDLE
     //                UMXDB_SUCCESS

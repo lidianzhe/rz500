@@ -52,6 +52,7 @@ extern "C" {
     //                UMXNET_ERROR_IN_ARGUMENTS
     //                UMXNET_SUCCESS
 
+
     int _UMXNET_EXPORT umxNet_destroy(UMXNET_HANDLE handle);
     // Destroy umxNet.
     //

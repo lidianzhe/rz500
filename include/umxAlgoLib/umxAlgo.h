@@ -39,7 +39,7 @@ extern "C" {
 
     int _UMXALGO_EXPORT umxAlgo_create_ADR(UMXALGO_HANDLE *phandle, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE);
 
-    int _UMXALGO_EXPORT umxAlgo_create(UMXALGO_HANDLE *phandle, Poco::Logger& logger, Poco::AutoPtr<Poco::Util::AbstractConfiguration> config, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE);
+    int _UMXALGO_EXPORT umxAlgo_create(UMXALGO_HANDLE *phandle, Poco::AutoPtr<Poco::Util::AbstractConfiguration> config, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE, int enableCompareTemplate = UMXALGO_TRUE);
     // Create umxAlgo.
     //
     // phandle[out] - UMXALGO_HANDLE value if successful. Otherwise, NULL.
@@ -53,6 +53,8 @@ extern "C" {
     //                UMXALGO_FACE_NEC_NEOFACE_JAPAN                 : NEC Neoface algorithm
     //                UMXALGO_FACE_NEUROTECH_VERILOOK_LITHUANIA      : Neurotech Verilook algorithm
     //                UMXALGO_FACE_OPENCV                            : OpenCV algorithm
+    // enableCompareTemplate[in] - UMXALGO_TRUE                      : Can use umxAlgo_iris_compareTemplate
+    //                           - UMXALGO_FALSE                     : Can't use umxAlgo_iris_compareTemplate
     //
     // Return value - UMXALGO_ERROR_CANNOT_ALLOC_MEMORY
     //                UMXALGO_ERROR_IN_ARGUMENTS
@@ -131,7 +133,7 @@ extern "C" {
     //                UMXALGO_TRUE
     //                UMXALGO_FALSE
 
-    int _UMXALGO_EXPORT umxAlgo_iris_getEnrollTemplate(UMXALGO_HANDLE handle, UMXALGO_IRIS_GET_TEMPLATE_INPUT* input, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output);
+    int _UMXALGO_EXPORT umxAlgo_iris_getEnrollTemplate(UMXALGO_HANDLE handle, UMXALGO_IRIS_GET_TEMPLATE_INPUT* input, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output, int subTNo=0);
     // Get iris enroll-template for enrollment.
     //
     // handle[in] - UMXALGO_HANDLE value
@@ -145,7 +147,7 @@ extern "C" {
     //                UMXALGO_IRIS_ERROR_FAIL_TO_GENERATE_TEMPLATE : fail to generate iris template
     //                UMXALGO_SUCCESS
 
-    int _UMXALGO_EXPORT umxAlgo_iris_getMatchTemplate(UMXALGO_HANDLE handle, UMXALGO_IRIS_GET_TEMPLATE_INPUT* input, UMXALGO_IRIS_GET_TEMPLATE_OUTPUT* output);
+    int _UMXALGO_EXPORT umxAlgo_iris_getMatchTemplate(UMXALGO_HANDLE handle, UMXALGO_IRIS_GET_TEMPLATE_INPUT* input, UMXALGO_IRIS_GET_TEMPLATE_OUTPUT* output, int subTNo=0);
     // Get iris match-template for recognition.
     //
     // handle[in] - UMXALGO_HANDLE value
@@ -215,6 +217,18 @@ extern "C" {
     //                UMXALGO_SUCCESS
 
     int _UMXALGO_EXPORT umxAlgo_face_find(UMXALGO_HANDLE handle, UMXALGO_FACE_FIND_INPUT* faceFindInput, UMXALGO_FACE_FIND_OUTPUT* faceFindOutput);
+    // Find face.
+    //
+    // handle[in] - UMXALGO_HANDLE value
+    // faceFindInput[in] - input data for finding face (for detail, refer to umxAlgoGlobal.h UMXALGO_FACE_FIND_INPUT please)
+    // faceFindOutput[out] - output data of found face (for detail, refer to umxAlgoGlobal.h UMXALGO_FACE_FIND_OUTPUT please)
+    //
+    // Return value - UMXALGO_FACE_NEO_ERROR_NOT_INITIALIZE : Neoface license initialize error
+    //                UMXALGO_FACE_NEO_ERROR_UNKNOWN : Neoface license or fail to find face error
+    //                UMXALGO_FACE_ERROR_FAIL_TO_FIND_FACE : Face algorithm didn't find face
+    //                UMXALGO_SUCCESS
+
+    int _UMXALGO_EXPORT umxAlgo_face_find2(UMXALGO_HANDLE handle, UMXALGO_FACE_FIND_INPUT* faceFindInput, UMXALGO_FACE_FIND_OUTPUT* faceFindOutput, UMXALGO_FACE_FIND_INPUT* logInput); //by dhkim
     // Find face.
     //
     // handle[in] - UMXALGO_HANDLE value
@@ -296,8 +310,27 @@ extern "C" {
     int _UMXALGO_EXPORT umxAlgo_face_identifyTemplate(UMXALGO_HANDLE handle, const int faceThreshold, float* retScore, unsigned char* retUuid);
     // EF-45(bkko)-28 : modify face recognition mathod of neurotech algorihtm for matching speed ^^^
 
-    int _UMXALGO_EXPORT umxAlgo_iris_getTemplate(UMXALGO_HANDLE handle, UMXALGO_IRIS_GET_TEMPLATE_INPUT* leftInput, UMXALGO_IRIS_GET_TEMPLATE_OUTPUT* leftOutput, UMXALGO_IRIS_GET_TEMPLATE_INPUT* rightInput, UMXALGO_IRIS_GET_TEMPLATE_OUTPUT* rightOutput);
+    int _UMXALGO_EXPORT umxAlgo_iris_getTemplate(UMXALGO_HANDLE handle,
+                                                 UMXALGO_IRIS_GET_TEMPLATE_INPUT* leftInput,
+                                                 UMXALGO_IRIS_GET_TEMPLATE_OUTPUT* leftOutput,
+                                                 UMXALGO_IRIS_GET_TEMPLATE_INPUT* rightInput,
+                                                 UMXALGO_IRIS_GET_TEMPLATE_OUTPUT* rightOutput,
+                                                 UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* leftEnrollOutput = NULL,
+                                                 UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* rightEnrollOutput = NULL,
+                                                 int matchTemplate = UMXALGO_TRUE);
     int _UMXALGO_EXPORT umxAlgo_iris_requestMatch(UMXALGO_HANDLE handle, int timer, UMXALGO_IRIS_IDENTIFY_INFO* info);
+
+    int _UMXALGO_EXPORT umxAlgo_iris_refurbishTemplateData(UMXALGO_HANDLE handle, std::vector<UMXCommon::SubjectData>* iris);
+    int _UMXALGO_EXPORT umxAlgo_iris_insertTemplateData(UMXALGO_HANDLE handle, const int whichEye, const unsigned char* enrolFeature, const int enrolFeatureSize, const unsigned char* uuid, const int init);
+    int _UMXALGO_EXPORT umxAlgo_iris_deleteTemplateData(UMXALGO_HANDLE handle, const unsigned char* uuid, const int uuidSize);
+    // Get right eye position of a face image after finding face (umxAlgo_face_find()).
+    //
+    // handle[in] - UMXALGO_HANDLE value
+    // iris[in] - saved(database) iris template's vector
+    // type[in] - data type you want to refurbishing
+    // Return value - UMXALGO_ERROR_INVALID_HANDLE
+    //                UMXALGO_SUCCESS
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

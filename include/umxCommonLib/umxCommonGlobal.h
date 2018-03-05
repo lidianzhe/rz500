@@ -58,7 +58,8 @@ namespace UMXCommon {
     {
         UserInfoData();
         UserInfoData(const std::string uuid, const std::string card, const std::string pin,
-                     const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed);
+                     const int admin, const int groupIndex, const int byPassCard, const int indivisual, const int threeOutStatus, const int threeOutAccessAllowed,
+                     const int jobCode, const int timeScheduleCode, const int apbStatus, const std::string message);
         static UserInfoData Parse(const std::string jsonString);
         const std::string AsJSONString() const;
         const cjsonpp::JSONObject AsJSONObject() const;
@@ -76,6 +77,34 @@ namespace UMXCommon {
 
         int _threeOutStatus;
         int _threeOutAccessAllowed;
+
+        int _jobCode;
+
+        int _timeScheduleCode;
+
+        int _apbStatus;
+
+        std::string _message;
+    };
+
+    struct CardInfoData
+    {
+        CardInfoData();
+        CardInfoData(const std::string uuid, const int subId, const std::string card, const std::string remarks);
+        static CardInfoData Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        std::string _userUUID;
+        int _subId;
+        std::string _card;
+        std::string _remarks;
+
+        std::string _insertTime;
+        std::string _updateTime;
     };
 
     struct UserInfoData_ADR
@@ -90,6 +119,14 @@ namespace UMXCommon {
 
         int _threeOutStatus;
         int _threeOutAccessAllowed;
+
+        int _jobCode;
+
+        int _timeScheduleCode;
+
+        int _apbStatus;
+
+        std::string _message;
     };
 
     struct SubjectData
