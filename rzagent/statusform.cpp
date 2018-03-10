@@ -155,7 +155,7 @@ void StatusForm::readConfig()
     //读取最新的配置文件
     m_config->load("/usr/local/bin/umxLauncher.properties");
     m_debugMode = m_config->getInt("launcher.device.hidden.debug",0);
-    m_useServer=m_config->getInt("launcher.network.server.useserver");
+    m_useServer=m_config->getInt("launcher.network.server.useserver",0);
     m_configRequestImage = m_config->getInt("rzagent.json.requestimage",0);
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
     m_client->setServer(m_config->getString("launcher.network.server.serverip","118.31.22.44")+":"+m_config->getString("launcher.network.server.port","8080"));
@@ -188,7 +188,6 @@ void StatusForm::syncToServer()
 
     if(m_useServer!=1 )
     {
-
         return;
     }
     std::string strJson;
@@ -206,7 +205,7 @@ void StatusForm::syncToServer()
         for(LogEntry log:logs){
             Poco::Data::BLOB i(log.GetImageData());
             std::cout<<"blob size="<<i.size()<<std::endl;
-            Poco::Data::BLOBInputStream bis(i);
+            //Poco::Data::BLOBInputStream bis(i);
             std::ostringstream os;
             Poco::Base64Encoder encoder(os);
             std::string s(i.rawContent(),i.size());
