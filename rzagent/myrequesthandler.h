@@ -26,6 +26,8 @@ private:
 
     void api_GetLogs(HTTPServerRequest& request, HTTPServerResponse &response);
     void api_DeleteLogs(HTTPServerRequest& request, HTTPServerResponse &response);
+
+    void api_UploadImages(HTTPServerRequest& request, HTTPServerResponse &response);
 };
 
 #endif // MYREQUESTHANDLER_H

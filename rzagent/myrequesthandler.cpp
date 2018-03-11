@@ -37,6 +37,11 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
     std::cout <<qPrintable(path.at(1))<<endl;
     //std::cout <<qPrintable(path.at(2))<<endl;
     qDebug()<<path.count();
+    //post /uploadimage
+    if(path.value(1)=="uploadimage" ){
+        api_UploadImages(request,response);
+        return;
+    }
     //get /personscount
     if(path.value(1)=="personscount" && request.getMethod()=="GET"){
         api_GetPersonsCount(request,response);
@@ -558,4 +563,70 @@ void MyRequestHandler::api_DeleteLogs(HTTPServerRequest &request, HTTPServerResp
     ostr<<obj.print();
 
     response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
+}
+
+void MyRequestHandler::api_UploadImages(HTTPServerRequest &request, HTTPServerResponse &response)
+{
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+    int suc_flag=0;
+    //read json
+    std::istream &i = request.stream();
+    int len = request.getContentLength();
+    char* buffer = new char[len];
+    i.read(buffer, len);
+    QString s=QString(buffer);
+    cjsonpp::JSONObject obj=cjsonpp::parse(s.toStdString());
+    Person person;
+    try {
+        person.Id = obj.get<JSONObject>("staff_no").as<string>();
+        person.Name =obj.get<string>("name");
+        person.Card = obj.get<string>("card_no");
+        person.WiegandCode = obj.get<int>("wiegandcode");
+    } catch (const cjsonpp::JSONError& e) {
+        std::cerr << e.what() << '\n';
+    }
+
+    //----
+    std::vector<JSONObject> stafflist= obj.get("image_list").asArray<JSONObject>();
+    std::cout<<"size:"<<stafflist.size()<<std::endl;
+    //utilsHelper *util = new utilsHelper();
+    AlgoUtils *algo = new AlgoUtils(dzrun.umxalgo_Handle);
+    JSONObject objlist=cjsonpp::arrayObject();
+    for(int i=0;i<stafflist.size();i++){
+        JSONObject objstaff= stafflist[i];
+        //string image=util->fromBase64(objstaff.get<string>("image"));
+        algo->savetofile(person.Id, i,objstaff.get<string>("image"));
+    }
+    //delete util;
+
+    //write json
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+    std::ostream& ostr = response.send();
+    JSONObject robj;
+
+    //----
+    int ret=algo->getTemplates(person);
+    if(ret>=0)
+    {
+        suc_flag=0;
+        response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
+    }
+    else
+    {
+        suc_flag=-1;
+        response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_NOT_FOUND);
+    }
+    robj.set("suc_flag",suc_flag);
+    robj.set("error_msg","");
+    robj.set("error_staff_list",objlist);
+    robj.set("staff_no",person.Id);
+    robj.set("lefteyescore",algo->leftscore);
+    robj.set("righteyescore",algo->rightscore);
+    ostr<<robj.print();
+
+    //system(QString("rm -rf %0").arg(QString::fromStdString( Path::home()+person.Id)).toStdString().c_str());
+    delete algo;
+
 }

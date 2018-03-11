@@ -154,6 +154,7 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
     subjectData._leftImagePath=smallleft;
     subjectData._rightImagePath=smallright;
     UserInfoData retUserinfo;
+
     umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,person.Id,&retUserinfo);
     if(retUserinfo._userUUID=="")
     {
@@ -171,7 +172,24 @@ int AlgoUtils::getTemplates(UMXALGO_HANDLE handle, Person &person)
     }else
     {
         std::cout << "update "<<person.Id <<" name="<<person.Name<<endl;
-        umxDB_updateSubject(dzrun.umxdb_Handle,subjectData);
+
+        int ret=    umxDB_updateSubject(dzrun.umxdb_Handle,subjectData);
+        if (ret<0)
+        {
+            umxDB_deleteUserByUUID(dzrun.umxdb_Handle,person.Id);
+            umxDB_deleteUserInfoByUUID(dzrun.umxdb_Handle,person.Id);
+            std::cout << "insert "<<person.Id<<" name="<<subjectData._lastName<<std::endl;
+            subjectData._recordVersion = 8976;
+            subjectData._firstName = "";
+            subjectData._accessAllowed = true;
+            subjectData._matchUntil ="";
+            subjectData._wiegandFacility = -1;
+            subjectData._wiegandSite = -1;
+            subjectData._wiegandCode = person.WiegandCode;
+            subjectData._wiegandCustom = "";
+            umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
+            umxDB_insertUserInfo(dzrun.umxdb_Handle,person.Id,person.Card,"",0,0,0,0,0,0,0,0,0,"");
+        }
     }
     return 0;
 }
@@ -381,6 +399,23 @@ void AlgoUtils::algotest2(QString filepath, string uuid, string name)
     subjectData._lastName=name;
     umxDB_insertSubject(dzrun.umxdb_Handle,subjectData);
     umxDB_insertUserInfo(dzrun.umxdb_Handle,uuid,"","",0,0,0,0,0,0,0,0,0,"");
+
+
+}
+
+void AlgoUtils::savetofile(string personid, int n, string content)
+{
+    QImage img;
+    QString strContent=QString::fromStdString(content);
+    QByteArray qa64 = strContent.toLatin1();
+    QByteArray qa = QByteArray::fromBase64(qa64);
+    img.loadFromData(qa);
+    Path p=Path::home()+personid;
+    File f(Path::home()+personid);
+    f.createDirectory();
+    //QString filename=QString::fromStdString(p.toString())+"/"+QString::number(n)+".png";
+    //std::cout << filename.toStdString() <<std::endl;
+    img.save(QString::fromStdString(p.toString())+"/"+QString::number(n)+".png");
 
 
 }

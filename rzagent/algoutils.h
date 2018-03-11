@@ -27,6 +27,8 @@ public:
     void algotest();
     void algotest2(QString filepath, string uuid, string name);
 
+    void savetofile(string personid,int n,string content);
+
 private:
     UMXALGO_HANDLE algoHandle;
     Poco::Logger& m_logger;

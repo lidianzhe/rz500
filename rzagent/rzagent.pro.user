@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.2.1, 2018-03-10T10:17:32. -->
+<!-- Written by QtCreator 4.2.1, 2018-03-11T22:57:41. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -472,28 +472,31 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">RemoteLinux.DirectUploadStep</value>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedFiles">
-       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/temp/build-rzagent-UMX_Kit-Debug/rzagent</value>
-       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Release/rzagent</value>
-       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
-       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Release/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Release/rzagent</value>
+       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
+       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
+       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Release/rzagent</value>
+       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Release/rzagent</value>
+       <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
        <value type="QString">/home/lihongjun/rz500/build-rzagent-UMX_Kit-Debug/rzagent</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedHosts">
        <value type="QString">192.168.0.19</value>
+       <value type="QString">192.168.0.7</value>
        <value type="QString">192.168.0.19</value>
-       <value type="QString">192.168.0.17</value>
-       <value type="QString">192.168.0.4</value>
        <value type="QString">192.168.0.241</value>
-       <value type="QString">192.168.1.105</value>
+       <value type="QString">192.168.0.11</value>
        <value type="QString">192.168.0.10</value>
+       <value type="QString">192.168.0.17</value>
        <value type="QString">192.168.0.11</value>
-       <value type="QString">192.168.0.11</value>
+       <value type="QString">192.168.0.4</value>
+       <value type="QString">192.168.1.105</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedRemotePaths">
+       <value type="QString">/home/root</value>
        <value type="QString">/home/root</value>
        <value type="QString">/home/root</value>
        <value type="QString">/home/root</value>
@@ -514,17 +517,19 @@
        <value type="QString"></value>
        <value type="QString"></value>
        <value type="QString"></value>
+       <value type="QString"></value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedTimes">
-       <value type="QDateTime">2017-02-26T12:38:39</value>
        <value type="QDateTime">2017-02-09T06:01:24</value>
-       <value type="QDateTime">2017-12-26T21:10:05</value>
-       <value type="QDateTime">2017-10-25T00:27:57</value>
+       <value type="QDateTime">2018-03-11T22:56:42</value>
+       <value type="QDateTime">2017-02-26T12:38:39</value>
        <value type="QDateTime">2017-12-02T10:24:43</value>
-       <value type="QDateTime">2017-02-23T00:46:51</value>
-       <value type="QDateTime">2017-03-01T09:40:44</value>
-       <value type="QDateTime">2017-11-23T10:46:54</value>
        <value type="QDateTime">2018-03-06T07:22:34</value>
+       <value type="QDateTime">2017-03-01T09:40:44</value>
+       <value type="QDateTime">2017-12-26T21:10:05</value>
+       <value type="QDateTime">2017-11-23T10:46:54</value>
+       <value type="QDateTime">2017-10-25T00:27:57</value>
+       <value type="QDateTime">2017-02-23T00:46:51</value>
       </valuelist>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.IgnoreMissingFiles">false</value>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.Incremental">true</value>
