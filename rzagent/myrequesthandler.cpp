@@ -626,7 +626,7 @@ void MyRequestHandler::api_UploadImages(HTTPServerRequest &request, HTTPServerRe
     robj.set("righteyescore",algo->rightscore);
     ostr<<robj.print();
 
-    //system(QString("rm -rf %0").arg(QString::fromStdString( Path::home()+person.Id)).toStdString().c_str());
+    system(QString("rm -rf %0").arg(QString::fromStdString( Path::home()+person.Id)).toStdString().c_str());
     delete algo;
 
 }
