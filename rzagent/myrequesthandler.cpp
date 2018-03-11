@@ -38,9 +38,13 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
     //std::cout <<qPrintable(path.at(2))<<endl;
     qDebug()<<path.count();
     //post /uploadimage
-    if(path.value(1)=="uploadimage" ){
+    if(path.value(1)=="uploadimage" && request.getMethod()=="POST"){
         api_UploadImages(request,response);
         return;
+    }
+    if(path.value(1)=="reboot" && request.getMethod()=="POST")
+    {
+        system("reboot");
     }
     //get /personscount
     if(path.value(1)=="personscount" && request.getMethod()=="GET"){
