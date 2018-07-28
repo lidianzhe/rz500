@@ -227,7 +227,7 @@ void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResp
         FaceData faroff;
         FaceData faron;
         umxDB_selectFacesByUUID(dzrun.umxdb_Handle,sd._userUUID,&allface);
-        if(allface.size()==2){
+        if(allface.size()>=2){
             faroff=allface[0];
             faron=allface[1];
             item.set("face_faroff",faroff.AsJSONString());
