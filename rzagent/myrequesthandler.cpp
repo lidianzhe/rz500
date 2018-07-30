@@ -358,13 +358,17 @@ void MyRequestHandler::api_DeletePersons(HTTPServerRequest &request, HTTPServerR
         JSONObject objstaff= stafflist[i];
         std::cout<<objstaff.get<string>("staff_no")<<std::endl;
         string staff_no=objstaff.get<string>("staff_no");
-        //
+        //umxDB_deleteUserInfoByUUID
         int ret=umxDB_deleteUserByUUID(dzrun.umxdb_Handle,staff_no);
+        if(ret==-741){
+            ret=umxDB_deleteUserInfoByUUID(dzrun.umxdb_Handle,staff_no);
+            ret=umxDB_deleteFacesByUUID(dzrun.umxdb_Handle,staff_no);
+        }
         if(ret!=0 && ret!=-401){
             stringstream stream;
             stream<<ret;
             string string_ret=stream.str();
-            if(ret=-201)
+            if(ret==-201)
                 string_ret="STAFF_UUID_NO_EXIST";
 
             JSONObject objerr;
@@ -424,6 +428,11 @@ int MyRequestHandler::saveStaff(Staff &staff)
             sd._matchUntil ="";
             ret=umxDB_insertSubject(dzrun.umxdb_Handle,sd);
             ret=umxDB_insertUserInfo(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0,0,0,0,"");
+            if(staff.card_no!=""){
+                UMXCommon::CardInfoData cid = UMXCommon::CardInfoData(sd._userUUID,0,staff.card_no,"");
+
+                umxDB_insertCard(dzrun.umxdb_Handle,cid);
+            }
             if(staff.face_faroff!="")
                 umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
             if(staff.face_faron!="")
