@@ -20,6 +20,7 @@ void RootHandler::handleRequest(HTTPServerRequest &request, HTTPServerResponse &
     ostr << "\"version\":\"1.6.5\",\n";
     ostr << "\"20180309\":\"add convertimage\",\n";
     ostr << "\"20180730\":\"fix four question\"\n";
+    ostr << "\"20190131\":\"upgrade to 0.5.3 LLSDK\"\n";
     ostr <<"}";
     ostr<<endl;
 

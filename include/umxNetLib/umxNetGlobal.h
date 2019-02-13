@@ -16,14 +16,13 @@
 #include <string>
 #include <deque>
 
-#include <Poco/Mutex.h>
-
-#include "umxCommonLib/cjson/cJSONpp.h"
-#include "umxCommonLib/umxCommonGlobal.h"
+#include "cjson/cJSONpp.h"
+#include "umxCommonGlobal.h"
 
 #include <Poco/Util/PropertyFileConfiguration.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/Logger.h>
+#include <Poco/Mutex.h>
 
 typedef void *UMXNET_HANDLE;
 
@@ -457,8 +456,14 @@ namespace UMXNetwork
         void SetEncounterId(const std::string& encounterId);
         void SetTimestamp(const std::string& timestamp);
         void SetSerialNumber(const std::string& serialNumber);
+
+        void SetRecordVersion(const int version);
+
         const std::string AsJSONString() const;
         const cjsonpp::JSONObject AsJSONObject() const;
+
+        const std::string AsJSONStringVer1() const;
+        const cjsonpp::JSONObject AsJSONObjectVer1() const;
 
     private:
         std::string _encounterId;
@@ -539,6 +544,8 @@ namespace UMXNetwork
         float _nearOnFaceScore;
 
         std::string _errorMessage;
+
+        int _recordVersion;
     };
 
     class BiometricDataCache
@@ -653,8 +660,21 @@ namespace UMXNetwork
         const void CharStr2HexStr(unsigned char const* pucCharStr, char* pszHexStr, int iSize) const;
         const void HexStr2CharStr(char const* pszHexStr, unsigned char* pucCharStr, int iSize) const;
 
-        const void ConvEncrypt(cjsonpp::JSONObject* obj, std::string name, std::string data) const;
         const std::string ConvEncrypt(std::string data) const;
+        const std::string ConvEncrypt(char* key, std::string data) const;
+        const std::string ConvKTTEncrypt(char* key, std::string data) const;
+        const std::string ConvKTTdecrypt(std::string encjsonString) const;
+        const void ConvEncrypt(cjsonpp::JSONObject* obj, std::string name, std::string data) const;
+
+    public:
+        std::string _lockUuid;
+        std::string _serialNo;
+        int _encryptMethod;
+
+    private:
+        const char* getKey() const;
+        const char* createOcpKey() const;
+        const std::string replaceString(std::string subject, const std::string &search, const std::string &replace) const;
     };
 
     class CommuteData : public CryptoData
@@ -738,6 +758,51 @@ namespace UMXNetwork
         std::string _userId;
     };
 
+    class KTTDMSPostData : public CryptoData
+    {
+    public:
+        KTTDMSPostData(){}
+
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        std::string _kttSystemID;
+        std::string _macAddr;
+        std::string _deviceCode;
+        std::string _manufacturer;
+        std::string _modelname;
+        std::string _fwversion;
+        std::string _alarmStatus;
+        std::string _mcInfo;
+        std::string _deviceID;
+        std::string _ipAddress;
+        std::string _subnetMask;
+        std::string _gateway;
+        std::string _informServerAddress;
+        std::string _informInterval;
+    };
+
+    class KTTDMSRespData : public CryptoData
+    {
+    public:
+        KTTDMSRespData(){}
+
+        std::string _returnCode;
+        int _actType;
+        std::string _upgradeServerIp;
+        int _upgradeServerPort;
+        std::string _upgradeUserName;
+        std::string _upgradeUserPassword;
+        std::string _upgradeImagePath;
+        std::string _upgradeImageName;
+        int _upgradeImageSize;
+        std::string _upgradeImagehash;
+        int _sysReboot;
+        int _sysRebootSource;
+        std::string _informServerAddress;
+        int _informInterval;
+    };
+
     class AcceptableData : public CryptoData
     {
     public:
@@ -752,6 +817,9 @@ namespace UMXNetwork
     class INetworkManager
     {
     public:
+#ifdef ANDROID
+        virtual ~INetworkManager() {}
+#endif
         enum : int
         {
             INET_MANAGER_SUCCESS =                                                                                     0,
@@ -778,6 +846,7 @@ namespace UMXNetwork
 
     public:
         virtual std::string GetUMXLauncherVersion()=0;
+        virtual unsigned int GetSubjectRecordVersion()=0;
         virtual Poco::Logger& GetLogger()=0;
         virtual Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> GetPropertiesFilePointer()=0;
         virtual std::string GetUMXMode()=0;
@@ -786,7 +855,7 @@ namespace UMXNetwork
         virtual int GetDoorStatus()=0;
         virtual int relay(bool forced, int duration)=0;
         virtual CameraControlResponse ControlStatus()=0;
-        virtual int StartEnrolCamera(bool faceMode = false, bool glassesMode = false, bool bothEyeMode = false, bool eitherEyeMode = false, bool streamingMode = false, bool recogMode = false,  std::string addr = "")=0;
+        virtual int StartEnrolCamera(bool faceMode = false, bool glassesMode = false, bool bothEyeMode = false, bool eitherEyeMode = false, bool streamingMode = false, bool recogMode = false,  bool tcpPreviewMode = false, std::string addr = "")=0;
         virtual int MatchTemplate(std::string seqUID, SubjectData subjectData)=0;
         virtual bool StopEnrolCamera()=0;
         virtual void StartReadCard()=0;
@@ -823,6 +892,7 @@ namespace UMXNetwork
                                                  const int threeOutStatus, const int threeOutAccessAllowed, const int jobCode, const int timeScheduleCode,
                                                  const int apbStatus, const std::string message)=0;
         virtual int deleteUserInfoByUUID(const std::string uuid)=0;
+        virtual int deleteAllUsers()=0;
         virtual int selectLogEntryFromToByPage(const int pageNumber, const int pageSize, const int fromId, const int toId, std::vector<LogEntry> *retLogEntry)=0;
         virtual int selectLogEntryByPage(const int pageNumber, const int pageSize, const std::string& order, std::vector<LogEntry> *retLogEntry)=0;
         virtual LogEntry selectLogEntryById(const int id)=0;
@@ -846,15 +916,20 @@ namespace UMXNetwork
         virtual std::vector<UMXNetwork::CommuteData>* getRestData()=0;
         virtual std::vector<UMXNetwork::ServerAuthData>* getRestServerAuthData()=0;
         virtual std::vector<UMXNetwork::ServerEnrolData>* getRestServerEnrolData()=0;
+        virtual std::vector<UMXNetwork::KTTDMSPostData>* getKTTDMSPostData()=0;
+        virtual std::vector<UMXNetwork::KTTDMSRespData>* getKTTDMSRespData()=0;
         virtual Poco::Mutex* getCommuteMutex()=0;
         virtual Poco::Mutex* getServerAuthDataMutex()=0;
         virtual Poco::Mutex* getServerEnrolMutex()=0;
+        virtual Poco::Mutex* getKTTDMSMutex()=0;
         virtual void setSendToRest(bool flag)=0;
         virtual bool getSendToRest()=0;
         virtual bool getServerAuthDataSendToRest()=0;
         virtual void setServerAuthDataSendToRest(bool flag)=0;
         virtual bool getSendToRestForEnrol()=0;
         virtual bool setSendToRestForEnrol(bool flag)=0;
+        virtual bool getSendToRestForKTTDMS()=0;
+        virtual bool setSendToRestForKTTDMS(bool flag)=0;
         virtual void* getDbManagerPtr()=0;
         virtual void* getAlgoMangerPtr()=0;
         virtual int getLastLogId()=0;
@@ -874,12 +949,26 @@ namespace UMXNetwork
         virtual void setRequestIPAddress(std::string addr)=0;
         virtual void heartBeat()=0;
 
+        //- update config properties
+        virtual int GetUpdateConfigProperties()=0;
+        virtual void SetUpdateConfigProperties(int nUpdateConfigProperties)=0;
+
         //- update firmware
         virtual int GetUpdateFirmwareSize()=0;
         virtual void SetUpdateFirmwareSize(int nUpdateFirmwarSize)=0;
 
         virtual void setAPBMode(int enable)=0;
         virtual void clearAPBStatus(std::string uuid = "", bool all = true)=0;
+
+        virtual void setLockUuid(std::string lockUuid) = 0;
+        virtual std::string getLockUuid() = 0;
+        virtual void setSerialNo(std::string serialNo) = 0;
+        virtual std::string getSerialNo() = 0;
+
+        virtual int insertUser(SubjectData *subjectData,
+                               std::vector<FaceData>* faceData,
+                               UserInfoData* userInfoData) = 0;
+        virtual int deleteUserByUUID(const std::string uuid) = 0;
     };
 }
 

@@ -22,6 +22,7 @@ namespace TemplateConverter
 {
     inline void ConvertToTemplateVector( const std::string& base64Template, std::vector<unsigned char>& lTemplate )
     {
+#ifndef ANDROID // need to fix - Base64Decoder
         std::istringstream is(base64Template);
         Poco::Base64Decoder decoder(is);
         std::istreambuf_iterator<char> isIt(decoder);
@@ -33,19 +34,40 @@ namespace TemplateConverter
             ++cnt;
             if(cnt >= 2048) break;
         }
+#endif
+    }
+
+    inline void ConvertToTemplateVectorForFace( const std::string& base64Template, std::vector<unsigned char>& lTemplate )
+    {
+#ifndef ANDROID // need to fix - Base64Decoder
+        std::istringstream is(base64Template);
+        Poco::Base64Decoder decoder(is);
+        std::istreambuf_iterator<char> isIt(decoder);
+        int cnt = 0;
+        while(isIt != std::istreambuf_iterator<char>())
+        {
+            lTemplate.push_back( static_cast<unsigned char>(*isIt) );
+            ++isIt;
+            ++cnt;
+            if(cnt >= 4096) break;
+        }
+#endif
     }
 
     inline void ConvertToTemplate( const std::string& base64Template, unsigned char* pTemplate )
     {
+#ifndef ANDROID // need to fix - Base64Decoder
         std::istringstream is(base64Template);
         Poco::Base64Decoder decoder(is);
         std::istreambuf_iterator<char> isIt(decoder);
         unsigned char* pTemplateIt = pTemplate;
         std::copy(isIt, std::istreambuf_iterator<char>(), pTemplateIt);
+#endif
     }
 
     inline void ConvertToImage( const std::string& base64Template, std::vector<unsigned char>& image )
     {
+#ifndef ANDROID // need to fix - Base64Decoder
         std::istringstream is(base64Template);
         Poco::Base64Decoder decoder(is);
         std::istreambuf_iterator<char> isIt(decoder);
@@ -54,6 +76,7 @@ namespace TemplateConverter
             image.push_back( static_cast<unsigned char>(*isIt) );
             ++isIt;
         }
+#endif
     }
 }
 

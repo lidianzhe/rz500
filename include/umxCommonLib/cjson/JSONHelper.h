@@ -13,7 +13,11 @@
 #define __JSON_HELPER_H__
 
 #include <iostream>
+#ifdef ANDROID
+#include "cJSONpp.h"
+#else
 #include "umxCommonLib/cjson/cJSONpp.h"
+#endif
 
 template <typename T>
 T get(cjsonpp::JSONObject obj, const char* name, const T defaultValue)

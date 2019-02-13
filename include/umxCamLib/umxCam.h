@@ -52,6 +52,9 @@
 #endif  // __GNUC_C >= 4
 #define _UMXCAM_EXPORT UMXCAM_SHARED_EXPORT
 
+#define MAINIMAGERUNTHREAD		1
+#define FACEEYERUNTHREAD		2
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -214,6 +217,19 @@ extern "C" {
     //                UMXCAM_ERROR_DEVICE_ALREADY_STARTED
     //                UMXCAM_ERROR_DEVICE_ALREADY_STOPPED
 
+#ifdef ANDROID
+	int _UMXCAM_EXPORT umxCam_releasePreviewBuffer_ADR(UMXCAM_HANDLE handle, UMXCAM_HANDLE buffer);
+    // Release preview buffer to re-use in the next UMXCAM_EVENT_PREVIEW_IMAGE event.
+    // For each image pointer, leftImage, rightImage and faceImage, if it is not NULL
+    // this function should be called separately.
+    //
+    // handle[in] - UMXCAM_HANDLE value
+    // buffer[in] - leftImage, rightImage, or faceImage in UMXCAM_IMAGE_INFO
+    //
+    // Return value - UMXCAM_ERROR_INVALID_HANDLE
+    //                UMXCAM_SUCCESS
+#endif
+
     int _UMXCAM_EXPORT umxCam_releasePreviewBuffer(UMXCAM_HANDLE handle, unsigned char *buffer);
     // Release preview buffer to re-use in the next UMXCAM_EVENT_PREVIEW_IMAGE event.
     // For each image pointer, leftImage, rightImage and faceImage, if it is not NULL
@@ -248,7 +264,7 @@ extern "C" {
     //                UMXCAM_ERROR_FAIL_TO_CAPTURE_WIDE_VIEW_IMAGE
     //                UMXCAM_SUCCESS
 
-    int _UMXCAM_EXPORT umxCam_stopCapture(UMXCAM_HANDLE handle);
+    int _UMXCAM_EXPORT umxCam_stopCapture(UMXCAM_HANDLE handle, bool goToMotorZero = true);
     // Stop capturing. It will clean the event queue and return after all images
     // go through. umxCam_cancelPendingReadEvent() can be called if necessary.
     //
@@ -318,13 +334,12 @@ extern "C" {
     int _UMXCAM_EXPORT umxCam_clear_simul(UMXCAM_HANDLE handle);
     // clear processDeque for simul.
 
-#ifdef APP_CALIB
-    #ifdef DEVICE_EF55
-        int _UMXCAM_EXPORT umxCam_motMove(UMXCAM_HANDLE handle, unsigned char Movetype, unsigned char MoveDir, unsigned short MoveStep, unsigned char LiquidEnable, unsigned short LiquidVoltage, int SleepTime = 500);
-    #else
-        int _UMXCAM_EXPORT umxCam_motMove(UMXCAM_HANDLE handle, unsigned char Movetype, unsigned char MoveDir, unsigned short MoveStep);
+	bool _UMXCAM_EXPORT umxCam_setCamLibThreadWaitFlag(UMXCAM_HANDLE handle, bool matchStart, int stopThreadIndex); //by dhkim
+	bool _UMXCAM_EXPORT umxCam_restartCamLibThread(UMXCAM_HANDLE handle, int reStartThreadIndex); //by dhkim
+
+    #ifdef APP_CALIB
+    int _UMXCAM_EXPORT umxCam_motMove(UMXCAM_HANDLE handle, unsigned char Movetype, unsigned char MoveDir, unsigned short MoveStep);
     #endif
-#endif
 
 #ifdef __cplusplus
 } // extern "C"

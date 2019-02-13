@@ -17,12 +17,17 @@
 #include <stdexcept>
 #include <sstream>
 #include "./cjson/JSONHelper.h"
+#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+//- for tbs build : BLOB
+//#include <Poco/Data/BLOB.h>
+#include <Poco/Data/LOB.h>
+#else
 #include <Poco/Data/BLOB.h>
+#endif
 
 namespace UMXCommon {
-    class VersionData
+    struct VersionData
     {
-    public:
         VersionData();
         VersionData(const int version);
         VersionData(const int id, const int version);
@@ -30,11 +35,20 @@ namespace UMXCommon {
         void SetId(const int id);
         const int GetVersion() const;
         void SetVersion(const int version);
-        const std::string AsJSONString() const;
+
         static VersionData Parse(const std::string jsonString);
-    private:
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
         int _id;
         int _version;
+#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+        std::string _insertTime;
+        std::string _updateTime;
+#endif
     };
 
     // EF-45(bkko)-34 : increase speed of iris recognition.
@@ -243,7 +257,11 @@ namespace UMXCommon {
         void SetImageData(Poco::Data::BLOB& imageData);
         const std::string AsJSONString() const;
         const cjsonpp::JSONObject AsJSONObject() const;
+#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+    public:
+#else
     private:
+#endif
         int _id;
         std::string _eventType;
         std::string _timestamp;
@@ -282,7 +300,11 @@ namespace UMXCommon {
         void SetSerialNumber(const std::string& serialNumber);
         const std::string AsJSONString() const;
         ImageCapture Parse(const std::string jsonString);
+#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+    public:
+#else
     private:
+#endif
         int _id;
         std::string _imageCaptureUUID;
         std::string _timestamp;
@@ -523,7 +545,11 @@ namespace UMXCommon {
         void SetAudioEnabled(const bool audioEnabled);
         const std::string AsJSONString() const;
         static CameraConfiguration Parse(const std::string jsonString);
+#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+    public:
+#else
     private:
+#endif
         int _id;
         std::string _serialNumber;
         std::shared_ptr<CameraMode> _cameraMode;
@@ -535,7 +561,8 @@ namespace UMXCommon {
     public:
         ControlData();
         ControlData(const bool result, const bool recogStart, const std::string& wavPath, const std::string& uuid, const std::string& lastName, const std::string& card,
-                    const int wiegandFacility, const int wiegandCode, const std::string& wiegandCustom, const int touchEnableStart, const int cameraInitPos, const int launcherShow);
+                    const int wiegandFacility, const int wiegandCode, const std::string& wiegandCustom, const int touchEnableStart, const int cameraInitPos, const int launcherShow,
+                    const std::string& resultViewImgData, const int resultViewImgWidth, const int resultViewImgHeight);
 
         static ControlData Parse(const std::string jsonString);
         static ControlData Parse(cjsonpp::JSONObject& obj);
@@ -557,6 +584,35 @@ namespace UMXCommon {
         int _touchEnableStart = 0;
         int _cameraInitPos = 0;
         int _launcherShow = 0;
+        std::string _resultViewImgData = "";
+        int _resultViewImgWidth = 0;
+        int _resultViewImgHeight = 0;
+    };
+
+    class CommonData
+    {
+    public:
+        CommonData();
+        ~CommonData();
+
+
+    };
+
+    struct EnrollUserData
+    {
+        EnrollUserData();
+//        UserData(SubjectData& subjectData, FaceData& faceData, UserInfoData& userInfoData, CardInfoData& cardInfoData);
+        static EnrollUserData Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        SubjectData _subjectData;
+        std::vector<FaceData> _faceDatas;
+        UserInfoData _userInfoData;
+        CardInfoData _cardInfoData;
     };
 }
 

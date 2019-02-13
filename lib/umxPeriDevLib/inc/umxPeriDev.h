@@ -105,10 +105,27 @@ int UMXPERIDEVLIB_EXPORT umxPeriDev_identify();
 // Param: void (*rfid_tagged_cb_f)(char*,int,int)
 // Return: 0 is success, other values is linux errno
 int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDTaggedCB(rfid_tagged_cb_f);
+
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDOpMode(const int opmode, const unsigned char* ldata, const int ldata_size, const unsigned char* rdata, const int rdata_size, char* cid, char* name);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDAutoMode(void);
+
+int UMXPERIDEVLIB_EXPORT umxPeriDev_getRFIDUserData(char *uid, unsigned char* cid, int* cid_size, unsigned char* data, int* data_size);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDUserDataMode(const int opmode, char* cid, const unsigned char* data, const int data_size);
+
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDMifareKey(unsigned char *key, int len);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDMifareBlock(int startBlock, int blocks);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDDesfireApp(unsigned char *app, int len);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDDesfireBlock(int fileno, int offset, int bytes);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setRFIDDesfireKey(int keyindex, int keytype, unsigned char *key, int keylen, int enciphered);
+
+int UMXPERIDEVLIB_EXPORT umxPeriDev_updateRFIDFirmware(char *firmwarefile);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_getRFIDFirmwareVersion(char *version);
+
 // Desc.: Get UID
 // Param: uid=UID buffer, size= buffer size
 // Return: 0 is success, other values is linux errno 
-int UMXPERIDEVLIB_EXPORT umxPeriDev_getRFIDuid(char *uid, int size);
+//int UMXPERIDEVLIB_EXPORT umxPeriDev_getRFIDuid(char *uid, int size);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_getRFIDuid(char *uid, int size, unsigned char* ldata, int* ldata_size, unsigned char* rdata, int* rdata_size, char* cid, char* name);
 // Desc.: Read data from card memory
 // Param: buffer=data buffer to read, buffer_size=buffer size, *read_size=Return real read size
 // Return: 0 is success, other values is linux errno 
@@ -132,6 +149,10 @@ int UMXPERIDEVLIB_EXPORT umxPeriDev_getWiegandConfig(
 // Return: 0 is success, other values is linux errno 
 int UMXPERIDEVLIB_EXPORT umxPeriDev_setWiegandConfig(
 	int in_bits, int in_pulse_width, int in_pulse_interval, int out_bits, int out_pulse_width, int out_pulse_interval);
+// Desc.: Get Wiegand in data on GPI mode
+// Param: value 0xFF or 0x00
+// Return: 0 is success, -1 fail
+int UMXPERIDEVLIB_EXPORT umxPeriDev_getWiegandInGpiValue(char *value);
 // Desc.: Set Wiegand in signal callback function that ready to read data
 // Param: void (*wiegand_in_cb_f)(int)
 // Return: 0 is success, other values is linux errno
@@ -267,7 +288,9 @@ PERIDEV_NET_ERROR UMXPERIDEVLIB_EXPORT umxPeriDev_getNetState(PERIDEV_NET_STATE*
 // Return: PERIDEV_NET_ERROR
 PERIDEV_NET_ERROR UMXPERIDEVLIB_EXPORT umxPeriDev_setNetIPv4(const char* deviceName, const char method,
 	const char* address, const char* netmask, const char* gateway);
-
+PERIDEV_NET_ERROR UMXPERIDEVLIB_EXPORT umxPeriDev_setNetIPv4ToFirstService(const char method,
+	const char* address, const char* netmask, const char* gateway);
+PERIDEV_NET_ERROR UMXPERIDEVLIB_EXPORT umxPeriDev_getNetIPv4ToFirstService(char *type, char *method, char* address, char* netmask, char* gateway);
 
 /*-------------------- Backlight(LCD) --------------------*/
 // * Caustion: Not supported on Android

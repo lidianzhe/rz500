@@ -252,8 +252,16 @@ public:
 
 	// create array object
 #ifdef WITH_CPP11
+#ifdef CMI_TBS
+    //- for tbs build : typename
+//    template <typename T,
+//              template<typename T, typename A> class ContT=std::vector>
+    template <typename T,
+              template<typename, typename> class ContT=std::vector>
+#else
 	template <typename T,
-			  template<typename T, typename A> class ContT=std::vector>
+              template<typename, typename A> class ContT=std::vector>
+#endif
 #else
 	template <typename T,
 			  template<typename T, typename A> class ContT>
@@ -277,8 +285,16 @@ public:
 	}
 #endif
 	// for Qt-style containers
+#ifdef CMI_TBS
+    //- for tbs build : typename
+//	template <typename T,
+//			  template<typename T> class ContT>
+    template <typename T,
+              template<typename> class ContT>
+#else
 	template <typename T,
-			  template<typename T> class ContT>
+              template<typename> class ContT>
+#endif
 	explicit JSONObject(const ContT<T>& elems)
 		: obj_(new Holder(cJSON_CreateArray(), true)),
 		  refs_(new ObjectSet)
@@ -322,8 +338,16 @@ public:
 
 	// get array
 #ifdef WITH_CPP11
+#ifdef CMI_TBS
+    //- for tbs build : typename
+//	template <typename T=JSONObject,
+//			  template<typename T, typename A> class ContT=std::vector>
+    template <typename T=JSONObject,
+              template<typename, typename> class ContT=std::vector>
+#else
 	template <typename T=JSONObject,
-			  template<typename T, typename A> class ContT=std::vector>
+              template<typename, typename A> class ContT=std::vector>
+#endif
 #else
 	template <typename T, template<typename T, typename A> class ContT>
 #endif
@@ -340,7 +364,13 @@ public:
 	}
 
 	// for Qt-style containers
-	template <typename T, template<typename T> class ContT>
+#ifdef CMI_TBS
+    //- for tbs build : typename
+//	template <typename T, template<typename T> class ContT>
+    template <typename T, template<typename> class ContT>
+#else
+    template <typename T, template<typename> class ContT>
+#endif
 	inline ContT<T> asArray() const
 	{
 		if (((*obj_)->type & 0xff) != cJSON_Array)

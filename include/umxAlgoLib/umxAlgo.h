@@ -37,7 +37,7 @@ extern "C" {
     // minor[out]
     // revision[out]
 
-    int _UMXALGO_EXPORT umxAlgo_create_ADR(UMXALGO_HANDLE *phandle, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE);
+    int _UMXALGO_EXPORT umxAlgo_create_ADR(UMXALGO_HANDLE *phandle, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE, int enableCompareTemplate = UMXALGO_TRUE);
 
     int _UMXALGO_EXPORT umxAlgo_create(UMXALGO_HANDLE *phandle, Poco::AutoPtr<Poco::Util::AbstractConfiguration> config, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE, int enableCompareTemplate = UMXALGO_TRUE);
     // Create umxAlgo.
@@ -114,7 +114,7 @@ extern "C" {
     //                UMXALGO_IRIS_MIR_ENROL_TEMPLATE_SIZE : Fotonation Mirlin algorithm's enrol iris template size
     //                UMXALGO_IRIS_MIR_MATCH_ROT_13_TEMPLATE_SIZE : Fotonation Mirlin algorithm's recog iris template size
 
-    double _UMXALGO_EXPORT umxAlgo_iris_conv_matching_score(UMXALGO_HANDLE handle, double score);
+    double _UMXALGO_EXPORT umxAlgo_iris_conv_matching_score(UMXALGO_HANDLE handle, double score, int dbSize);
     // Convert a score (ex. active iris score or others algorithm) to hanmming distance score (MIRLIN) notation.
     //
     // handle[in] - UMXALGO_HANDLE value
@@ -228,17 +228,7 @@ extern "C" {
     //                UMXALGO_FACE_ERROR_FAIL_TO_FIND_FACE : Face algorithm didn't find face
     //                UMXALGO_SUCCESS
 
-    int _UMXALGO_EXPORT umxAlgo_face_find2(UMXALGO_HANDLE handle, UMXALGO_FACE_FIND_INPUT* faceFindInput, UMXALGO_FACE_FIND_OUTPUT* faceFindOutput, UMXALGO_FACE_FIND_INPUT* logInput); //by dhkim
-    // Find face.
-    //
-    // handle[in] - UMXALGO_HANDLE value
-    // faceFindInput[in] - input data for finding face (for detail, refer to umxAlgoGlobal.h UMXALGO_FACE_FIND_INPUT please)
-    // faceFindOutput[out] - output data of found face (for detail, refer to umxAlgoGlobal.h UMXALGO_FACE_FIND_OUTPUT please)
-    //
-    // Return value - UMXALGO_FACE_NEO_ERROR_NOT_INITIALIZE : Neoface license initialize error
-    //                UMXALGO_FACE_NEO_ERROR_UNKNOWN : Neoface license or fail to find face error
-    //                UMXALGO_FACE_ERROR_FAIL_TO_FIND_FACE : Face algorithm didn't find face
-    //                UMXALGO_SUCCESS
+	int _UMXALGO_EXPORT umxAlgo_eyes_find(UMXALGO_HANDLE handle, UMXALGO_EYES_FIND_INPUT* eyesFindInput);
 
     int _UMXALGO_EXPORT umxAlgo_face_getLEyePosition(UMXALGO_HANDLE handle, UMXALGO_POINT_XY* leye);
     // Get left eye position of a face image after finding face (umxAlgo_face_find()).
@@ -319,7 +309,7 @@ extern "C" {
                                                  UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* rightEnrollOutput = NULL,
                                                  int matchTemplate = UMXALGO_TRUE);
     int _UMXALGO_EXPORT umxAlgo_iris_requestMatch(UMXALGO_HANDLE handle, int timer, UMXALGO_IRIS_IDENTIFY_INFO* info);
-
+    int _UMXALGO_EXPORT umxAlgo_iris_refresh(UMXALGO_HANDLE handle);
     int _UMXALGO_EXPORT umxAlgo_iris_refurbishTemplateData(UMXALGO_HANDLE handle, std::vector<UMXCommon::SubjectData>* iris);
     int _UMXALGO_EXPORT umxAlgo_iris_insertTemplateData(UMXALGO_HANDLE handle, const int whichEye, const unsigned char* enrolFeature, const int enrolFeatureSize, const unsigned char* uuid, const int init);
     int _UMXALGO_EXPORT umxAlgo_iris_deleteTemplateData(UMXALGO_HANDLE handle, const unsigned char* uuid, const int uuidSize);

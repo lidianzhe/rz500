@@ -19,9 +19,9 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/Util/AbstractConfiguration.h>
 #include "umxDBGlobal.h"
-#include "umxAlgoLib/umxAlgoGlobal.h"
-#include "umxCamLib/umxCamGlobal.h"
-#include "umxCommonLib/umxCommonGlobal.h"
+#include "umxAlgoGlobal.h"
+#include "umxCamGlobal.h"
+#include "umxCommonGlobal.h"
 
 using namespace UMXCommon;
 
@@ -115,6 +115,18 @@ extern "C" {
     // Count userinfo
     //
     // handle[in] - UMXDB_HANDLE value
+    // count[out] - userinfo count
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_IN_ARGUMENTS_USERINFO_COUNT_NULL_POINTER
+    //                UMXDB_EXCEPTION_USERINFO_COUNT
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_countUserInfoByIndivisual(UMXDB_HANDLE handle, const std::string mode, int* count);
+    // Count userinfo by mode
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // mode[in] - indivisual_mode value
     // count[out] - userinfo count
     //
     // Return value - UMXDB_ERROR_INVALID_HANDLE
@@ -591,6 +603,7 @@ extern "C" {
     int _UMXDB_EXPORT umxDB_insertCard(UMXDB_HANDLE handle, const CardInfoData card_info);
     int _UMXDB_EXPORT umxDB_deleteCardByUUIDandSubId(UMXDB_HANDLE handle, const std::string uuid, const int subId);
     int _UMXDB_EXPORT umxDB_delete_Table_then_insert_CardinfoByUUID(UMXDB_HANDLE handle, const std::string uuid, std::vector<CardInfoData> *retCardInfo);
+    int _UMXDB_EXPORT umxDB_selectCardInfoByPage(UMXDB_HANDLE handle, const int page, const int pageSize, std::vector<CardInfoData> *retAllCardInfo);
     // Insert user info.
     //
     // handle[in] - UMXDB_HANDLE value
@@ -716,6 +729,21 @@ extern "C" {
     //                UMXDB_ERROR_USERINFO_COUNT_UUID
     //                UMXDB_EXCEPTION_USERINFO_COUNT_UUID
     //                UMXDB_ERROR_USERINFO_DELETE_BY_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_VACUUM_SERVICE
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_deleteCardInfoByUUID(UMXDB_HANDLE handle, const std::string uuid);
+    // Delete userinfo by uuid.
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // uuid[in] - unique id
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_CARDINFO_COUNT_UUID_NO_EXIST
+    //                UMXDB_ERROR_CARDINFO_COUNT_UUID
+    //                UMXDB_EXCEPTION_CARDINFO_COUNT_UUID
+    //                UMXDB_ERROR_CARDINFO_DELETE_BY_UUID
     //                UMXDB_EXCEPTION_SUBJECT_VACUUM_SERVICE
     //                UMXDB_SUCCESS
 
@@ -1283,6 +1311,46 @@ extern "C" {
     //                UMXDB_SUCCESS
 
     int _UMXDB_EXPORT umxDB_test_ADR(UMXDB_HANDLE handle, char* str0, std::string& str1, std::vector<std::string> *strAll, LogEntry* logEntry, ImageCapture* imageCapture);
+
+    int _UMXDB_EXPORT umxDB_insertUser(UMXDB_HANDLE handle, SubjectData *subjectData, std::vector<FaceData>* faceData, UserInfoData* userInfoData, CardInfoData card_info);
+    // Insert subject using SubjectData.
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // subjectData[in] - SubjectData type's iris data
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_LASTNAME_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_ALREADY_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_INSERT
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_deleteUserByUUID2(UMXDB_HANDLE handle, const std::string uuid);
+    // Delete user by uuid.
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // uuid[in] - user unique id
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_NO_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_ERROR_SUBJECT_DELETE_BY_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_DELETE_BY_UUID
+    //                UMXDB_ERROR_USERINFO_COUNT_UUID_NO_EXIST
+    //                UMXDB_ERROR_USERINFO_COUNT_UUID
+    //                UMXDB_EXCEPTION_USERINFO_COUNT_UUID
+    //                UMXDB_ERROR_USERINFO_DELETE_BY_UUID
+    //                UMXDB_EXCEPTION_USERINFO_DELETE
+    //                UMXDB_ERROR_FACE_COUNT_UUID_NO_EXIST
+    //                UMXDB_ERROR_FACE_COUNT_UUID
+    //                UMXDB_EXCEPTION_FACE_COUNT_UUID_AND_SUBID
+    //                UMXDB_ERROR_FACE_DELETE_BY_UUID
+    //                UMXDB_EXCEPTION_FACE_DELETE_BY_UUID
+    //                UMXDB_SUCCESS
 
 #endif
 

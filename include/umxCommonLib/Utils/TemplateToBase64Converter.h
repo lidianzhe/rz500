@@ -369,12 +369,14 @@ namespace TemplateConverter
 
     inline void ConvertToBase64( const unsigned char* pTemplate, const int templateLength, std::string& base64Template )
     {
+#ifndef ANDROID // need to fix - Base64Decoder
         std::ostringstream os;
         Poco::Base64Encoder encoder(os);
         std::ostream_iterator<unsigned char> osIt(encoder);
         std::copy(pTemplate, pTemplate + templateLength, osIt);
         encoder.close();
         base64Template = os.str();
+#endif
     }
 
     inline std::string ConvertToBase64( const unsigned char* pTemplate, const int templateLength )

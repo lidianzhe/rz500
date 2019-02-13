@@ -167,6 +167,14 @@ typedef void *UMXDB_HANDLE;
 #define UMXDB_EXCEPTION_CARDINFO_COUNT_UUID_AND_SUBID                                            -752
 #define UMXDB_EXCEPTION_CARDINFO_DELETE_ALL                                                      -753
 #define UMXDB_EXCEPTION_CARDINFO_DELETE_BY_UUID                                                  -754
+#define UMXDB_EXCEPTION_CARDINFO_SELECT_BY_PAGE                                                  -755
+#define UMXDB_EXCEPTION_CARDINFO_DELETE                                                          -756
+
+#define UMXDB_ERROR_USER_COUNT_UUID                                                              -760
+#define UMXDB_ERROR_USER_COUNT_UUID_NO_EXIST                                                     -761
+#define UMXDB_ERROR_USER_DELETE_BY_UUID                                                          -762
+#define UMXDB_EXCEPTION_USER_COUNT_UUID                                                          -763
+#define UMXDB_EXCEPTION_USER_INSERT                                                              -764
 
 #define UMXDB_ERROR_EVENTLOG_SELECT_BY_LAST_LOGID                                                -800
 #define UMXDB_ERROR_EVENTLOG_DELETE_BY_LOGID                                                     -801
@@ -199,6 +207,7 @@ typedef void *UMXDB_HANDLE;
 
 #define DB_DEFAULT_FEATURE_VERSION                                                              DB_DELTAID_FEATURE_VERSION
 #define DB_DELTAID_FEATURE_VERSION                                                              0x2310
+#define DB_DLIB_FEATURE_VERSION                                                                 0x61000000
 #define DB_NEUROTECH_FEATURE_VERSION                                                            DB_NEUROTECH_FEATURE_VERSION_6_0
 #define DB_ENCRYPT_VERSIONDATA_ID                                                               1   // 0: DB_Version 1: Is it encrypted or not?
 #define DB_ENCRYPT_VERSIONDATA_VERSION                                                          1   // 1:encrypted

@@ -128,12 +128,34 @@ typedef struct _UMXCAM_DEVICE_INFO {
 #define UMXCAM_MESSAGE_OPEN_EYES_WIDE                  3
 #define UMXCAM_MESSAGE_TAKE_OFF_GLASSES                4
 #define UMXCAM_MESSAGE_DO_NOT_MOVE                     5
+#define UMXCAM_MESSAGE_REALEYE_TEST_FAILED             6
+#define UMXCAM_MESSAGE_LARGE_FACE                   9999
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// Message to GUI in UMXCAM_IMAGE_INFO
+// Indicator color to GUI in UMXCAM_IMAGE_INFO
 ////////////////////////////////////////////////////////////////////////////////////////
+
+#define UMXCAM_INDICATOR_COLOR_UNKNOWN              0
+#define UMXCAM_INDICATOR_COLOR_RED                  1
+#define UMXCAM_INDICATOR_COLOR_GREEN                2
+#define UMXCAM_INDICATOR_COLOR_BLUE                 3
 
 typedef struct _UMXCAM_START_PARA {
+    _UMXCAM_START_PARA() {
+        cbSize = 0;
+        startMode = UMXCAM_NORMAL_START_MODE;
+        faceCaptureEnabled = UMXCAM_FALSE;
+        whichEye = UMXCAM_EITHER_EYE;
+        enrolRecogMode = UMXCAM_RECOG_MODE;
+        minUsableIrisArea = 70;
+        faceFullResolution = UMXCAM_FALSE;
+        faceImageInterval = 10;
+        checkFakeFace = UMXCAM_FALSE;
+        faceColorCorrection = UMXCAM_FALSE;
+        coverGlassTrans = 100;
+        checkRealEye = UMXCAM_FALSE;
+    }
+
     int cbSize;                              // size of this struct
     int startMode;          // UMXCAM_NORMAL_START_MODE or UMXCAM_RETRY_START_MODE
     int faceCaptureEnabled; // UMXCAM_TRUE or UMXCAM_FALSE
@@ -147,6 +169,7 @@ typedef struct _UMXCAM_START_PARA {
     int faceColorCorrection;// UMXCAM_TRUE or UMXCAM_FALSE
     int coverGlassTrans;    // IR Transmission coefficient of additional cover glass in percentage
                             // The value between 50% and 100% is only allowed.
+    int checkRealEye;       // UMXCAM_TRUE or UMXCAM_FALSE
 } UMXCAM_START_PARA;
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -156,6 +179,71 @@ typedef struct _UMXCAM_START_PARA {
 typedef void *UMXCAM_HANDLE;
 
 typedef struct _UMXCAM_IMAGE_INFO {
+    _UMXCAM_IMAGE_INFO() {
+        cbSize = sizeof(struct _UMXCAM_IMAGE_INFO);
+
+        leftImage = NULL;
+        rightImage = NULL;
+        faceImage = NULL;
+        faceImageARGB32 = NULL;
+        faceImageBMP24 = NULL;
+        faceImageBMP8 = NULL;
+
+        leftWidth = rightWidth = faceWidth = 0;
+        leftHeight = rightHeight = faceHeight = 0;
+        leftResolution = rightResolution = faceResolution = 0;
+        whichCam = UMXCAM_UNKNOWN_CAM;
+        leftBoundary = rightBoundary = -1;
+        topBoundary = bottomBoundary = -1;
+
+        leftEyeCenterX = rightEyeCenterX = -1;
+        leftEyeCenterY = rightEyeCenterY = -1;
+
+        leftIrisCenterX = rightIrisCenterX = -1;
+        leftIrisCenterY = rightIrisCenterY = -1;
+        leftIrisRadius = rightIrisRadius = -1;
+        leftPupilRadius = rightPupilRadius = -1;
+        leftExposedIrisArea = rightExposedIrisArea = -1;
+
+        leftIrisMargin = rightIrisMargin = UMXCAM_MARGINS_FAIL;
+        leftLiveness = rightLiveness =
+                faceLiveness = UMXCAM_UNKNOWN;
+
+        leftDistance = rightDistance = avgDistance = -1;
+        leftXYMovement = rightXYMovement = -1;
+        leftZMovement = rightZMovement = -1;
+        ipdPixels = -1;
+        ipdMicron = -1;
+        rollAngle = UMXCAM_MAX_ROLL_ANGLE;
+        rollAngleUncertainty = UMXCAM_MAX_ROLL_ANGLE;
+
+        doesLeftLookFront = doesRightLookFront = UMXCAM_UNKNOWN;
+        isLeftImageQualityOK = isRightImageQualityOK = UMXCAM_UNKNOWN;
+
+        message = UMXCAM_MESSAGE_MOVE_DOWN;
+        additionalInfo = NULL;
+
+        faceImageYUVSub2 = NULL;
+
+        irisTemplateSize = -1;
+        leftIrisTemplate = NULL;
+        rightIrisTemplate = NULL;
+
+        leftPupilCenterX = -1;
+        rightPupilCenterX = -1;
+        leftPupilCenterY = -1;
+        rightPupilCenterY = -1;
+
+        leftUsableIrisArea = 0.0;
+        rightUsableIrisArea = 0.0;
+        leftQualityOk = false;
+        rightQualityOk = false;
+        leftQualityScore = 0.0;
+        rightQualityScore = 0.0;
+
+        indicatorColor = UMXCAM_INDICATOR_COLOR_UNKNOWN;
+    }
+
     int cbSize;                              // size of this struct
     int frameCount;                          // frame count of images.
 
@@ -201,7 +289,8 @@ typedef struct _UMXCAM_IMAGE_INFO {
     // The box boundaries where the both eyes should be presented in faceImageARGB32 image
     int leftBoundary, rightBoundary, topBoundary, bottomBoundary;
 	//----------------------------------------------------------------------------
-
+	int faceLeft, faceRight, faceTop, faceBottom; //by dhkim
+	//----------------------------------------------------------------------------
     //----------------------------------------------------------------------------
     // Both eyes location information in the face image
     // If not avaiable, the "int" values will be -1 or UMXCAM_UNKNOWN
@@ -274,6 +363,8 @@ typedef struct _UMXCAM_IMAGE_INFO {
     double leftUsableIrisArea, rightUsableIrisArea;
     bool leftQualityOk, rightQualityOk;
     double leftQualityScore, rightQualityScore;
+
+    int indicatorColor;
 } UMXCAM_IMAGE_INFO;
 
 typedef struct _UMXCAM_EVENT {

@@ -27,7 +27,11 @@
 
 typedef void *UMXALGO_HANDLE;
 
+#ifdef ANDROID
+#include "umxCommonGlobal.h"
+#else
 #include "umxCommonLib/umxCommonGlobal.h"
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // boolean type information
@@ -69,9 +73,7 @@ typedef void *UMXALGO_HANDLE;
 
 #define UMXALGO_FACE_OPENCV                                         5
 
-#define UMXALGO_FACE_EYE_DLIB                                           6
-//#define UMXALGO_FACE_DLIB											6 //by dhkim
-//#define UMXALGO_EYE_DLIB                                          7 //by dhkim
+#define UMXALGO_FACE_EYE_DLIB                                       6
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // template type (Enrol or Recog)
@@ -128,12 +130,11 @@ typedef void *UMXALGO_HANDLE;
 ////////////////////////////////////////////////////////////////////////////////////////
 
 #define UMXALGO_FACE_TEMPLATE_SIZE                      1024*4
+#define UMXALGO_DLIB_FACE_TEMPLATE_SIZE					128
 
 #define UMXALGO_FACE_NEUROTECH_VERILOOK                         "verilook"
 #define UMXALGO_FACE_NEC_NEOFACE                                "neoface"
 #define UMXALGO_FACE_DLIB 										"dlib" 	   //by dhkim
-#define UMXALGO_FACE_DLIBFACE									"dlibface" //by dhkim
-#define UMXALGO_FACE_DLIBEYE									"dlibeye" //by dhkim
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Threads
@@ -241,17 +242,53 @@ typedef struct _UMXALGO_POINT_XY
     int  y;
 } UMXALGO_POINT_XY;
 
+typedef struct _UMXALGO_RECT
+{
+    int left;
+    int top;
+    int right;
+    int bottom;
+} UMXALGO_RECT; //by dhkim
+
 typedef struct _UMXALGO_FACE_FIND_INPUT {
     int cbSize;
     unsigned char* image;
-    int width;
-    int height;
-    int bmpBit;
+    unsigned char* landmarkImage; //by dhkim
+    UMXALGO_RECT lastFaceInfo;    //by dhkim
+    UMXALGO_RECT lastEyeInfo;  	  //by dhkim
+    int  width;
+    int  height;
+    int  bmpBit;
+    int  landmarkImgWidth;  //by dhkim the width of the image used for face-landmark
+    int  landmarkImgHeight; //by dhkim the height of the image used for face-landmark
+    int  diffPixelByMotor;	//by dhkim (diff-pixel value by motor-moving)
+    long lastFaceLevel;     //by dhkim (The start pyramide level to use in the dlib-algorithm)
+    long lastEyeLevel;      //by dhkim (The start pyramide level to use in the dlib-algorithm)
+    bool objRoiUse; 		//by dhkim
+    bool doFindLandMark;
 }UMXALGO_FACE_FIND_INPUT;
+
+typedef struct _UMXALGO_EYES_FIND_INPUT {
+    int cbSize;
+    unsigned char* leftLEDImage;
+    unsigned char* rightLEDImage; //by dhkim
+    UMXALGO_RECT lastFaceInfo;    //by dhkim
+    UMXALGO_RECT lastEyeInfo;  	  //by dhkim
+    int  leftWidth;
+    int  leftHeight;
+    int  rightWidth;
+    int  rightHeight;
+    int  shitfXFromRightImage;
+    int  shitfYFromRightImage;
+	int  diffPixelByMotor;	//by dhkim (diff-pixel value by motor-moving)
+	bool isPrevFaceFound;
+	bool isPrevEyeFound;
+}UMXALGO_EYES_FIND_INPUT;
 
 typedef struct _UMXALGO_FACE_FIND_OUTPUT {
     int cbSize;
-    int isFaceFound;
+    int isFaceFound;         // success in face detection
+    int isEyeFound;          // success in eyes detection
     int eyeWidth;
     int leftEyeX;            // left eye's x coordinate
     int leftEyeY;            // left eye's y coordinate
@@ -261,6 +298,10 @@ typedef struct _UMXALGO_FACE_FIND_OUTPUT {
     int rightFaceX;
     int topFaceY;
     int bottomFaceY;
+    int leftEyeBothX;        //by dhkim (left X coordiante of both-eye detection resion)
+    int rightEyeBothX;       //by dhkim (right X coordiante of both-eye detection resion)
+    int topEyeBothY;         //by dhkim (ltop Y coordiante of both-eye detection resion)
+    int bottomEyeBothY;      //by dhkim (bottom Y coordiante of both-eye detection resion)
     float roll;              // angle between the horizontal axis and the line connecting left with right eye.
                              // For enrollment, this should be between -9 and +9 degree
                              // For recognition, it can be relaxed to +/-15 degree.
@@ -268,11 +309,13 @@ typedef struct _UMXALGO_FACE_FIND_OUTPUT {
     float pan;               // angle between the vertical axis and the line connecting left with right eye.
                              // For enrollment, this should be between -9 and +9 degree
                              // For recognition, it can be relaxed to +/-15 degree.
-    float faceScore;             // represents the dependability of face. The recommended value is bigger than 0.45
+    float faceScore;         // represents the dependability of face. The recommended value is bigger than 0.45
     float frontalFaceScore;  // indicates how much the face is facing front.
                              // It is between 0 and 1 and 1 means the face is facing straight front.
                              // The recommended frontalFaceScore should be bigger than 0.4
     int ledState;
+    unsigned long faceLevel; //by dhkim : This is the (face)pyramid level set in the previous frame.
+    unsigned long eyeLevel;  //by dhkim : This is the (eye)pyramid level set in the previous frame.
 }UMXALGO_FACE_FIND_OUTPUT;
 
 typedef struct _UMXALGO_FACE_GET_TEMPLATE_OUTPUT {
@@ -293,74 +336,80 @@ enum
 // Return values - errors
 ////////////////////////////////////////////////////////////////////////////////////////
 
-#define UMXALGO_SUCCESS                                             0           // success
+#define UMXALGO_SUCCESS                                                 0           // success
 
 // Global
-#define UMXALGO_ERROR_CANNOT_ALLOC_MEMORY                           -1          // handler was not created
+#define UMXALGO_ERROR_CANNOT_ALLOC_MEMORY                               -1          // handler was not created
 
-#define UMXALGO_ERROR_INVALID_HANDLE                                -2          // Invalid UMXALGO_HANDLE in argument
+#define UMXALGO_ERROR_INVALID_HANDLE                                    -2          // Invalid UMXALGO_HANDLE in argument
 
-#define UMXALGO_ERROR_IN_ARGUMENTS                                  -3          // Error in arguments
+#define UMXALGO_ERROR_IN_ARGUMENTS                                      -3          // Error in arguments
 
 // Iris : Global
-#define UMXALGO_IRIS_ERROR_WRONG_TEMPLATE_SIZE                      -1000       // wrong template size
+#define UMXALGO_IRIS_ERROR_WRONG_TEMPLATE_SIZE                          -1000       // wrong template size
 
-#define UMXALGO_IRIS_ERROR_NO_INPUT_IMAGE                           -1001       // no input image
+#define UMXALGO_IRIS_ERROR_NO_INPUT_IMAGE                               -1001       // no input image
 
-#define UMXALGO_IRIS_ERROR_FAIL_TO_GENERATE_TEMPLATE                -1002       // fail to generate iris template
+#define UMXALGO_IRIS_ERROR_FAIL_TO_GENERATE_TEMPLATE                    -1002       // fail to generate iris template
 
-#define UMXALGO_IRIS_ERROR_COMPARE_RESULT                           -1003       // invalid compare result
+#define UMXALGO_IRIS_ERROR_COMPARE_RESULT                               -1003       // invalid compare result
 
-#define UMXALGO_IRIS_ERROR_FAIL_TO_COMPARE_TEMPLATES                -1004       // fail to compare templates
+#define UMXALGO_IRIS_ERROR_FAIL_TO_COMPARE_TEMPLATES                    -1004       // fail to compare templates
 
 // Iris : Mirlin (Fotonation)
-#define UMXALGO_IRIS_MIR_ERROR_INVALID_LICENSE                      -2000       // invalid mirlin license
+#define UMXALGO_IRIS_MIR_ERROR_INVALID_LICENSE                          -2000       // invalid mirlin license
 
-#define UMXALGO_IRIS_MIR_ERROR_EMPTY_ENROL_TEMPLATE                 -2001       // empty enrol iris template
+#define UMXALGO_IRIS_MIR_ERROR_EMPTY_ENROL_TEMPLATE                     -2001       // empty enrol iris template
 
 // Face : Global
-#define UMXALGO_FACE_ERROR_OUT_OF_RANGE_MIN_EYES_WIDTH              -4000       // eyes width is out of minimum range
+#define UMXALGO_FACE_ERROR_OUT_OF_RANGE_MIN_EYES_WIDTH                  -4000       // eyes width is out of minimum range
 
-#define UMXALGO_FACE_ERROR_OUT_OF_RANGE_MAX_EYES_WIDTH              -4001       // eyes width is out of maximum range
+#define UMXALGO_FACE_ERROR_OUT_OF_RANGE_MAX_EYES_WIDTH                  -4001       // eyes width is out of maximum range
 
-#define UMXALGO_FACE_ERROR_FAIL_TO_FIND_FACE                        -4002       // fail to find face
+#define UMXALGO_FACE_ERROR_FAIL_TO_FIND_FACE                            -4002       // fail to find face
 
-#define UMXALGO_FACE_ERROR_FAIL_TO_GET_FACE_TEMPLATE                -4003       // fail to get face template (features)
+#define UMXALGO_FACE_ERROR_FAIL_TO_GET_FACE_TEMPLATE                    -4003       // fail to get face template (features)
 
-#define UMXALGO_FACE_ERROR_FAIL_TO_COMPARE_FACE_TEMPLATES           -4004       // fail to compare face templates
+#define UMXALGO_FACE_ERROR_FAIL_TO_COMPARE_FACE_TEMPLATES               -4004       // fail to compare face templates
+
+#define UMXALGO_FACE_ERROR_MIN_ILLUMINANCE_TO_GET_FACE_TEMPLATE         -4005		// fail to get face template
+                                                                                    // (because illuminance value in off-image)
 
 // Face : NeoFace (NEC)
-#define UMXALGO_FACE_NEO_ERROR_UNKNOWN                              -5000       // Neoface unknown error
+#define UMXALGO_FACE_NEO_ERROR_UNKNOWN                                  -5000       // Neoface unknown error
 
-#define UMXALGO_FACE_NEO_ERROR_NOT_INITIALIZE                       -5001       // Neoface license initialize error
+#define UMXALGO_FACE_NEO_ERROR_NOT_INITIALIZE                           -5001       // Neoface license initialize error
 
-#define UMXALGO_FACE_NEO_ERROR_CREATE_CFACEINFO                     -5002       // fail to create Neoface's CFaceInfo class
+#define UMXALGO_FACE_NEO_ERROR_CREATE_CFACEINFO                         -5002       // fail to create Neoface's CFaceInfo class
 
-#define UMXALGO_FACE_NEO_ERROR_CREATE_CFACEFEATURE                  -5003       // fail to create Neoface's CFaceFeature class
+#define UMXALGO_FACE_NEO_ERROR_CREATE_CFACEFEATURE                      -5003       // fail to create Neoface's CFaceFeature class
 
-#define UMXALGO_FACE_NEO_ERROR_FAIL_TO_SET_FEATURE                  -5004       // fail to set feature by Neoface
+#define UMXALGO_FACE_NEO_ERROR_FAIL_TO_SET_FEATURE                      -5004       // fail to set feature by Neoface
 
-#define UMXALGO_FACE_NEO_ERROR_FAIL_TO_SERIALIZE_FEATURE            -5005       // fail to serialize feature by Neoface
+#define UMXALGO_FACE_NEO_ERROR_FAIL_TO_SERIALIZE_FEATURE                -5005       // fail to serialize feature by Neoface
 
-#define UMXALGO_FACE_NEO_ERROR_CREATE_CVERIFIER                     -5006       // fail to create Neoface's CVerifier class
+#define UMXALGO_FACE_NEO_ERROR_CREATE_CVERIFIER                         -5006       // fail to create Neoface's CVerifier class
 
-#define UMXALGO_FACE_NEO_ERROR_FAIL_TO_VERIFY_FACE_FEATURE          -5007       // fail to verify face features
+#define UMXALGO_FACE_NEO_ERROR_FAIL_TO_VERIFY_FACE_FEATURE              -5007       // fail to verify face features
 
-#define UMXALGO_FACE_NEO_ERROR_WRONG_SCORE                          -5008       // wrong score (out of normal range)
+#define UMXALGO_FACE_NEO_ERROR_WRONG_SCORE                              -5008       // wrong score (out of normal range)
 
-#define UMXALGO_FACE_NEO_ERROR_LESS_THAN_THRESHOLD_SCORE            -5009       // score is less than threshold
+#define UMXALGO_FACE_NEO_ERROR_LESS_THAN_THRESHOLD_SCORE                -5009       // score is less than threshold
 
-#define UMXALGO_FACE_NEO_ERROR_INSUFFICIENT_FACESCORE               -5010       // insufficient face score
+#define UMXALGO_FACE_NEO_ERROR_INSUFFICIENT_FACESCORE                   -5010       // insufficient face score
 
-#define UMXALGO_FACE_NEO_ERROR_INSUFFICIENT_FACEROLL                -5011       // insufficient face roll
+#define UMXALGO_FACE_NEO_ERROR_INSUFFICIENT_FACEROLL                    -5011       // insufficient face roll
 
-#define UMXALGO_FACE_NEO_ERROR_INSUFFICIENT_FACETILT                -5012       // insufficient face tilt
+#define UMXALGO_FACE_NEO_ERROR_INSUFFICIENT_FACETILT                    -5012       // insufficient face tilt
 
 namespace UMXAlgorithm
 {
     class IAlgorithm
     {
     public:
+#ifdef ANDROID
+        virtual ~IAlgorithm(){}
+#endif
         virtual std::vector<UMXCommon::SubjectData>* getIrisSubjectData()=0;
         virtual Poco::Mutex* getIrisSubjectMutex()=0;
     };
