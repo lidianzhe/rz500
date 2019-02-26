@@ -17,7 +17,7 @@
 #include <stdexcept>
 #include <sstream>
 #include "./cjson/JSONHelper.h"
-#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+#if defined(CMI_TBS) || defined(POCO_UPDATE)
 //- for tbs build : BLOB
 //#include <Poco/Data/BLOB.h>
 #include <Poco/Data/LOB.h>
@@ -45,7 +45,7 @@ namespace UMXCommon {
 
         int _id;
         int _version;
-#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+#if defined(CMI_TBS) || defined(POCO_UPDATE)
         std::string _insertTime;
         std::string _updateTime;
 #endif
@@ -257,7 +257,7 @@ namespace UMXCommon {
         void SetImageData(Poco::Data::BLOB& imageData);
         const std::string AsJSONString() const;
         const cjsonpp::JSONObject AsJSONObject() const;
-#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+#if defined(CMI_TBS) || defined(POCO_UPDATE)
     public:
 #else
     private:
@@ -300,7 +300,7 @@ namespace UMXCommon {
         void SetSerialNumber(const std::string& serialNumber);
         const std::string AsJSONString() const;
         ImageCapture Parse(const std::string jsonString);
-#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+#if defined(CMI_TBS) || defined(POCO_UPDATE)
     public:
 #else
     private:
@@ -545,7 +545,7 @@ namespace UMXCommon {
         void SetAudioEnabled(const bool audioEnabled);
         const std::string AsJSONString() const;
         static CameraConfiguration Parse(const std::string jsonString);
-#if defined(CMI_TBS) || defined(CMI_UMANICK) || defined(CMI_POCO_UPDATE)
+#if defined(CMI_TBS) || defined(POCO_UPDATE)
     public:
 #else
     private:

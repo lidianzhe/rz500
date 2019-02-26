@@ -845,6 +845,7 @@ namespace UMXNetwork
         };
 
     public:
+        virtual bool getLauncherInitialize()=0;
         virtual std::string GetUMXLauncherVersion()=0;
         virtual unsigned int GetSubjectRecordVersion()=0;
         virtual Poco::Logger& GetLogger()=0;

@@ -341,6 +341,9 @@ extern "C" {
     int _UMXCAM_EXPORT umxCam_motMove(UMXCAM_HANDLE handle, unsigned char Movetype, unsigned char MoveDir, unsigned short MoveStep);
     #endif
 
+    int _UMXCAM_EXPORT umxCam_printDebugMSG(UMXCAM_HANDLE handle, char* func,
+                                             int line, char* additional = nullptr);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

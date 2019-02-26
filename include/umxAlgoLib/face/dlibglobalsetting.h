@@ -70,9 +70,9 @@ static unsigned int _totalTime6  = 0;
 
 typedef struct {
     long top;
-	long left;
-	long right;
-	long bottom;
+    long left;
+    long right;
+    long bottom;
 } rectInfo_t;
 
 typedef struct {
@@ -80,11 +80,17 @@ typedef struct {
     rectInfo_t rect;
 } detInfo_t;
 
-static bool glevelSetMode;
+typedef struct {
+	double score;
+	rectInfo_t rect;
+} irisDetInfo_t;
 
-static unsigned long gDiffPramidLevel;
-static std::vector<detInfo_t> gFaceDetInfo;
-static std::vector<detInfo_t> gEyeDetInfo;
+//static bool gLevelSetMode;
+//static bool gParallelMode;
+
+//static unsigned long gDiffPramidLevel;
+//static std::vector<detInfo_t> gFaceDetInfo;
+//static std::vector<detInfo_t> gEyeDetInfo;
 
 ////////////////////////////////////////////////////////////////////// /////////
 ///////////////////                                     /////////////// ////////
@@ -115,15 +121,21 @@ public:
 
     void setFaceDetInfo(std::vector<detInfo_t> det_info);
     void setEyeDetInfo(std::vector<detInfo_t> det_info);
+    void setIrisDetInfo(std::vector<irisDetInfo_t> det_info);
     void setPyramidLevel(bool flag);
     void setPyramidLevelValue(long start_level, long end_level);
+    void setParallelMode(bool flag);
+    void setWideSearchMode(bool flag); //true: wide search, false : narrow search
 
+    bool getParallelMode(void);
     bool getPyramidLevel(void);
+    bool getWideSearchMode();
 
     unsigned long getPyramidLevelValue();
 
     std::vector<detInfo_t> getFaceDetInfo();
     std::vector<detInfo_t> getEyeDetInfo();
+    std::vector<irisDetInfo_t> getIrisDetInfo();
 
     #if defined(FACE_RECOG_SPEED_TEST)
     unsigned int  getTotalTime(unsigned int section);
