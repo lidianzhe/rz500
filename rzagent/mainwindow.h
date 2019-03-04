@@ -22,7 +22,7 @@ public:
     ~MainWindow();
 
     void initUI(QWidget *parent);
-private slots:
+public slots:
     void setTop();
 private:
     Ui::MainWindow *ui;

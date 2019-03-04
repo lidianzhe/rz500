@@ -17,10 +17,10 @@ using Poco::Data::BLOBInputStream;
 using Poco::StreamCopier;
 #include <QByteArray>
 #include <QTimer>
+#include <QDateTime>
 #include <QThread>
 #include <vector>
 #include "stdlib.h"
-
 #include "umxAlgoLib/umxAlgo.h"
 #include "umxDBLib/umxDB.h"
 #include "umxCommonLib/umxCommonGlobal.h"
@@ -29,6 +29,9 @@ using Poco::StreamCopier;
 #include "Poco/Base64Encoder.h"
 #include "algoutils.h"
 #include "runtime.h"
+
+#include "umxPeriDev.h"
+
 /*
 insert into camera_configuration (id,serialNumber,Mode) values(
 1,'HC0709A000303','Recog')
@@ -194,8 +197,35 @@ void StatusForm::syncToServer()
     std::vector<LogEntry> logs;
     logs.clear();
     int ret=-1;
+    bool isNew=true;
     try{
-        ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,3,"asc",&logs);
+        int count;
+        ret = umxDB_countLog(_umxDBHandle,&count);
+        //如果记录数大于1条，说明有没上传的数据，取最新一条，判读是否为刚识别的，上传直到完成。
+        if(count>1){
+            ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,1,"desc",&logs);
+            LogEntry logNew = logs[0];
+            QDateTime t1 = QDateTime::fromString(QString::fromStdString(logNew.GetTimestamp()),"yyyy-MM-ddThh:mm:ssZ");
+            QDateTime t2 = QDateTime::currentDateTime();
+            qint64 msecs = t1.msecsTo(t2);
+            if((logNew.GetUserUUID()=="") || (msecs>2000)){
+                logs.clear();
+                isNew=false;
+                ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,3,"asc",&logs);
+            }
+        }else
+        {
+            if(count==1){
+                ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,1,"desc",&logs);
+                LogEntry logNew = logs[0];
+                QDateTime t1 = QDateTime::fromString(QString::fromStdString(logNew.GetTimestamp()),"yyyy-MM-ddThh:mm:ssZ");
+                QDateTime t2 = QDateTime::currentDateTime();
+                qint64 msecs = t1.msecsTo(t2);
+                if(logNew.GetUserUUID()=="" || msecs>2000){
+                    isNew=false;
+                }
+            }
+        }
     }
     catch(Poco::Exception &e){
         poco_warning(_logger,"selectlog fail:"+e.message());
@@ -231,7 +261,7 @@ void StatusForm::syncToServer()
             std::cout<<"begin post"<<std::endl;
             if (m_client->Post(strJson)==HTTPResponse::HTTPStatus::HTTP_CREATED)
             {
-                ui->infoText->setText(QString("upload log Id=%1").arg(log.GetId()));
+                ui->infoText->setText(QString("上传日志 logId=%1").arg(log.GetId()));
                 try{
                     std::cout<<"upload log Id="<<log.GetId()<<std::endl;
                     bool isimage=true;
@@ -246,13 +276,28 @@ void StatusForm::syncToServer()
             {
                 std::cout<<"返回，待syncTime调用后，再次尝试连接。"<<std::endl;
                 ui->infoText->setText("bad request or not found....");
-                //返回，待syncTime调用后，再次尝试连接
-                m_timer->start();
-                return;
             }
+            //----
+            if(isNew)
+            {
+                //如果没查到则显示
+                umxPeriDev_setLedIndicatorBrightness(255,0,0);
+                sleep(2);
+                system("aplay /usr/local/share/CMITECH/sound/cn/unauthorized.wav");
+                umxPeriDev_setLedIndicatorBrightness(0,0,0);
+
+                ui->infoText->setText(QString("Can't Find CARD"));
+                umxPeriDev_setRelay(1);
+                sleep(1);
+                umxPeriDev_setRelay(0);
+
+            }
+            //----
         }
     }
-
+    if(isNew){
+        m_timer->setInterval(1000);
+    }
     m_timer->start();
 
 }

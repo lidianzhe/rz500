@@ -12,12 +12,27 @@ QMAKE_CXXFLAGS += -std=c++0x
 TARGET = rzagent
 TEMPLATE = app
 
+DEFINES += UMX_X11_SUPPORTED
+DEFINES += UMX_CHECK_FAKE_FACE
+
 DEFINES += DESKTOP
 DEFINES +=POCO_NO_SOO
 
 target.file = $${TARGET}
 target.path = /home/root
 INSTALLS += target
+
+REMOVE_OBJECT = rm -rf ./*.o
+REMOVE_UI = rm -rf ./ui_*
+REMOVE_MOC = rm -rf ./moc_*
+QMAKE_CLEAN += rm -rf ./rzagent && \
+               $${REMOVE_OBJECT} && \
+               $${REMOVE_UI} && \
+               $${REMOVE_MOC}
+
+QMAKE_POST_LINK += $${REMOVE_OBJECT} && \
+                   $${REMOVE_UI} && \
+                   $${REMOVE_MOC}
 
 
 # The following define makes your compiler emit warnings if you use
@@ -49,14 +64,8 @@ LIBS += \
         -lneofacem400 \
         -L../lib/Neuro \
         -lNBiometricClient -lNBiometrics -lNDevices -lNMedia -lNLicensing -lNCore -lNMediaProc \
-        -L../lib/libs \
-        -lumxAlgo \
-        -lumxCam \
-        -lumxNet \
-        -lumxDB \
-        -lumxCommon \
-        -L../lib/umxPeriDevLib \
-        -lumxPeriDev \
+        -L../lib/libs -lumxAlgo -lumxCam -lumxNet -lumxDB -lumxCommon \
+        -L../lib/umxPeriDevLib -lumxPeriDev \
         -L../lib/Poco -lPocoData -lPocoDataSQLite -lPocoFoundation -lPocoXML -lPocoUtil -lPocoNet \
         -fopenmp \
         -lopencv_core -lopencv_imgproc -lopencv_objdetect -lopencv_highgui \

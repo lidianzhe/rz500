@@ -20,7 +20,6 @@
 #include "algoutils.h"
 
 #include "serverthread.h"
-
 typedef struct _IRIS_INFO {
     std::string uuid;
     unsigned char* image;
@@ -44,7 +43,7 @@ public:
     explicit StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent = 0);
     ~StatusForm();
     //返回设备是否为调试模式
-    int getDebugMode(){return m_debugMode;}
+    int getDebugMode(){return m_debugMode || m_showMessage;}
 
 private slots:
     void syncToServer();
@@ -75,7 +74,7 @@ private:
     int m_useServer;
     int m_debugMode;
     int m_configRequestImage;
-
+    int m_showMessage=0;
     void initlog();
     void readConfig();
     // umxAlgoLib
