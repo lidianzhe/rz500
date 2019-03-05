@@ -287,6 +287,8 @@ void StatusForm::syncToServer()
                 umxPeriDev_setLedIndicatorBrightness(0,0,0);
 
                 ui->infoText->setText(QString("Can't Find CARD"));
+
+                //
                 umxPeriDev_setRelay(1);
                 sleep(1);
                 umxPeriDev_setRelay(0);
