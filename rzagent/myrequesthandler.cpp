@@ -643,3 +643,26 @@ void MyRequestHandler::api_UploadImages(HTTPServerRequest &request, HTTPServerRe
     delete algo;
 
 }
+//-----------------------------------------------------------------------------------------------------------
+void MyRequestHandler::api_GetTemplates(HTTPServerRequest &request, HTTPServerResponse &response)
+{
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+    int suc_flag=0;
+    //read json
+    std::istream &i = request.stream();
+    int len = request.getContentLength();
+    char* buffer = new char[len];
+    i.read(buffer, len);
+    QString s=QString(buffer);
+    cjsonpp::JSONObject obj=cjsonpp::parse(s.toStdString());
+    string leftimage,rightimage;
+    try {
+        leftimage = obj.get<JSONObject>("leftimage").as<string>();
+        rightimage =obj.get<string>("rightimage");
+    } catch (const cjsonpp::JSONError& e) {
+        std::cerr << e.what() << '\n';
+    }
+
+
+}

@@ -7,6 +7,7 @@
 #include "entities.h"
 #include "umxAlgoLib/umxAlgoGlobal.h"
 #include <QString>
+#include <QImage>
 using namespace std;
 using Poco::Logger;
 class AlgoUtils
@@ -17,6 +18,7 @@ public:
     int getTemplates(UMXALGO_HANDLE handle,Person &person);
     int getTemplates(Person &person);
     int getEnrollTemplate(UMXALGO_HANDLE handle,std::string& imagepath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT& output);
+    int getEnrollTemplate(UMXALGO_HANDLE handle,QImage* image ,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT& output);
     void splitEyes(std::string &filename);
     void clearEnrollIrisTemplate(UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* enrollIrisTemplate);
     void saveSmallImage(string imagePath,string destPath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output);

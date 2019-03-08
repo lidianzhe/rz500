@@ -202,16 +202,21 @@ int AlgoUtils::getTemplates(Person &person)
 int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, std::string &imagepath, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT &output)
 {
 
-    int tempSize = umxAlgo_iris_template_size(handle, UMXALGO_IRIS_TYPE_ENROL_TEMPLATE);
+    QImage* image;
+    image->load(QString::fromStdString(imagepath));
+    this->getEnrollTemplate(handle,image,output);
+    delete image;
+}
 
+int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, QImage *image, UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT &output)
+{
+    int tempSize = umxAlgo_iris_template_size(handle, UMXALGO_IRIS_TYPE_ENROL_TEMPLATE);
     UMXALGO_IRIS_GET_TEMPLATE_INPUT irisGetTemplateInput;
     irisGetTemplateInput.cbSize = sizeof(UMXALGO_IRIS_GET_TEMPLATE_INPUT);
 
-    QImage left;
-    left.load(QString::fromStdString(imagepath));
-    irisGetTemplateInput.image = left.bits();
-    irisGetTemplateInput.width = left.width();
-    irisGetTemplateInput.height = left.height();
+    irisGetTemplateInput.image = image->bits();
+    irisGetTemplateInput.width = image->width();
+    irisGetTemplateInput.height = image->height();
     irisGetTemplateInput.centerX = 0;
     irisGetTemplateInput.centerY = 0;
     irisGetTemplateInput.radius = 0;
@@ -232,6 +237,8 @@ int AlgoUtils::getEnrollTemplate(UMXALGO_HANDLE handle, std::string &imagepath, 
     }
     return 0;
 }
+
+
 
 void AlgoUtils::splitEyes(std::string &filename)
 {

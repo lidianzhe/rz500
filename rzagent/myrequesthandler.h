@@ -28,6 +28,9 @@ private:
     void api_DeleteLogs(HTTPServerRequest& request, HTTPServerResponse &response);
 
     void api_UploadImages(HTTPServerRequest& request, HTTPServerResponse &response);
+    //获取模板数据
+    void api_GetTemplates(HTTPServerRequest& request, HTTPServerResponse &response);
+
 };
 
 #endif // MYREQUESTHANDLER_H
