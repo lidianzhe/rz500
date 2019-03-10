@@ -8,10 +8,9 @@ class Runtime
 {
 public:
     Runtime();
-    static AlgoUtils *algoUtils;
+    AlgoUtils *algoUtils;
     UMXALGO_HANDLE umxalgo_Handle;
     UMXDB_HANDLE umxdb_Handle;
-    std::string Name;
 };
 
 extern Runtime dzrun;

@@ -84,7 +84,12 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
         api_DeleteLogs(request,response);
         return;
     }
-
+    //获取模板
+    if(uri.getPath()=="/getiristemplate" && request.getMethod()=="PUT")
+    {
+        api_GetTemplates(request,response);
+        return;
+    }
     response.setContentType("application/json");
     response.redirect(request.getURI(),HTTPResponse::HTTPStatus::HTTP_NOT_IMPLEMENTED);
 }
@@ -658,11 +663,33 @@ void MyRequestHandler::api_GetTemplates(HTTPServerRequest &request, HTTPServerRe
     cjsonpp::JSONObject obj=cjsonpp::parse(s.toStdString());
     string leftimage,rightimage;
     try {
-        leftimage = obj.get<JSONObject>("leftimage").as<string>();
-        rightimage =obj.get<string>("rightimage");
+        leftimage = obj.get<string>("lefteye_image");
+        rightimage =obj.get<string>("righteye_image");
     } catch (const cjsonpp::JSONError& e) {
         std::cerr << e.what() << '\n';
+        return;
     }
 
+    //加载算法
+    string leftout,rightout;
+    int leftirisarea=0,rightirisarea=0;
+    AlgoUtils *algo = new AlgoUtils(dzrun.umxalgo_Handle);
+    algo->getTemplateString(leftimage,leftout,leftirisarea);
+    algo->getTemplateString(rightimage,rightout,rightirisarea);
 
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+    std::ostream& ostr = response.send();
+    JSONObject robj;
+    response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
+    robj.set("lefteye_template",leftout);
+    robj.set("lefteye_irisarea",leftirisarea);
+    robj.set("righteye_template",rightout);
+    robj.set("righteye_irisarea",rightirisarea);
+
+    ostr<<robj.print();
+
+    delete algo;
 }
+
+

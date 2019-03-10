@@ -18,10 +18,12 @@ public:
     int getTemplates(UMXALGO_HANDLE handle,Person &person);
     int getTemplates(Person &person);
     int getEnrollTemplate(UMXALGO_HANDLE handle,std::string& imagepath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT& output);
-    int getEnrollTemplate(UMXALGO_HANDLE handle,QImage* image ,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT& output);
+    int getEnrollTemplate(QImage* image ,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT& output);
+    //从图像生成模板，传入传出为base64编码字符串，便于在webapi中传递
+    int getTemplateString(const string& base64Input , string& base64Output,int& irisarea);
     void splitEyes(std::string &filename);
     void clearEnrollIrisTemplate(UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* enrollIrisTemplate);
-    void saveSmallImage(string imagePath,string destPath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output);
+    void saveSmallImage(string imagePath,string destPath,UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT* output,bool center=true);
 
     void setHandle(UMXALGO_HANDLE handle){this->algoHandle=handle;}
     double leftscore;

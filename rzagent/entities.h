@@ -17,6 +17,8 @@ struct Person{
     int LeftEyeScore;
     int RightEyeScore;
     int WiegandCode;
+    std::string left_feature;
+    std::string right_feature;
 };
 
 struct Staff{
