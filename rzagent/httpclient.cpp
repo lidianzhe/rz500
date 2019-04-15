@@ -18,6 +18,7 @@
 #include <QString>
 #include "umxCamLib/umxCamGlobal.h"
 #include "algoutils.h"
+#include "runtime.h"
 using Poco::Net::HTTPClientSession;
 using Poco::Net::HTTPRequest;
 using Poco::Net::HTTPResponse;
@@ -71,7 +72,7 @@ std::string Client::Get()
     }
 }
 
-HTTPResponse::HTTPStatus Client::Post(std::string &body)
+HTTPResponse::HTTPStatus Client::SyncToServerPost(std::string &body)
 {
 
     URI uri("http://"+m_Server+m_Path+m_LogsUri);
@@ -134,19 +135,71 @@ std::string Client::getDatetime()
 
 }
 
-std::string Client::BuildJSON()
+std::string Client::getAvailable()
 {
-    /*
-   Poco::JSON::Object jsnObj;
-   jsnObj.set("Id",3);
-   jsnObj.set("UUId",3);
-   jsnObj.set("Info","IrisOk");
-   std::stringstream ss;
-   jsnObj.stringify(ss,3);
-   return ss.str();
-   */
-    return "{\"Id\":3,\"UUId\":2,\"Info\":\"IrisOk\"}";
+    try{
+        URI uri("http://"+m_Server+m_Path+"available");
+        std::string path=uri.getPathAndQuery();
+        if (path.empty()) path="/";
+
+        HTTPClientSession session(uri.getHost(),uri.getPort());
+
+        HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
+        session.setTimeout(Poco::Timespan(2,0));
+        HTTPResponse response;
+
+        session.sendRequest(request);
+        std::istream &isres =session.receiveResponse(response);
+        std::cout << response.getStatus() <<" "<< response.getReason() << std::endl;
+
+        std::stringstream ss;
+        StreamCopier::copyStream(isres,ss);
+        std::cout<<"get available = "<<ss.str()<<std::endl;
+        return ss.str();
+    }
+    catch(Poco::Exception &exc)
+    {
+        std::cout <<"getTime request:" <<exc.displayText() <<std::endl;
+        return "";
+    }
+    catch(...)
+    {
+        std::cout <<"get request : other error"<<std::endl;
+        return "";
+    }
+
 }
+
+HTTPResponse::HTTPStatus Client::Request(const std::string& method,const string& path, const std::string &body, string &data)
+{
+    URI uri(path);
+    HTTPClientSession session(uri.getHost(),uri.getPort());
+    HTTPRequest request(method,uri.getPath(),HTTPRequest::HTTP_1_1);
+    session.setTimeout(Poco::Timespan(2,0));
+    request.setContentLength((int)body.length());
+    request.setContentType("application/json");
+    request.add("lock_uid",dzrun.lock_uid);
+    try{
+        session.sendRequest(request)<<body;
+        HTTPResponse response;
+        std::istream &isres = session.receiveResponse(response);
+        std::cout <<"API:"<<method <<"  "<<path<<"  "<< response.getStatus() << " " << response.getReason() << std::endl;
+        std::stringstream ss;
+        StreamCopier::copyStream(isres,ss);
+        data=ss.str();
+        return response.getStatus();
+    }
+    catch(Poco::Exception &exc){
+        session.reset();
+        std::cout << "post request:"<<exc.displayText() <<std::endl;
+        return HTTPResponse::HTTPStatus::HTTP_NOT_FOUND;
+    }
+    catch(...){
+        std::cout << "post request: no handle error"<<std::endl;
+        return HTTPResponse::HTTPStatus::HTTP_EXPECTATION_FAILED;
+    }
+}
+
 
 bool Client::DeleteLog(long id)
 {

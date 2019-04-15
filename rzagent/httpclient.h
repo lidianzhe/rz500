@@ -36,12 +36,15 @@ public:
     //body
     bool doRequest(HTTPClientSession &session, HTTPRequest &request, HTTPResponse &response, std::string &body);
     std::string Get();
-    HTTPResponse::HTTPStatus Post(std::string &body);
+    HTTPResponse::HTTPStatus SyncToServerPost(std::string &body);
     std::string getDatetime();
     void setLogsUri(std::string uri){m_LogsUri=uri;}
     void setServer(std::string server){m_Server=server;}
     void setPath(std::string path){m_Path=path;}
-    std::string BuildJSON();
+//
+    HTTPResponse::HTTPStatus Request(const std::string &method, const string &path, const std::string &body, string &data);
+
+    std::string getAvailable();
 private:
     std::string m_Server="120.27.233.3:80";
     std::string m_Path="/irisapi/api/";
@@ -50,6 +53,7 @@ private:
     AlgoUtils *m_utils;
 
     bool DeleteLog(long id);
+
 
 
 };

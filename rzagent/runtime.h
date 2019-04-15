@@ -11,6 +11,7 @@ public:
     AlgoUtils *algoUtils;
     UMXALGO_HANDLE umxalgo_Handle;
     UMXDB_HANDLE umxdb_Handle;
+    string lock_uid;
 };
 
 extern Runtime dzrun;

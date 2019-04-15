@@ -113,7 +113,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     {
         m_timeTimer = new QTimer(this);
         connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
-        m_timeTimer->setInterval(1000*30);
+        m_timeTimer->setInterval(1000*60);
         m_timeTimer->start();
 
         m_timer = new QTimer(this);
@@ -161,6 +161,7 @@ void StatusForm::readConfig()
     m_debugMode = m_config->getInt("launcher.device.hidden.debug",0);
     m_useServer=m_config->getInt("launcher.network.server.useserver",0);
     m_configRequestImage = m_config->getInt("rzagent.json.requestimage",0);
+    m_checkAvailable = m_config->getInt("rzagent.setup.checkAvailable",0);
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
     m_client->setServer(m_config->getString("launcher.network.server.serverip","118.31.22.44")+":"+m_config->getString("launcher.network.server.port","8080"));
     m_client->setPath(m_config->getString("launcher.network.server.syncuri","/api/"));
@@ -212,7 +213,7 @@ void StatusForm::syncToServer()
             if((logNew.GetUserUUID()=="") || (msecs>2000)){
                 logs.clear();
                 isNew=false;
-                ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,3,"asc",&logs);
+                ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,5,"asc",&logs);
             }
         }else
         {
@@ -260,7 +261,7 @@ void StatusForm::syncToServer()
             //strJson =log.AsJSONString();
             std::cout<<"josn: "<<strJson<<std::endl;
             std::cout<<"begin post"<<std::endl;
-            if (m_client->Post(strJson)==HTTPResponse::HTTPStatus::HTTP_CREATED)
+            if (m_client->SyncToServerPost(strJson)==HTTPResponse::HTTPStatus::HTTP_CREATED)
             {
                 ui->infoText->setText(QString("上传日志 logId=%1").arg(log.GetId()));
                 try{
@@ -279,22 +280,25 @@ void StatusForm::syncToServer()
                 ui->infoText->setText("bad request or not found....");
             }
             //----
-            isNew=false; //先不起用这个功能
-            if(isNew)
+
+            if(m_checkAvailable && isNew)
             {
                 //如果没查到则显示
-                umxPeriDev_setLedIndicatorBrightness(255,0,0);
-                sleep(2);
-                system("aplay /usr/local/share/CMITECH/sound/cn/unauthorized.wav");
-                umxPeriDev_setLedIndicatorBrightness(0,0,0);
-
-                ui->infoText->setText(QString("Can't Find CARD"));
-
-                //
-                umxPeriDev_setRelay(1);
-                sleep(1);
-                umxPeriDev_setRelay(0);
-
+                std::string strAvailable =m_client->getAvailable();
+                if(strAvailable=="1")
+                {
+                    umxPeriDev_setRelay(1);
+                    sleep(1);
+                    umxPeriDev_setRelay(0);
+                }
+                else
+                {
+                    umxPeriDev_setLedIndicatorBrightness(255,0,0);
+                    ui->infoText->setText(QString("Can't Find Location CARD"));
+                    sleep(1);
+                    system("aplay /usr/local/share/CMITECH/sound/cn/unauthorized.wav");
+                    umxPeriDev_setLedIndicatorBrightness(0,0,0);
+                }
             }
             //----
         }
@@ -309,6 +313,7 @@ void StatusForm::syncToServer()
 void StatusForm::syncTime()
 {
     m_timeTimer->stop();
+    readConfig();
     if(m_useServer!=1 )
     {
         m_timeTimer->start();

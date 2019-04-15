@@ -56,7 +56,7 @@ void MainWindow::initUI(QWidget *parent)
 void MainWindow::setTop()
 {
     hide();
-    if(_pStatusForm->getDebugMode()==1){
+    if( _pStatusForm->getDebugMode()==1){ //(_pStatusForm->m_checkAvailable==1) ||
         setWindowFlags(Qt::WindowStaysOnTopHint);
         show();
     }else

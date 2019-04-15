@@ -90,6 +90,12 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
         api_GetTemplates(request,response);
         return;
     }
+    //login
+    if(uri.getPath()=="/login" && request.getMethod()=="POST")
+    {
+        api_Login(request,response);
+        return;
+    }
     response.setContentType("application/json");
     response.redirect(request.getURI(),HTTPResponse::HTTPStatus::HTTP_NOT_IMPLEMENTED);
 }
@@ -399,13 +405,12 @@ void MyRequestHandler::api_DeletePersons(HTTPServerRequest &request, HTTPServerR
 int MyRequestHandler::saveStaff(Staff &staff)
 {
     SubjectData sd;
-    sd._recordVersion = 8976;
+    sd._recordVersion = 17952;//8976;
     sd._accessAllowed = true;
     sd._wiegandFacility = -1;
     sd._wiegandSite = -1;
     sd._wiegandCode = (uint)staff.wiegandcode;
     sd._wiegandCustom = "";
-
     sd._userUUID = staff.staff_no;
     sd._lastName = staff.name;
     sd._leftTemplate=Poco::Data::BLOB(staff.left_feature);
@@ -422,31 +427,49 @@ int MyRequestHandler::saveStaff(Staff &staff)
         faroff._imagePath = "/usr/local/share/CMITECH/Images/"+faroff._userUUID+"_faroff.jpg";
         faron._imagePath = "/usr/local/share/CMITECH/Images/"+faron._userUUID+"_faron.jpg";
     }
-    UserInfoData retUserinfo;
-    umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,&retUserinfo);
+    UserInfoData userinfo
+            ;
+    umxDB_selectUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,&userinfo);
     int ret;
     try{
 
-        if(retUserinfo._userUUID=="")
+        if(userinfo._userUUID=="")
         {
             sd._firstName = "";
             sd._matchUntil ="";
             ret=umxDB_insertSubject(dzrun.umxdb_Handle,sd);
             ret=umxDB_insertUserInfo(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0,0,0,0,"");
+            /*
+            HTTPResponse::HTTPStatus status= AddSubject(sd);
+            userinfo._userUUID=sd._userUUID;
+            userinfo._card = staff.card_no;
+            userinfo._pin = staff.password;
+            userinfo._admin = staff.is_admin;
+            userinfo._byPassCard=staff.bypasscard;
+            userinfo._indivisual=staff.verify_type;
+            userinfo._card=staff.card_no;
+            status=AddUserInfo(userinfo);
+            */
             if(staff.card_no!=""){
                 UMXCommon::CardInfoData cid = UMXCommon::CardInfoData(sd._userUUID,0,staff.card_no,"");
-
                 umxDB_insertCard(dzrun.umxdb_Handle,cid);
             }
             if(staff.face_faroff!="")
                 umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
+                //AddFace(faroff);
             if(staff.face_faron!="")
                 umxDB_insertFace2(dzrun.umxdb_Handle,&faron);
+                //AddFace(faron);
         }else
         {
             std::cout << "update "<<sd._userUUID <<" name="<<sd._lastName<<endl;
             ret=umxDB_updateSubject(dzrun.umxdb_Handle,sd);
             ret=umxDB_updateUserInfoByUUID(dzrun.umxdb_Handle,sd._userUUID,staff.card_no,staff.password,staff.is_admin,0,staff.bypasscard,staff.verify_type,0,0,0,0,0,"");
+            umxDB_deleteCardInfoByUUID(dzrun.umxdb_Handle,sd._userUUID);
+            if(staff.card_no!=""){
+                UMXCommon::CardInfoData cid = UMXCommon::CardInfoData(sd._userUUID,0,staff.card_no,"");
+                umxDB_insertCard(dzrun.umxdb_Handle,cid);
+            }
             umxDB_deleteFacesByUUID(dzrun.umxdb_Handle,sd._userUUID);
             if(staff.face_faroff!="")
                 umxDB_insertFace2(dzrun.umxdb_Handle,&faroff);
@@ -501,7 +524,7 @@ void MyRequestHandler::api_GetLogs(HTTPServerRequest &request, HTTPServerRespons
             if(ret==UMXDB_SUCCESS)
                 suc_flag=0;
             int count=result.size();
-            std::ostream& ostr = response.send();
+
             JSONObject obj;
             obj.set("suc_flag",suc_flag);
             obj.set("error_msg","");
@@ -524,11 +547,9 @@ void MyRequestHandler::api_GetLogs(HTTPServerRequest &request, HTTPServerRespons
                 r.add(item);
             }
             obj.set("staff_list",r);
-            ostr<<obj.print();
-
             response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
-
-
+            std::ostream& ostr = response.send();
+            ostr<<obj.print();
 }
 
 void MyRequestHandler::api_DeleteLogs(HTTPServerRequest &request, HTTPServerResponse &response)
@@ -573,14 +594,15 @@ void MyRequestHandler::api_DeleteLogs(HTTPServerRequest &request, HTTPServerResp
     delete util;
 
     //write json
-    std::ostream& ostr = response.send();
+    response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
     JSONObject obj;
     obj.set("suc_flag",suc_flag);
     obj.set("error_msg","");
     obj.set("error_staff_list",objlist);
+    std::ostream& ostr = response.send();
     ostr<<obj.print();
 
-    response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
+
 }
 
 void MyRequestHandler::api_UploadImages(HTTPServerRequest &request, HTTPServerResponse &response)
@@ -621,7 +643,7 @@ void MyRequestHandler::api_UploadImages(HTTPServerRequest &request, HTTPServerRe
     //write json
     response.setChunkedTransferEncoding(true);
     response.setContentType("application/json");
-    std::ostream& ostr = response.send();
+
     JSONObject robj;
 
     //----
@@ -642,10 +664,26 @@ void MyRequestHandler::api_UploadImages(HTTPServerRequest &request, HTTPServerRe
     robj.set("staff_no",person.Id);
     robj.set("lefteyescore",algo->leftscore);
     robj.set("righteyescore",algo->rightscore);
+
+    std::ostream& ostr = response.send();
     ostr<<robj.print();
 
     system(QString("rm -rf %0").arg(QString::fromStdString( Path::home()+person.Id)).toStdString().c_str());
     delete algo;
+
+}
+
+void MyRequestHandler::api_Login(HTTPServerRequest &request, HTTPServerResponse &response)
+{
+    //获取lock_uid
+    checkConnetct();
+    response.setChunkedTransferEncoding(true);
+    response.setContentType("application/json");
+    response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
+    JSONObject robj;
+    robj.set("lock_uid",dzrun.lock_uid);
+    std::ostream& ostr = response.send();
+    ostr<<robj.print();
 
 }
 //-----------------------------------------------------------------------------------------------------------
@@ -679,17 +717,111 @@ void MyRequestHandler::api_GetTemplates(HTTPServerRequest &request, HTTPServerRe
 
     response.setChunkedTransferEncoding(true);
     response.setContentType("application/json");
-    std::ostream& ostr = response.send();
+
     JSONObject robj;
     response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_OK);
     robj.set("lefteye_template",leftout);
     robj.set("lefteye_irisarea",leftirisarea);
     robj.set("righteye_template",rightout);
     robj.set("righteye_irisarea",rightirisarea);
-
+    std::ostream& ostr = response.send();
     ostr<<robj.print();
 
     delete algo;
 }
+
+bool MyRequestHandler::tryLock()
+{
+    string data;
+    string path=LOCALHOST+PATH_LOCK;
+    string body="";
+    HTTPResponse::HTTPStatus status = _client->Request(HTTPRequest::HTTP_POST,path,body,data);
+    if (status==HTTPResponse::HTTP_OK){
+        cjsonpp::JSONObject obj=cjsonpp::parse(data);
+        dzrun.lock_uid = obj.get<string>("lock_uid");
+        return true;
+    }else
+        return false;
+}
+
+bool MyRequestHandler::stealLock()
+{
+    string data;
+    string path=LOCALHOST+PATH_LOCK;
+    string body="";
+    HTTPResponse::HTTPStatus status = _client->Request(HTTPRequest::HTTP_PUT,path,body,data);
+    if (status==HTTPResponse::HTTP_OK){
+        cjsonpp::JSONObject obj=cjsonpp::parse(data);
+        dzrun.lock_uid = obj.get<string>("lock_uid");
+        GetSubject();
+        return true;
+    }else
+        return false;
+}
+
+void MyRequestHandler::checkConnetct()
+{
+    if(!tryLock() && dzrun.lock_uid=="")
+        stealLock();
+}
+
+HTTPResponse::HTTPStatus  MyRequestHandler::AddSubject(SubjectData &subject)
+{
+    Relay();
+    checkConnetct();
+    string data;
+    QString path=QString::fromStdString(LOCALHOST+PATH_ADDSUBJECT);
+    path=path.arg(QString::fromStdString(dzrun.lock_uid));
+    string body=subject.AsJSONString();
+    //std::cout<<body<<std::endl;
+    HTTPResponse::HTTPStatus status = _client->Request(HTTPRequest::HTTP_POST,path.toStdString(),body,data);
+    return status;
+}
+
+HTTPResponse::HTTPStatus MyRequestHandler::AddUserInfo(UserInfoData &userinfo)
+{
+    checkConnetct();
+    string data;
+    QString path=QString::fromStdString(LOCALHOST+PATH_ADDUSERINFO);
+    path=path.arg(QString::fromStdString(dzrun.lock_uid));
+    HTTPResponse::HTTPStatus status = _client->Request(HTTPRequest::HTTP_POST,path.toStdString(),userinfo.AsJSONString(),data);
+    return status;
+}
+
+HTTPResponse::HTTPStatus MyRequestHandler::AddFace(FaceData &facedata)
+{
+    checkConnetct();
+    string data;
+    QString path=QString::fromStdString(LOCALHOST+PATH_ADDFACE);
+    path=path.arg(QString::fromStdString(dzrun.lock_uid));
+    HTTPResponse::HTTPStatus status = _client->Request(HTTPRequest::HTTP_POST,path.toStdString(),facedata.AsJSONString(),data);
+    return status;
+}
+
+HTTPResponse::HTTPStatus MyRequestHandler::GetSubject()
+{
+
+    checkConnetct();
+    string data;
+    QString path=QString::fromStdString(LOCALHOST+PATH_GETSUBJECT);
+    path=path.arg(QString::fromStdString(dzrun.lock_uid));
+    string body="";
+    //std::cout<<body<<std::endl;
+    HTTPResponse::HTTPStatus status = _client->Request(HTTPRequest::HTTP_GET,path.toStdString(),body,data);
+    std::cout<<data<<std::endl;
+    return status;
+
+}
+
+HTTPResponse::HTTPStatus MyRequestHandler::Relay()
+{
+    checkConnetct();
+    string data;
+    QString path=QString::fromStdString(LOCALHOST+"/1.0/config/relay?lock_uid=%1");
+    path=path.arg(QString::fromStdString(dzrun.lock_uid));
+    HTTPResponse::HTTPStatus status = _client->Request(HTTPRequest::HTTP_PUT,path.toStdString(),"",data);
+    return status;
+}
+
 
 

@@ -42,6 +42,7 @@ class StatusForm : public QDialog
 public:
     explicit StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent = 0);
     ~StatusForm();
+        int m_checkAvailable=0;
     //返回设备是否为调试模式
     int getDebugMode(){return m_debugMode || m_showMessage;}
 
@@ -75,6 +76,7 @@ private:
     int m_debugMode;
     int m_configRequestImage;
     int m_showMessage=0;
+
     void initlog();
     void readConfig();
     // umxAlgoLib

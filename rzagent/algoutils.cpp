@@ -214,13 +214,10 @@ int AlgoUtils::getEnrollTemplate(QImage *image, UMXALGO_IRIS_GET_ENROL_TEMPLATE_
         std::cout << "Fail to get enroll template: ret " << retGetEnroll << std::endl;
         return -1;
     }
-    if(output.usableIrisArea < 70.0)
+    if(output.usableIrisArea < 50.0)
     {
-        std::cout << "Enroll iris small usable area: " << output.usableIrisArea << "/70.0" << std::endl;
+        std::cout << "Enroll iris small usable area: " << output.usableIrisArea << "/50.0" << std::endl;
         return -1;
-
-
-
     }
     return UMXALGO_SUCCESS;
 }
