@@ -232,6 +232,39 @@ void StatusForm::syncToServer()
     catch(Poco::Exception &e){
         poco_warning(_logger,"selectlog fail:"+e.message());
     }
+
+    //----二次验证
+    if(m_checkAvailable && isNew)
+    {
+        //如果没查到则显示
+        std::string strAvailable =m_client->getAvailable();
+        if(strAvailable=="1")
+        {
+            umxPeriDev_setRelay(1);
+            sleep(1);
+            umxPeriDev_setRelay(0);
+        }
+        else
+        {
+
+            try{
+                std::cout<<"remove log Id="<<logs[0].GetId()<<std::endl;
+                bool isimage=true;
+                ret = umxDB_deleteLogEntryById(_umxDBHandle, logs[0].GetId(),&isimage);
+            }
+            catch(Poco::Exception &e){
+                poco_warning(_logger,"remove log fail:"+e.message());
+            }
+
+            umxPeriDev_setLedIndicatorBrightness(255,0,0);
+            ui->infoText->setText(QString("Can't Find Location CARD"));
+            sleep(1);
+            system("aplay /usr/local/share/CMITECH/sound/cn/unauthorized.wav");
+            umxPeriDev_setLedIndicatorBrightness(0,0,0);
+            return;  //直接返回
+        }
+    }
+    //----结束二次验证
     if (ret == UMXDB_SUCCESS)
     {
         for(LogEntry log:logs){
@@ -279,35 +312,14 @@ void StatusForm::syncToServer()
                 std::cout<<"返回，待syncTime调用后，再次尝试连接。"<<std::endl;
                 ui->infoText->setText("bad request or not found....");
             }
-            //----
 
-            if(m_checkAvailable && isNew)
-            {
-                //如果没查到则显示
-                std::string strAvailable =m_client->getAvailable();
-                if(strAvailable=="1")
-                {
-                    umxPeriDev_setRelay(1);
-                    sleep(1);
-                    umxPeriDev_setRelay(0);
-                }
-                else
-                {
-                    umxPeriDev_setLedIndicatorBrightness(255,0,0);
-                    ui->infoText->setText(QString("Can't Find Location CARD"));
-                    sleep(1);
-                    system("aplay /usr/local/share/CMITECH/sound/cn/unauthorized.wav");
-                    umxPeriDev_setLedIndicatorBrightness(0,0,0);
-                }
-            }
-            //----
         }
     }
     if(isNew){
         m_timer->setInterval(1000);
-    }
+    }else
+        m_timer->setInterval(1000*3);
     m_timer->start();
-
 }
 
 void StatusForm::syncTime()

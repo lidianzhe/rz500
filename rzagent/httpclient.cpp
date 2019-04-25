@@ -145,7 +145,7 @@ std::string Client::getAvailable()
         HTTPClientSession session(uri.getHost(),uri.getPort());
 
         HTTPRequest request(HTTPRequest::HTTP_GET,path,HTTPRequest::HTTP_1_1);
-        session.setTimeout(Poco::Timespan(2,0));
+        session.setTimeout(Poco::Timespan(5,0));
         HTTPResponse response;
 
         session.sendRequest(request);
@@ -160,12 +160,12 @@ std::string Client::getAvailable()
     catch(Poco::Exception &exc)
     {
         std::cout <<"getTime request:" <<exc.displayText() <<std::endl;
-        return "";
+        return "0";
     }
     catch(...)
     {
         std::cout <<"get request : other error"<<std::endl;
-        return "";
+        return "0";
     }
 
 }
