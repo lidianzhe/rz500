@@ -118,7 +118,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
         m_timer = new QTimer(this);
         connect(m_timer,SIGNAL(timeout()),this,SLOT(syncToServer()));
-        m_timer->setInterval(1000*5);
+        m_timer->setInterval(1000*(m_checkAvailable=1?1:5));
         m_timer->start();
     }
 
@@ -211,7 +211,7 @@ void StatusForm::syncToServer()
             QDateTime t1 = QDateTime::fromString(QString::fromStdString(logNew.GetTimestamp()),"yyyy-MM-ddThh:mm:ssZ");
             QDateTime t2 = QDateTime::currentDateTime();
             qint64 msecs = t1.msecsTo(t2);
-            if((logNew.GetUserUUID()=="") || (msecs>2000)){
+            if((logNew.GetUserUUID()=="") || (msecs>5000)){
                 logs.clear();
                 isNew=false;
                 ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,5,"asc",&logs);
@@ -224,7 +224,7 @@ void StatusForm::syncToServer()
                 QDateTime t1 = QDateTime::fromString(QString::fromStdString(logNew.GetTimestamp()),"yyyy-MM-ddThh:mm:ssZ");
                 QDateTime t2 = QDateTime::currentDateTime();
                 qint64 msecs = t1.msecsTo(t2);
-                if(logNew.GetUserUUID()=="" || msecs>2000){
+                if(logNew.GetUserUUID()=="" || msecs>5000){
                     isNew=false;
                 }
             }else //count==0
@@ -324,10 +324,6 @@ void StatusForm::syncToServer()
 
         }
     }
-    if(isNew){
-        m_timer->setInterval(1000);
-    }else
-        m_timer->setInterval(1000*3);
     m_timer->start();
 }
 
@@ -340,8 +336,6 @@ void StatusForm::syncTime()
         m_timeTimer->start();
         return;
     }
-    m_config->load("/usr/local/bin/umxLauncher.properties");
-    readConfig();
 
     std::string strTime= m_client->getDatetime();
     if(strTime!="")
