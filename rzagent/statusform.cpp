@@ -200,13 +200,14 @@ void StatusForm::syncToServer()
     logs.clear();
     int ret=-1;
     bool isNew=true;
+    LogEntry logNew;
     try{
         int count;
         ret = umxDB_countLog(_umxDBHandle,&count);
         //如果记录数大于1条，说明有没上传的数据，取最新一条，判读是否为刚识别的，上传直到完成。
         if(count>1){
             ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,1,"desc",&logs);
-            LogEntry logNew = logs[0];
+            logNew = logs[0];
             QDateTime t1 = QDateTime::fromString(QString::fromStdString(logNew.GetTimestamp()),"yyyy-MM-ddThh:mm:ssZ");
             QDateTime t2 = QDateTime::currentDateTime();
             qint64 msecs = t1.msecsTo(t2);
@@ -219,13 +220,16 @@ void StatusForm::syncToServer()
         {
             if(count==1){
                 ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,1,"desc",&logs);
-                LogEntry logNew = logs[0];
+                logNew = logs[0];
                 QDateTime t1 = QDateTime::fromString(QString::fromStdString(logNew.GetTimestamp()),"yyyy-MM-ddThh:mm:ssZ");
                 QDateTime t2 = QDateTime::currentDateTime();
                 qint64 msecs = t1.msecsTo(t2);
                 if(logNew.GetUserUUID()=="" || msecs>2000){
                     isNew=false;
                 }
+            }else //count==0
+            {
+                isNew=false;
             }
         }
     }
@@ -233,24 +237,29 @@ void StatusForm::syncToServer()
         poco_warning(_logger,"selectlog fail:"+e.message());
     }
 
+    bool availbale = true;
     //----二次验证
     if(m_checkAvailable && isNew)
     {
+        std::cout<<"call getAvailable api"<<std::endl;
         //如果没查到则显示
-        std::string strAvailable =m_client->getAvailable();
+        LogEntry newlog=logs[0];
+             std::cout<<          newlog.GetUserUUID()<<std::endl;
+        std::string strAvailable =m_client->getAvailable(newlog.GetUserUUID());
+        std::cout<<"getAvailable="<<strAvailable<<std::endl;
         if(strAvailable=="1")
         {
+                    std::cout<<"setRelay=1"<<std::endl;
             umxPeriDev_setRelay(1);
             sleep(1);
             umxPeriDev_setRelay(0);
         }
         else
         {
-
             try{
-                std::cout<<"remove log Id="<<logs[0].GetId()<<std::endl;
+                std::cout<<"remove log Id="<<newlog.GetId()<<std::endl;
                 bool isimage=true;
-                ret = umxDB_deleteLogEntryById(_umxDBHandle, logs[0].GetId(),&isimage);
+                ret = umxDB_deleteLogEntryById(_umxDBHandle, newlog.GetId(),&isimage);
             }
             catch(Poco::Exception &e){
                 poco_warning(_logger,"remove log fail:"+e.message());
@@ -261,11 +270,11 @@ void StatusForm::syncToServer()
             sleep(1);
             system("aplay /usr/local/share/CMITECH/sound/cn/unauthorized.wav");
             umxPeriDev_setLedIndicatorBrightness(0,0,0);
-            return;  //直接返回
+            availbale=false;
         }
     }
     //----结束二次验证
-    if (ret == UMXDB_SUCCESS)
+    if (availbale && ret == UMXDB_SUCCESS)
     {
         for(LogEntry log:logs){
             Poco::Data::BLOB i(log.GetImageData());
