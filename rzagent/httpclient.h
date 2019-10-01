@@ -45,6 +45,7 @@ public:
     HTTPResponse::HTTPStatus Request(const std::string &method, const string &path, const std::string &body, string &data);
 
     std::string getAvailable(std::string uuid);
+    std::string getAvailable(std::string uuid,std::string sn);
 private:
     std::string m_Server="120.27.233.3:80";
     std::string m_Path="/irisapi/api/";

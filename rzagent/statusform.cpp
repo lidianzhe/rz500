@@ -54,9 +54,6 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     ui->centerTextbar->setStyleSheet("QWidget#centerTextbar{border-image: url(:/images/textbar_center.png);}");
     ui->rightTextbar->setStyleSheet("QWidget#rightTextbar{background-image: url(:/images/textbar_right.png);}");
 
-    //launcher.network.server.port: 80
-    //launcher.network.server.serverip: 120.27.233.3
-    //launcher.network.server.useserver: 1
 
     // config logger
     m_config = new Poco::Util::PropertyFileConfiguration("/usr/local/bin/umxLauncher.properties");
@@ -138,7 +135,6 @@ StatusForm::~StatusForm()
 //
 void StatusForm::initlog()
 {
-
     AutoPtr<FileChannel> pChannel(new FileChannel);
     pChannel->setProperty("path", "/home/root/rzagent.log");
     pChannel->setProperty("rotation", m_config->getString("logging.channels.file.rotation", "10M"));
@@ -159,7 +155,7 @@ void StatusForm::readConfig()
     //读取最新的配置文件
     m_config->load("/usr/local/bin/umxLauncher.properties");
     m_debugMode = m_config->getInt("launcher.device.hidden.debug",0);
-    m_useServer=m_config->getInt("launcher.network.server.useserver",0);
+    m_useServer=m_config->getInt("rzagent.server.useserver",0);
     m_configRequestImage = m_config->getInt("rzagent.json.requestimage",0);
     m_checkAvailable = m_config->getInt("rzagent.setup.checkAvailable",0);
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;

@@ -135,10 +135,16 @@ std::string Client::getDatetime()
 
 }
 
+
 std::string Client::getAvailable(std::string uuid)
 {
+    return getAvailable(uuid,"");
+}
+
+std::string Client::getAvailable(std::string uuid, std::string sn)
+{
     try{
-        URI uri("http://"+m_Server+m_Path+"available/"+uuid);
+        URI uri("http://"+m_Server+m_Path+"available/"+uuid+"/"+sn);
         std::string path=uri.getPathAndQuery();
         //if (path.empty()) path="/";
 
@@ -167,7 +173,6 @@ std::string Client::getAvailable(std::string uuid)
         std::cout <<"get request : other error"<<std::endl;
         return "0";
     }
-
 }
 
 HTTPResponse::HTTPStatus Client::Request(const std::string& method,const string& path, const std::string &body, string &data)
