@@ -338,7 +338,7 @@ void StatusForm::syncTime()
     std::string strTime= m_client->getDatetime();
     if(strTime!="")
     {
-        strTime = "date -s "+strTime;
+        strTime = "date -s \""+strTime+"\"";
         system(strTime.c_str());
     }
     m_timeTimer->start();
