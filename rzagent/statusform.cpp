@@ -115,7 +115,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
         m_timer = new QTimer(this);
         connect(m_timer,SIGNAL(timeout()),this,SLOT(syncToServer()));
-        m_timer->setInterval(1000*(m_checkAvailable=1?1:5));
+        m_timer->setInterval(1000*(m_checkAvailable==1?1:5));
         m_timer->start();
     }
 
@@ -152,6 +152,7 @@ void StatusForm::initlog()
 
 void StatusForm::readConfig()
 {
+    std::cout<<"call readConfig()"<<std::endl;
     //读取最新的配置文件
     m_config->load("/usr/local/bin/umxLauncher.properties");
     m_debugMode = m_config->getInt("launcher.device.hidden.debug",0);
@@ -161,6 +162,7 @@ void StatusForm::readConfig()
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
     m_client->setServer(m_config->getString("launcher.network.server.serverip","118.31.22.44")+":"+m_config->getString("launcher.network.server.port","8080"));
     m_client->setPath(m_config->getString("launcher.network.server.syncuri","/api/"));
+
 }
 
 void StatusForm::clearEnrollIrisTemplate(UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT *enrollIrisTemplate)
