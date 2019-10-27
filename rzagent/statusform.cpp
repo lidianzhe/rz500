@@ -340,6 +340,7 @@ void StatusForm::syncTime()
     {
         strTime = "date -s \""+strTime+"\"";
         system(strTime.c_str());
+        system("hwclock -w");
     }
     m_timeTimer->start();
 }
