@@ -12,6 +12,7 @@ HTTPRequestHandler *MyRequestHandlerFactory::createRequestHandler(const HTTPServ
     if(request.getURI()=="/")
         return new RootHandler();
     else
+    {
         return new MyRequestHandler();
-
+    }
 }

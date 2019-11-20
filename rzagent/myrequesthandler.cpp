@@ -46,16 +46,24 @@ MyRequestHandler::MyRequestHandler()
 
 void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerResponse &response)
 {
-    Poco::URI uri(request.getURI());
-    QStringList path=QString::fromStdString(uri.getPath()).split("/");
-    std::cout << uri.getPath() <<endl;
-    std::cout << uri.getQuery() <<endl;
-    std::cout <<qPrintable(path.at(1))<<endl;
-    //std::cout <<qPrintable(path.at(2))<<endl;
-    qDebug()<<path.count();
-    //post /uploadimage
-
     Logger& m_logger = dzrun.initLog("webrequest");
+    Poco::URI uri(request.getURI());
+    std::cout<<"uri="<<request.getURI()<<endl;
+    if(request.getURI().substr(0,1)!="/")
+    {
+        poco_error(m_logger,"Error URI,may be GET Request's Body has context ");
+        std::cout<<"error URI,may be GET Body has context"<<request.getURI();
+        response.setChunkedTransferEncoding(true);
+        response.setContentType("application/json");
+        response.redirect("/",HTTPResponse::HTTPStatus::HTTP_NOT_IMPLEMENTED);
+        return;
+    }
+    QStringList path=QString::fromStdString(uri.getPath()).split("/");
+
+    //std::cout << uri.getPath() <<endl;
+    //std::cout << uri.getQuery() <<endl;
+    //std::cout <<qPrintable(path.at(1))<<endl;
+
     poco_information_f1(m_logger,"web request: %s",uri.getPathAndQuery());
 
     qDebug()<<"web request:"<< QString::fromStdString( uri.getPathAndQuery());
