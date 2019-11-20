@@ -76,6 +76,13 @@ typedef void *UMXALGO_HANDLE;
 #define UMXALGO_FACE_EYE_DLIB                                       6
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// Face type to detect(by dhkim)
+////////////////////////////////////////////////////////////////////////////////////////
+
+#define UMXALGO_FACE_NORMAL 							0
+#define UMXALGO_FACE_MINER								1 
+
+////////////////////////////////////////////////////////////////////////////////////////
 // template type (Enrol or Recog)
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -253,15 +260,17 @@ typedef struct _UMXALGO_RECT
 typedef struct _UMXALGO_FACE_FIND_INPUT {
     int cbSize;
     unsigned char* image;
+    unsigned char* offSub4Image;  //by dhkim
     unsigned char* landmarkImage; //by dhkim
     UMXALGO_RECT lastFaceInfo;    //by dhkim
     UMXALGO_RECT lastEyeInfo;  	  //by dhkim
     int  width;
     int  height;
-    int  bmpBit;
-    int  landmarkImgWidth;  //by dhkim the width of the image used for face-landmark
-    int  landmarkImgHeight; //by dhkim the height of the image used for face-landmark
+    int  offSub4Width;      //by dhkim the width of the image used for face-landmark
+    int  offSub4Height;     //by dhkim the height of the image used for face-landmark
+    int  faceType;
     int  diffPixelByMotor;	//by dhkim (diff-pixel value by motor-moving)
+    int  bmpBit;
     long lastFaceLevel;     //by dhkim (The start pyramide level to use in the dlib-algorithm)
     long lastEyeLevel;      //by dhkim (The start pyramide level to use in the dlib-algorithm)
     bool objRoiUse; 		//by dhkim
@@ -280,7 +289,9 @@ typedef struct _UMXALGO_EYES_FIND_INPUT {
     int  rightHeight;
     int  shitfXFromRightImage;
     int  shitfYFromRightImage;
+	int  faceType;
 	int  diffPixelByMotor;	//by dhkim (diff-pixel value by motor-moving)
+	int  faceRoiType;
 	bool isPrevFaceFound;
 	bool isPrevEyeFound;
 }UMXALGO_EYES_FIND_INPUT;
@@ -337,6 +348,16 @@ enum ObjectType { //by dhkim
     OBJECT_FACE_TYPE   = 1,
     OBJECT_EYE_TYPE    = 2,
     OBJECT_IRIS_TYPE   = 3
+};
+
+enum ThresholdType { //by dhkim
+	EYES_FAIL_THRESHOLD = 6	
+};
+
+enum InputFaceRoiType {
+    EXPAND  = 0x01,
+	NORMAL  = 0X03,
+	MOVE    = 0x04
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

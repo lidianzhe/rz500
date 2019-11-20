@@ -129,6 +129,8 @@ typedef struct _UMXCAM_DEVICE_INFO {
 #define UMXCAM_MESSAGE_TAKE_OFF_GLASSES                4
 #define UMXCAM_MESSAGE_DO_NOT_MOVE                     5
 #define UMXCAM_MESSAGE_REALEYE_TEST_FAILED             6
+#define UMXCAM_MESSAGE_MOVE_RIGHT                      7
+#define UMXCAM_MESSAGE_MOVE_LEFT                       8
 #define UMXCAM_MESSAGE_LARGE_FACE                   9999
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -154,6 +156,7 @@ typedef struct _UMXCAM_START_PARA {
         faceColorCorrection = UMXCAM_FALSE;
         coverGlassTrans = 100;
         checkRealEye = UMXCAM_FALSE;
+        fakeEyeGazeLevel = 10;
     }
 
     int cbSize;                              // size of this struct
@@ -170,6 +173,7 @@ typedef struct _UMXCAM_START_PARA {
     int coverGlassTrans;    // IR Transmission coefficient of additional cover glass in percentage
                             // The value between 50% and 100% is only allowed.
     int checkRealEye;       // UMXCAM_TRUE or UMXCAM_FALSE
+    int fakeEyeGazeLevel;   // min: 5, max: 30, default: 10
 } UMXCAM_START_PARA;
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -240,6 +244,8 @@ typedef struct _UMXCAM_IMAGE_INFO {
         rightQualityOk = false;
         leftQualityScore = 0.0;
         rightQualityScore = 0.0;
+
+		isFaceDetectInLongTimeFarDist = false;
 
         indicatorColor = UMXCAM_INDICATOR_COLOR_UNKNOWN;
     }
@@ -364,6 +370,8 @@ typedef struct _UMXCAM_IMAGE_INFO {
     bool leftQualityOk, rightQualityOk;
     double leftQualityScore, rightQualityScore;
 
+	bool isFaceDetectInLongTimeFarDist; //by dhkim
+
     int indicatorColor;
 } UMXCAM_IMAGE_INFO;
 
@@ -460,6 +468,8 @@ typedef struct _UMXCAM_EVENT {
 // Error occured during image capture
 #define UMXCAM_EVENT_VIDEO_ERROR                    6  // Internal error (possibly hardware problem)
                                                     // Application should call UMXCAM_closeDevice().
+
+#define UMXCAM_EVENT_MESSAGE                        7
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Event value for UMXCAM_DM_EVENT structure (Tamper switch and Function Key) - EMA/EMB only

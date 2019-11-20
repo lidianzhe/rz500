@@ -217,6 +217,14 @@ extern "C" {
     //                UMXCAM_ERROR_DEVICE_ALREADY_STARTED
     //                UMXCAM_ERROR_DEVICE_ALREADY_STOPPED
 
+    int _UMXCAM_EXPORT umxCam_isWhiteLEDOn(UMXCAM_HANDLE handle);
+    // Check if WhiteLED On
+    //
+    // handle[in] - UMXCAM_HANDLE value
+    //
+    // Return value - UMXCAM_TRUE
+    //                UMXCAM_FALSE
+
 #ifdef ANDROID
 	int _UMXCAM_EXPORT umxCam_releasePreviewBuffer_ADR(UMXCAM_HANDLE handle, UMXCAM_HANDLE buffer);
     // Release preview buffer to re-use in the next UMXCAM_EVENT_PREVIEW_IMAGE event.

@@ -191,6 +191,16 @@ int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedF6Brightness(const int value);
 // Param: Red, Green, Blue range (0 ~ 255)
 // Return: 0 is success, other values is linux errno 
 int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedIndicatorBrightness(const int red, const int green, const int blue);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedIndicatorDimming(const int value);
+
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedDownBrightness_EF45ML(const int value);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedRightBrightness_EF45ML(const int value);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedUpBrightness_EF45ML(const int value);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedLeftBrightness_EF45ML(const int value);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedIndicatorDistance_EF45ML(const int red, const int green, const int blue);
+
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedLeftBrightness_EF50(const int value);
+int UMXPERIDEVLIB_EXPORT umxPeriDev_setLedRightBrightness_EF50(const int value);
 
 /*-------------------- RS232 --------------------*/
 // Desc.: Set RS232 port receive callback function to read data

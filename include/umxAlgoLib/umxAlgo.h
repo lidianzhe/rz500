@@ -37,9 +37,12 @@ extern "C" {
     // minor[out]
     // revision[out]
 
-    int _UMXALGO_EXPORT umxAlgo_create_ADR(UMXALGO_HANDLE *phandle, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE, int enableCompareTemplate = UMXALGO_TRUE);
-
-    int _UMXALGO_EXPORT umxAlgo_create(UMXALGO_HANDLE *phandle, Poco::AutoPtr<Poco::Util::AbstractConfiguration> config, int irisType = UMXALGO_DISABLE, int faceType = UMXALGO_DISABLE, int enableCompareTemplate = UMXALGO_TRUE);
+    int _UMXALGO_EXPORT umxAlgo_create(UMXALGO_HANDLE *phandle, 
+    								  Poco::AutoPtr<Poco::Util::AbstractConfiguration> config, 
+    								  int irisAlgo = UMXALGO_DISABLE, 
+    								  int faceAlgo = UMXALGO_DISABLE, 
+    								  int faceType = UMXALGO_DISABLE, 
+    								  int enableCompareTemplate = UMXALGO_TRUE);
     // Create umxAlgo.
     //
     // phandle[out] - UMXALGO_HANDLE value if successful. Otherwise, NULL.
@@ -59,6 +62,11 @@ extern "C" {
     // Return value - UMXALGO_ERROR_CANNOT_ALLOC_MEMORY
     //                UMXALGO_ERROR_IN_ARGUMENTS
     //                UMXALGO_SUCCESS
+     int _UMXALGO_EXPORT umxAlgo_create_ADR(UMXALGO_HANDLE *phandle, 
+     									   int irisAlgo = UMXALGO_DISABLE, 
+     									   int faceAlgo = UMXALGO_DISABLE, 
+                                           int faceType = UMXALGO_DISABLE,
+     									   int enableCompareTemplate = UMXALGO_TRUE);
 
     int _UMXALGO_EXPORT umxAlgo_iris_setIAlgoManager(UMXALGO_HANDLE handle, UMXAlgorithm::IAlgorithm* algo);
 

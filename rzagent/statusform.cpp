@@ -37,7 +37,7 @@ insert into camera_configuration (id,serialNumber,Mode) values(
 1,'HC0709A000303','Recog')
 */
 StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
-    QDialog(parent),_logger(Poco::Logger::get("rzagent")),
+    QDialog(parent),
     ui(new Ui::StatusForm)
 {
     ui->setupUi(this);
@@ -55,23 +55,20 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     ui->rightTextbar->setStyleSheet("QWidget#rightTextbar{background-image: url(:/images/textbar_right.png);}");
 
 
-    // config logger
     m_config = new Poco::Util::PropertyFileConfiguration("/usr/local/bin/umxLauncher.properties");
-    //HC0709A000231
+
     //读取配置
-    m_DeviceSN=m_config->getString("umx.device.serialnumber","HC0709A000303");
+    m_DeviceSN=m_config->getString("umx.device.serialnumber","HC0000000000");
     if(m_DeviceSN.empty()){
-        m_config->setString("umx.device.serialnumber","HC0709A000303");
+        m_config->setString("umx.device.serialnumber","HC0000000000");
         m_config->save("/usr/local/bin/umxLauncher.properties");
     }
 
     std::cout<<m_DeviceSN<<std::endl;
-
+    poco_information_f1(logger_handle,"service start runing,deivce's SN is %s",m_DeviceSN);
     m_client = new Client();
     //封装需要读取的内容
     readConfig();
-
-    initlog();
 
     // umxAlgoLib
     int ret = umxAlgo_create(&_gUmxAlgoHandle, m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
@@ -81,8 +78,8 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
     std::cout<<"ret="<<ret<<std::endl;
     // umxDBLib
-    int retDB = umxDB_create(&_umxDBHandle, _logger.get("umxDBLib"), m_config);
-    poco_information(_logger,"open database");
+    int retDB = umxDB_create(&_umxDBHandle, logger_handle, m_config);
+    poco_information(logger_handle,"open database");
     std::cout << "call umxDB_create" <<std::endl;
     ui->infoText->setText("open database");
     //
@@ -113,10 +110,10 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
         m_timeTimer->setInterval(1000*60);
         m_timeTimer->start();
 
-        m_timer = new QTimer(this);
-        connect(m_timer,SIGNAL(timeout()),this,SLOT(syncToServer()));
-        m_timer->setInterval(1000*(m_checkAvailable==1?1:5));
-        m_timer->start();
+        m_syncTimer = new QTimer(this);
+        connect(m_syncTimer,SIGNAL(timeout()),this,SLOT(syncToServer()));
+        m_syncTimer->setInterval(1000*(m_checkAvailable==1?1:5));
+        m_syncTimer->start();
     }
 
 }
@@ -133,22 +130,7 @@ StatusForm::~StatusForm()
 
 
 //
-void StatusForm::initlog()
-{
-    AutoPtr<FileChannel> pChannel(new FileChannel);
-    pChannel->setProperty("path", "/home/root/rzagent.log");
-    pChannel->setProperty("rotation", m_config->getString("logging.channels.file.rotation", "10M"));
-    pChannel->setProperty("archive", m_config->getString("logging.channels.file.archive", "number"));
-    pChannel->setProperty("purgeCount", m_config->getString("logging.channels.file.purgeCount", "10"));
 
-    AutoPtr<PatternFormatter> pPF(new PatternFormatter);
-    pPF->setProperty("pattern", m_config->getString("logging.formatters.standard.pattern", "%L%Y-%m-%d %H:%M:%S %Z %s: [%p] %t")); // local time
-
-    AutoPtr<FormattingChannel> pFC(new FormattingChannel(pPF, pChannel));
-    _logger.setChannel(pFC);
-    poco_information(_logger,"init rzagent log");
-    std::cout << "write log " <<std::endl;
-}
 
 void StatusForm::readConfig()
 {
@@ -187,7 +169,14 @@ void StatusForm::clearIrisInfo(IRIS_INFO *irisInfo)
 
 void StatusForm::syncToServer()
 {
-    m_timer->stop();
+    m_syncTimer->stop();
+
+    Logger& m_logger=dzrun.initLog("sync");
+    std::cout << "----begin call syncToServer----"<<endl;
+    //poco_information(m_logger,"----begin call syncToServer----");
+    std::cout << "runing syncToServer Interval = "<<m_syncTimer->interval()<<endl;
+
+    m_uploadingFail = false;
 
     if(m_useServer!=1 )
     {
@@ -212,7 +201,7 @@ void StatusForm::syncToServer()
             if((logNew.GetUserUUID()=="") || (msecs>5000)){
                 logs.clear();
                 isNew=false;
-                ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,5,"asc",&logs);
+                ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,20,"asc",&logs);
             }
         }else
         {
@@ -232,7 +221,7 @@ void StatusForm::syncToServer()
         }
     }
     catch(Poco::Exception &e){
-        poco_warning(_logger,"selectlog fail:"+e.message());
+        poco_warning(m_logger," selectlog fail:"+e.message());
     }
 
     bool availbale = true;
@@ -260,7 +249,7 @@ void StatusForm::syncToServer()
                 ret = umxDB_deleteLogEntryById(_umxDBHandle, newlog.GetId(),&isimage);
             }
             catch(Poco::Exception &e){
-                poco_warning(_logger,"remove log fail:"+e.message());
+                poco_warning(m_logger,"remove log fail:"+e.message());
             }
 
             umxPeriDev_setLedIndicatorBrightness(255,0,0);
@@ -272,57 +261,69 @@ void StatusForm::syncToServer()
         }
     }
     //----结束二次验证
-    if (availbale && ret == UMXDB_SUCCESS)
+    if (availbale && ret == UMXDB_SUCCESS &&logs.size()>0)
     {
+        std::stringstream ss;
+        ss.clear();
+        ss<<"[";
         for(LogEntry log:logs){
-            Poco::Data::BLOB i(log.GetImageData());
-            std::cout<<"blob size="<<i.size()<<std::endl;
-            //Poco::Data::BLOBInputStream bis(i);
-            std::ostringstream os;
-            Poco::Base64Encoder encoder(os);
-            std::string s(i.rawContent(),i.size());
-            //std::vector<char> c = log.GetImageData().content();
-            //s.insert(s.begin(),c.begin(),c.end());
-            encoder<<s;
-            encoder.close();
-            //std::cout<<"asbase64: "<<os.str()<<std::endl;
-
-            std::stringstream ss;
-            ss.clear();
-            ss<<"{\"pId\":"<<1<<",\"deviceSN\":"<<"\""<<m_DeviceSN<<"\",\"id\":"<<log.GetId()<<",";
+            ss<<"\n{\"pId\":"<<0<<",\"deviceSN\":"<<"\""<<m_DeviceSN<<"\",\"id\":"<<log.GetId()<<",";
             ss<<"\"eventType\":\""<<log.GetEventType()<<"\",\"timeStamp\":\""<<log.GetTimestamp()<<"\",\"userUID\":\""<<log.GetUserUUID()<<"\",";
             ss<<"\"info\":\""<<log.GetInfo()<<"\",\"additionalData\":\""<<log.GetAdditionalData()<<"\",\"imageData\":";
-            if(m_configRequestImage == 0 || os.str()=="")
-                ss<<"null";
-            else
+            if(m_configRequestImage == 0 )
+                ss<<"\"\"";
+            else{ //解码Image
+                Poco::Data::BLOB i(log.GetImageData());
+                std::cout<<"blob size="<<i.size()<<std::endl;
+                std::ostringstream os;
+                Poco::Base64Encoder encoder(os);
+                std::string s(i.rawContent(),i.size());
+                //std::vector<char> c = log.GetImageData().content();
+                //s.insert(s.begin(),c.begin(),c.end());
+                encoder<<s;
+                encoder.close();
+                //std::cout<<"asbase64: "<<os.str()<<std::endl;
                 ss<<"\""<<os.str()<<"\"";
-            ss<<"}";
-            strJson=ss.str();
-            //strJson =log.AsJSONString();
-            std::cout<<"josn: "<<strJson<<std::endl;
-            std::cout<<"begin post"<<std::endl;
-            if (m_client->SyncToServerPost(strJson)==HTTPResponse::HTTPStatus::HTTP_CREATED)
-            {
-                ui->infoText->setText(QString("上传日志 logId=%1").arg(log.GetId()));
-                try{
-                    std::cout<<"upload log Id="<<log.GetId()<<std::endl;
-                    bool isimage=true;
-                    ret = umxDB_deleteLogEntryById(_umxDBHandle, log.GetId(),&isimage);
-                }
-                catch(Poco::Exception &e){
-                    poco_warning(_logger,"delete log fail:"+e.message());
-                }
-
             }
-            else
-            {
-                std::cout<<"返回，待syncTime调用后，再次尝试连接。"<<std::endl;
-                ui->infoText->setText("bad request or not found....");
-            }
-
+            ss<<"},";
         }
+        strJson=ss.str();
+        strJson.pop_back();
+        strJson=strJson+"\n]";
+        //strJson =log.AsJSONString();
+        std::cout<<"josn: "<<strJson<<std::endl;
+        std::cout<<"begin post"<<std::endl;
+        if (m_client->SyncToServerPost(strJson)==HTTPResponse::HTTPStatus::HTTP_CREATED)
+        {
+            //ui->infoText->setText(QString("上传日志 logId=%1").arg(log.GetId()));
+
+            try{
+                int b=logs.front().GetId();
+                int e=logs.back().GetId();
+                int size=logs.size();
+                std::cout<<"upload success, logs size="<<logs.size()<<" from "<<b <<" to "<<e <<std::endl;
+                poco_information_f3(m_logger,"upload success, logs size= %d from %d  to %d",size,b,e);
+                ret = umxDB_deleteLogEntryFromTo(_umxDBHandle,b,e);
+                //bool isimage=true;
+                //ret = umxDB_deleteLogEntryById(_umxDBHandle, log.GetId(),&isimage);
+            }
+            catch(Poco::Exception &e){
+                poco_warning(logger_handle,"rzagent: delete logs fail:"+e.message());
+            }
+        }
+        else
+        {
+            std::cout<<"上传失败，待syncTime调用后，再次尝试连接。"<<std::endl;
+            //poco_warning(m_logger,"SyncToServer:上传失败，待syncTime调用后，再次尝试连接。");
+            ui->infoText->setText("bad request or not found....");
+            m_uploadingFail = true;
+            return;
+        }
+
     }
-    m_timer->start();
+    //poco_information(m_logger,"----end call syncToServer----");
+    std::cout << "----end call syncToServer"<<endl;
+    m_syncTimer->start();
 }
 
 void StatusForm::syncTime()
@@ -343,4 +344,8 @@ void StatusForm::syncTime()
         system("hwclock -w");
     }
     m_timeTimer->start();
+    //重新激活同步计时器
+    if(m_uploadingFail)
+        m_syncTimer->start();
+    std::cout<<"call syncTime end"<<std::endl;
 }

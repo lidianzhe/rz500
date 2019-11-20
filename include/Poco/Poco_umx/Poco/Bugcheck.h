@@ -185,9 +185,9 @@ struct poco_static_assert_test
 	typedef char POCO_JOIN(poco_static_assert_typedef_, __LINE__) \
         [POCO_STATIC_ASSERTION_FAILURE<(bool) (B)>::value]
 #else
-#define poco_static_assert(B) \
-	typedef poco_static_assert_test<sizeof(POCO_STATIC_ASSERTION_FAILURE<(bool) (B)>)> \
-		POCO_JOIN(poco_static_assert_typedef_, __LINE__)
+    #define poco_static_assert(B) \
+            typedef poco_static_assert_test<sizeof(POCO_STATIC_ASSERTION_FAILURE<(bool) (B)>)> \
+                    POCO_JOIN(poco_static_assert_typedef_, __LINE__)
 #endif
 
 

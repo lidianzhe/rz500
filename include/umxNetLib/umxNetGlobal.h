@@ -459,11 +459,16 @@ namespace UMXNetwork
 
         void SetRecordVersion(const int version);
 
+        void SetServerMatchingKey(const std::string& smkey);
+
         const std::string AsJSONString() const;
         const cjsonpp::JSONObject AsJSONObject() const;
 
         const std::string AsJSONStringVer1() const;
         const cjsonpp::JSONObject AsJSONObjectVer1() const;
+
+        const std::string AsJSONStringVer2() const;
+        const cjsonpp::JSONObject AsJSONObjectVer2() const;
 
     private:
         std::string _encounterId;
@@ -546,6 +551,8 @@ namespace UMXNetwork
         std::string _errorMessage;
 
         int _recordVersion;
+
+        std::string _smKey; //server matching key
     };
 
     class BiometricDataCache
@@ -630,6 +637,25 @@ namespace UMXNetwork
                 return data;
             }
 
+            if((jsonString.find("Warning") != std::string::npos) || (jsonString.find("warning") != std::string::npos))
+            {
+                data._retCode = 0;
+                return data;
+            }
+
+            std::size_t pos = jsonString.find("resultCode");
+            if(pos <= 0)
+            {
+                data._retCode = 0;
+                return data;
+            }
+
+            if(jsonString.find("200", pos) == std::string::npos)
+            {
+                data._retCode = 0;
+                return data;
+            }            
+
         //    std::cout << jsonString << std::endl;
             cjsonpp::JSONObject obj = cjsonpp::parse( jsonString );
 
@@ -669,7 +695,6 @@ namespace UMXNetwork
     public:
         std::string _lockUuid;
         std::string _serialNo;
-        int _encryptMethod;
 
     private:
         const char* getKey() const;
@@ -725,6 +750,8 @@ namespace UMXNetwork
         std::string _leftImgData;
         std::string _rightImgData;
         std::string _irisCapturedFace;
+        std::string _smKey;
+        std::string _serialNo;
 
         int _leftImgHeight;
         int _leftImgWidth;
@@ -895,6 +922,7 @@ namespace UMXNetwork
         virtual int deleteUserInfoByUUID(const std::string uuid)=0;
         virtual int deleteAllUsers()=0;
         virtual int selectLogEntryFromToByPage(const int pageNumber, const int pageSize, const int fromId, const int toId, std::vector<LogEntry> *retLogEntry)=0;
+        virtual int selectLogEntryFromCount(const int fromId, const int count, std::vector<LogEntry> *retLogEntry)=0;
         virtual int selectLogEntryByPage(const int pageNumber, const int pageSize, const std::string& order, std::vector<LogEntry> *retLogEntry)=0;
         virtual LogEntry selectLogEntryById(const int id)=0;
         virtual bool deleteLogEntryFromTo(const int fromId, const int toId)=0;
@@ -952,7 +980,7 @@ namespace UMXNetwork
 
         //- update config properties
         virtual int GetUpdateConfigProperties()=0;
-        virtual void SetUpdateConfigProperties(int nUpdateConfigProperties)=0;
+        virtual void SetUpdateConfigProperties(int nUpdateConfigProperties, int micVol, int spkVol)=0;
 
         //- update firmware
         virtual int GetUpdateFirmwareSize()=0;
@@ -966,10 +994,60 @@ namespace UMXNetwork
         virtual void setSerialNo(std::string serialNo) = 0;
         virtual std::string getSerialNo() = 0;
 
-        virtual int insertUser(SubjectData *subjectData,
-                               std::vector<FaceData>* faceData,
-                               UserInfoData* userInfoData) = 0;
+        virtual int insertUser(SubjectData *subjectData, std::vector<FaceData>* faceData, UserInfoData* userInfoData) = 0;
+        virtual int insertUser(SubjectData *subjectData, std::vector<FaceData>* faceData, UserInfoData* userInfoData, std::vector<CardInfoData>* cardInfoDatas) = 0;
         virtual int deleteUserByUUID(const std::string uuid) = 0;
+
+        virtual int insertCards(std::vector<CardInfoData>* cardInfoDatas) = 0;
+        virtual int selectCardInfoByUUID(const std::string uuid, std::vector<CardInfoData>* cardInfoDatas) = 0;
+        virtual int deleteCardInfoByUUID(const std::string uuid) = 0;
+
+        virtual void setNotTransmissionLogId(int logId) = 0;
+        virtual void getNotTransmissionLogId(std::vector<int>* retLogId) = 0;
+        virtual void deleteNotTransmissionLogId(int logId) = 0;
+
+        virtual int selectUserScheduleDataByUUID(std::string uuid, UserScheduleData *retAllUserInfo)=0;
+        virtual int deleteAllScheduleData() = 0;
+        virtual bool deleteScheduleDataByUUID(std::string uuid) = 0;
+        virtual bool insertScheduleData(UserScheduleData* data) = 0;
+        virtual int updateScheduleData(UserScheduleData* data) = 0;
+
+        virtual int selectScheduleInfo(const int scIdx, const int siIdx, std::vector<Schedule>* retData) = 0;
+        virtual int selectScheduleSpecialDay(const std::string sdType, const std::string uuid, std::string sdDate, std::vector<ScheduleSpecialDay>* retData) = 0;
+        virtual int selectScheduleTypeInfo(const int stiIdx, const int stIdx, std::vector<ScheduleTypeInfo>* retData) = 0;
+
+        virtual int deleteScheduleBySchedule(Schedule* data) = 0;
+        virtual int deleteScheduleByScheduleSpecialDay(ScheduleSpecialDay* data) = 0;
+        virtual int deleteScheduleByScheduleTypeInfo(ScheduleTypeInfo* data) = 0;
+
+        virtual int insertScheduleBySchedule(Schedule* data) = 0;
+        virtual int insertScheduleByScheduleSpecialDay(ScheduleSpecialDay* data) = 0;
+        virtual int insertScheduleByScheduleTypeInfo(ScheduleTypeInfo* data) = 0;
+
+        virtual int updateScheduleBySchedule(Schedule* data) = 0;
+        virtual int updateScheduleByScheduleSpecialDay(ScheduleSpecialDay* data) = 0;
+        virtual int updateScheduleByScheduleTypeInfo(ScheduleTypeInfo* data) = 0;
+
+        virtual void setSignalSmbDoorEvent(int type, int duration) = 0;
+        virtual void setSignalSmbFireEvent(int state) = 0;
+
+        virtual int updateUserScheduleByUsersInfoData(std::vector<UserInfoData>* data) = 0;
+        virtual int setDeviceScheduleType(int sc_idx) = 0;
+        virtual void updateDeviceScheduleTypeInfo(bool ignore = false) = 0;
+
+        virtual void setManualOperation(int type) = 0;
+        virtual int getManualOperation() = 0;
+
+        virtual int getControlOperationActiveMode() = 0;
+        virtual void setControlOperationActiveMode(int active) = 0;
+
+        virtual int getControlOperationType() = 0;
+        virtual void setControlOperationType(int newOpMode) = 0;
+
+        virtual void getControlOperationHostInfo(std::string* hostIp, int* hostPort, std::string* request_uri) = 0;
+        virtual void setControlOperationHostInfo(std::string hostIp, int hostPort, std::string request_uri) = 0;
+
+        virtual bool get52HoursInfo(std::string uuid, int taMode, ControlDatas* retData, int delayTimeout) = 0;
     };
 }
 

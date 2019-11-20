@@ -132,7 +132,7 @@ namespace TemplateConverter
         // Write the header(s) using little-endian byte order
         const Poco::Int32 File_Hdr_Size  = 14;
         const Poco::Int32 Bmp_Hdr_Size   = 40;
-        const Poco::Int32 Pal_Hdr_Size   = 4 * 256;
+        //const Poco::Int32 Pal_Hdr_Size   = 4 * 256;
         const Poco::Int32 Total_Hdr_Size = File_Hdr_Size + Bmp_Hdr_Size; // + Pal_Hdr_Size;
 
         Poco::Int32 Row_Size       = ( ( width % 4 ) == 0 ) ? width : ( ( width | 4 ) & ( ~3 ) );
@@ -451,7 +451,7 @@ namespace TemplateConverter
         // Write the header(s) using little-endian byte order
         const Poco::Int32 File_Hdr_Size  = 14;
         const Poco::Int32 Bmp_Hdr_Size   = 40;
-        const Poco::Int32 Pal_Hdr_Size   = 4 * 256;
+        //const Poco::Int32 Pal_Hdr_Size   = 4 * 256;
         const Poco::Int32 Total_Hdr_Size = File_Hdr_Size + Bmp_Hdr_Size; // + Pal_Hdr_Size;
 
         Poco::Int32 Row_Size       = ( ( width % 4 ) == 0 ) ? width : ( ( width | 4 ) & ( ~3 ) );

@@ -63,6 +63,8 @@ typedef void *UMXDB_HANDLE;
 
 #define UMXDB_ERROR_IN_ARGUMENTS_IMAGECAPTURE_VECTOR_NULL_POINTER                                 -60
 
+#define UMXDB_ERROR_TEXT_ENCRYPTION                                                               -70
+
 #define UMXDB_ERROR_UUID_NULL_STRING                                                             -100
 #define UMXDB_ERROR_PAGE_INVALID                                                                 -101
 #define UMXDB_ERROR_PAGESIZE_INVALID                                                             -102
@@ -104,6 +106,20 @@ typedef void *UMXDB_HANDLE;
 #define UMXDB_EXCEPTION_SUBJECT_SELECT_BY_UUID                                                   -320
 #define UMXDB_EXCEPTION_SUBJECT_FEATURE_ENCRYPTION                                               -321
 #define UMXDB_EXCEPTION_SUBJECT_FEATURE_DECRYPTION                                               -322
+#define UMXDB_EXCEPTION_SCHEDULE_SEARCH_BY_UUID                                                  -323
+#define UMXDB_EXCEPTION_SCHEDULEINFO_SEARCH                                                      -324
+#define UMXDB_EXCEPTION_SCHEDULESPECIALDAY_SEARCH                                                -325
+#define UMXDB_EXCEPTION_SCHEDULETYPEINFO_SEARCH                                                  -326
+#define UMXDB_EXCEPTION_SCHEDULEINFO_DELETE                                                      -327
+#define UMXDB_EXCEPTION_SCHEDULESPECIALDAY_DELETE                                                -328
+#define UMXDB_EXCEPTION_SCHEDULETYPEINFO_DELETE                                                  -329
+#define UMXDB_EXCEPTION_SCHEDULEINFO_INSERT                                                      -330
+#define UMXDB_EXCEPTION_SCHEDULESPECIALDAY_INSERT                                                -331
+#define UMXDB_EXCEPTION_SCHEDULETYPEINFO_INSERT                                                  -332
+#define UMXDB_EXCEPTION_SCHEDULEINFO_UPDATE                                                      -333
+#define UMXDB_EXCEPTION_SCHEDULESPECIALDAY_UPDATE                                                -334
+#define UMXDB_EXCEPTION_SCHEDULETYPEINFO_UPDATE                                                  -335
+#define UMXDB_EXCEPTION_SCHEDULE_DELETE_BYUSER                                                   -336
 
 #define UMXDB_ERROR_FACE_COUNT_UUID                                                              -400
 #define UMXDB_ERROR_FACE_COUNT_UUID_NO_EXIST                                                     -401
@@ -176,6 +192,11 @@ typedef void *UMXDB_HANDLE;
 #define UMXDB_EXCEPTION_USER_COUNT_UUID                                                          -763
 #define UMXDB_EXCEPTION_USER_INSERT                                                              -764
 
+#define UMXDB_ERROR_SCHEDULEDATA_DELETE_ALL                                                      -770
+#define UMXDB_EXCEPTION_SCHEDULEDATA_DELETE_ALL                                                  -771
+#define UMXDB_ERROR_SCHEDULEDATA_DELETE_BY_UUID                                                  -772
+#define UMXDB_EXCEPTION_SCHEDULEDATA_DELETE_BY_UUID                                              -773
+
 #define UMXDB_ERROR_EVENTLOG_SELECT_BY_LAST_LOGID                                                -800
 #define UMXDB_ERROR_EVENTLOG_DELETE_BY_LOGID                                                     -801
 #define UMXDB_ERROR_EVENTLOG_DELETE_BY_LOGID_FROM_TO                                             -802
@@ -199,8 +220,13 @@ typedef void *UMXDB_HANDLE;
 #define UMXDB_EXCEPTION_EVENTLOG_DELETE_FIRST_LOG                                                -913
 #define UMXDB_EXCEPTION_EVENTLOG_DELETE_BY_LOGID                                                 -914
 #define UMXDB_EXCEPTION_EVENTLOG_SELECT_IMAGE_LOGS                                               -915
+#define UMXDB_EXCEPTION_EVENTLOG_SELECT_LOG_INVALID_ARGUMENTS                                    -916
+#define UMXDB_EXCEPTION_EVENTLOG_SELECT_LOG                                                      -917
 
 #define UMXDB_EXCEPTION_IMAGECAPTURE_SELECT_ALL                                                 -1000
+
+#define UMXDB_EXCEPTION_MAIN_DB_INTEGRITY                                                        -1100
+#define UMXDB_EXCEPTION_EVENT_DB_INTEGRITY                                                       -1101
 
 #define DB_NEUROTECH_FEATURE_VERSION_6_0                                                        0x3600
 #define DB_NEUROTECH_FEATURE_VERSION_10_0                                                       0x3A00

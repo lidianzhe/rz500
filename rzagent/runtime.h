@@ -4,6 +4,10 @@
 #include "umxAlgoLib/umxAlgoGlobal.h"
 #include "umxDBLib/umxDBGlobal.h"
 #include <iostream>
+
+using namespace std;
+using Poco::Logger;
+#define logger_handle (Logger::get("main"))
 class Runtime
 {
 public:
@@ -12,6 +16,7 @@ public:
     UMXALGO_HANDLE umxalgo_Handle;
     UMXDB_HANDLE umxdb_Handle;
     string lock_uid;
+    Logger& initLog(std::string name="main");
 };
 
 extern Runtime dzrun;

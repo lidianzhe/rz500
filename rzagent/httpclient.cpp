@@ -74,7 +74,7 @@ std::string Client::Get()
 
 HTTPResponse::HTTPStatus Client::SyncToServerPost(std::string &body)
 {
-
+    Logger& m_logger=dzrun.initLog("sync");
     URI uri("http://"+m_Server+m_Path+m_LogsUri);
     HTTPClientSession session(uri.getHost(),uri.getPort());
     HTTPRequest request(HTTPRequest::HTTP_POST,uri.getPath(),HTTPRequest::HTTP_1_1);
@@ -92,13 +92,15 @@ HTTPResponse::HTTPStatus Client::SyncToServerPost(std::string &body)
     catch(Poco::Exception &exc){
         session.reset();
         std::cout << "post request:"<<exc.displayText() <<std::endl;
+        poco_warning_f1(m_logger,"POST: %s",exc.displayText());
         return HTTPResponse::HTTPStatus::HTTP_NOT_FOUND;
     }
     catch(...){
-        std::cout << "post request: no handle error"<<std::endl;
+        session.reset();
+        poco_error(m_logger,"POST: no handle error");
+        std::cout << "POST: no handle error"<<std::endl;
         return HTTPResponse::HTTPStatus::HTTP_EXPECTATION_FAILED;
     }
-
 }
 
 std::string Client::getDatetime()
@@ -124,7 +126,9 @@ std::string Client::getDatetime()
     }
     catch(Poco::Exception &exc)
     {
+        Logger& m_logger=dzrun.initLog("sync");
         std::cout <<"getTime request:" <<exc.displayText() <<std::endl;
+        poco_warning_f1(m_logger,"GET: %s",exc.displayText());
         return "";
     }
     catch(...)

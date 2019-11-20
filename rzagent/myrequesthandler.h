@@ -54,6 +54,8 @@ private:
     bool stealLock();
     void checkConnetct();
 
+    void InitLog();
+
     HTTPResponse::HTTPStatus AddSubject(SubjectData &subject);
     HTTPResponse::HTTPStatus AddUserInfo(UserInfoData &userinfo);
     HTTPResponse::HTTPStatus AddFace(FaceData &facedata);

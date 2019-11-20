@@ -42,6 +42,7 @@ class StatusForm : public QDialog
 public:
     explicit StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent = 0);
     ~StatusForm();
+
         int m_checkAvailable=0;
     //返回设备是否为调试模式
     int getDebugMode(){return m_debugMode || m_showMessage;}
@@ -54,7 +55,7 @@ private:
 
     QStackedWidget *_pQStackedWidget;
     // umxAlgoLib, umxDBLib, umxNetLib
-    Poco::Logger& _logger;
+
     Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> m_config;
 
     // umxAlgoLib
@@ -62,7 +63,7 @@ private:
     // umxDBLib
     UMXDB_HANDLE _umxDBHandle;
     UMXCAM_HANDLE _umxCAMHandle;
-
+    //Poco::Logger& _logger;
     //algoutils
     AlgoUtils* m_utils;
 
@@ -70,12 +71,14 @@ private:
     //
     std::string m_DeviceSN;
     Client *m_client;
-    QTimer *m_timer;
+    QTimer *m_syncTimer;
     QTimer *m_timeTimer;
     int m_useServer;
     int m_debugMode;
     int m_configRequestImage;
     int m_showMessage=0;
+
+    bool m_uploadingFail=false;
 
     void initlog();
     void readConfig();

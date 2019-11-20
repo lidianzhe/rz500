@@ -764,7 +764,7 @@ extern "C" {
 
     int _UMXDB_EXPORT umxDB_insertLog_ADR(UMXDB_HANDLE handle, const char* type, const char* uuid, const char* info, const char* message, const char* matchedFaceImage, int matchedFaceImageSize);
 
-    int _UMXDB_EXPORT umxDB_insertLog(UMXDB_HANDLE handle, const std::string& type, const std::string& uuid, const std::string& info, const std::string& message, const char* matchedFaceImage, int matchedFaceImageSize);
+    int _UMXDB_EXPORT umxDB_insertLog(UMXDB_HANDLE handle, const std::string& type, const std::string& uuid, const std::string& info, const std::string& message, const char* matchedFaceImage, int matchedFaceImageSize, std::string timestamp);
     // Insert log into event_log table of ServiceLog.db.
     //
     // handle[in] - UMXDB_HANDLE value
@@ -839,6 +839,23 @@ extern "C" {
     // pageSize[in] - page size
     // fromId[in] - from id
     // toId[in] - to id
+    // retLogEntry[out] - LogEntry class's instance list
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_IN_ARGUMENTS_EVENTLOG_VECTOR_NULL_POINTER
+    //                UMXDB_ERROR_PAGE_INVALID
+    //                UMXDB_ERROR_PAGESIZE_INVALID
+    //                UMXDB_ERROR_EVENTLOG_LOGID_FROM_TO_WRONG_RANGE
+    //                UMXDB_EXCEPTION_EVENTLOG_SELECT_LOG_PAGE_BY_LOGID_FROM_TO_INVALID_PAGE
+    //                UMXDB_EXCEPTION_EVENTLOG_SELECT_LOG_PAGE_BY_LOGID_FROM_TO
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_selectLogEntryFromCount(UMXDB_HANDLE handle, const int fromId, const int count, std::vector<LogEntry> *retLogEntry);
+    // Select LogEntry from id to id by page.
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // fromId[in] - from id
+    // count[in] - limit count
     // retLogEntry[out] - LogEntry class's instance list
     //
     // Return value - UMXDB_ERROR_INVALID_HANDLE
@@ -1226,6 +1243,14 @@ extern "C" {
     // Return value - UMXDB_ERROR_INVALID_HANDLE
     //                UMXDB_SUCCESS
 
+    int _UMXDB_EXPORT umxDB_encryptPlainText(UMXDB_HANDLE handle, unsigned char* src, int srcSize, unsigned char* ret, int* retSize);
+    // Set encrypt data.
+    //
+    // handle[in] - UMXDB_HANDLE value
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_SUCCESS
+
     int _UMXDB_EXPORT umxDB_setDecryptFaceFeatureData(UMXDB_HANDLE handle, unsigned char* src, int srcSize, unsigned char* ret, int* retSize);
     // Set decrypt data.
     //
@@ -1312,7 +1337,22 @@ extern "C" {
 
     int _UMXDB_EXPORT umxDB_test_ADR(UMXDB_HANDLE handle, char* str0, std::string& str1, std::vector<std::string> *strAll, LogEntry* logEntry, ImageCapture* imageCapture);
 
-    int _UMXDB_EXPORT umxDB_insertUser(UMXDB_HANDLE handle, SubjectData *subjectData, std::vector<FaceData>* faceData, UserInfoData* userInfoData, CardInfoData card_info);
+    int _UMXDB_EXPORT umxDB_insertUser(UMXDB_HANDLE handle, SubjectData *subjectData, std::vector<FaceData>* faceDatas, UserInfoData* userInfoData, CardInfoData card_info);
+    // Insert subject using SubjectData.
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // subjectData[in] - SubjectData type's iris data
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_LASTNAME_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_ALREADY_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_INSERT
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_insertUser2(UMXDB_HANDLE handle, SubjectData *subjectData, std::vector<FaceData>* faceDatas, UserInfoData* userInfoData, std::vector<CardInfoData>* cardInfoDatas);
     // Insert subject using SubjectData.
     //
     // handle[in] - UMXDB_HANDLE value
@@ -1353,6 +1393,272 @@ extern "C" {
     //                UMXDB_SUCCESS
 
 #endif
+
+    int _UMXDB_EXPORT umxDB_integrityServiceDB(UMXDB_HANDLE handle);
+    // Integrity check (Service.db)
+    //
+    // handle[in] - UMXDB_HANDLE value
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_LASTNAME_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_ALREADY_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_INSERT
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_integrityServiceLogDB(UMXDB_HANDLE handle);
+    // Integrity check (ServiceLog.db)
+    //
+    // handle[in] - UMXDB_HANDLE value
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_LASTNAME_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_ALREADY_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_INSERT
+    //                UMXDB_SUCCESS
+
+
+    int _UMXDB_EXPORT umxDB_selectUserScheduleUsed(UMXDB_HANDLE handle, std::string id);
+    // select pattern for user
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // id[in] - user unique id
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_LASTNAME_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_ALREADY_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_INSERT
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_selectScheduleTypeInfoByUser(UMXDB_HANDLE handle, std::string uuid);
+    // select type_info for user
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // uuid[in] - user id (if type is device)
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_LASTNAME_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_ALREADY_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_INSERT
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_selectScheduleTypeInfoByDevice(UMXDB_HANDLE handle, int sc_idx);
+    // select type_info for device
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // sc_idx[in] - schedule type value
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_LASTNAME_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_ALREADY_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_INSERT
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_selectUserScheduleDataByUUID(UMXDB_HANDLE handle, std::string uuid, UserScheduleData *retUserScheduleData);
+    // select schedule data for user
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // uuid[in] - user unique id
+    // retUserScheduleData[out] - schedule data
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_LASTNAME_NULL_STRING
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID_ALREADY_EXIST
+    //                UMXDB_ERROR_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_COUNT_UUID
+    //                UMXDB_EXCEPTION_SUBJECT_INSERT
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_deleteAllScheduleData(UMXDB_HANDLE handle);
+    // delete all schedule data
+    //
+    // handle[in] - UMXDB_HANDLE value
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_deleteScheduleDataByUUID(UMXDB_HANDLE handle, std::string uuid);
+    // delete schedule data for specific user
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // uuid[in] - user id
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_insertScheduleData(UMXDB_HANDLE handle, UserScheduleData* data);
+    // delete schedule data for specific user
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // UserScheduleData[in] - user schedule data
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_updateScheduleData(UMXDB_HANDLE handle, UserScheduleData* data);
+    // update schedule data for specific user
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // UserScheduleData[in] - user schedule data
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_selectScheduleInfo(UMXDB_HANDLE handle, const int scIdx, const int siIdx, std::vector<Schedule>* retData);
+    // select schedule info
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // scIdx[in] - schedule code
+    // siIdx[in] - schedule repeating cycle number
+    // retData[out] - schedule info
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_selectScheduleSpecialDay(UMXDB_HANDLE handle, const std::string sdType, const std::string uuid, std::string sdDate, std::vector<ScheduleSpecialDay>* retData);
+    // select schedule special day
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // sdType[in] - device and user classification
+    // uuid[in] - user id
+    // sdDate[in] - schedule date
+    // retData[out] - schedule special day
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_selectScheduleTypeInfo(UMXDB_HANDLE handle, const int stiIdx, const int stIdx, std::vector<ScheduleTypeInfo>* retData);
+    // select schedule type info
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // stiIdx[in] - main key
+    // stIdx[in] - sub key
+    // retData[out] - schedule type info
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_deleteScheduleBySchedule(UMXDB_HANDLE handle, Schedule* data);
+    // delete schedule
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - schedule data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_deleteScheduleByScheduleSpecialDay(UMXDB_HANDLE handle, ScheduleSpecialDay* data);
+    // delete schedule special day
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - ScheduleSpecialDay data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_deleteScheduleByScheduleTypeInfo(UMXDB_HANDLE handle, ScheduleTypeInfo* data);
+    // delete schedule type info
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - ScheduleTypeInfo data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_insertScheduleBySchedule(UMXDB_HANDLE handle, Schedule* data);
+    // insert schedule
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - schedule data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_insertScheduleByScheduleSpecialDay(UMXDB_HANDLE handle, ScheduleSpecialDay* data);
+    // insert schedule special day
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - ScheduleSpecialDay data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_insertScheduleByScheduleTypeInfo(UMXDB_HANDLE handle, ScheduleTypeInfo* data);
+    // insert schedule type info
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - ScheduleTypeInfo data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_updateScheduleBySchedule(UMXDB_HANDLE handle, Schedule* data);
+    // update schedule
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - schedule data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_updateScheduleByScheduleSpecialDay(UMXDB_HANDLE handle, ScheduleSpecialDay* data);
+    // update schedule special day
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - ScheduleSpecialDay data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_updateScheduleByScheduleTypeInfo(UMXDB_HANDLE handle, ScheduleTypeInfo* data);
+    // update schedule type info
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - ScheduleTypeInfo data pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
+    int _UMXDB_EXPORT umxDB_updateUserScheduleByUsersInfoData(UMXDB_HANDLE handle, std::vector<UserInfoData>* data);
+    // update schedule code to userinfo table
+    //
+    // handle[in] - UMXDB_HANDLE value
+    // data[in] - userinfodata pointer
+    //
+    // Return value - UMXDB_ERROR_INVALID_HANDLE
+    //                UMXDB_ERROR_UUID_NULL_STRING
+    //                UMXDB_SUCCESS
+
 
     /// ^^^^ special function ^^^^
 

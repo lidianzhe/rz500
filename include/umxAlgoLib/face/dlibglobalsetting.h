@@ -40,13 +40,6 @@ using Poco::FileChannel;
 using Poco::FormattingChannel;
 using Poco::PatternFormatter;
 using Poco::AutoPtr;
-
-static unsigned int _totalTime1  = 0;
-static unsigned int _totalTime2  = 0;
-static unsigned int _totalTime3  = 0;
-static unsigned int _totalTime4  = 0;
-static unsigned int _totalTime5  = 0;
-static unsigned int _totalTime6  = 0;
 #endif
 
 ////////////////////////////////////////////////////////////////////// /////////
@@ -78,19 +71,7 @@ typedef struct {
 typedef struct {
     unsigned long level;
     rectInfo_t rect;
-} detInfo_t;
-
-typedef struct {
-	double score;
-	rectInfo_t rect;
-} irisDetInfo_t;
-
-//static bool gLevelSetMode;
-//static bool gParallelMode;
-
-//static unsigned long gDiffPramidLevel;
-//static std::vector<detInfo_t> gFaceDetInfo;
-//static std::vector<detInfo_t> gEyeDetInfo;
+} faceEyeInfo_t;
 
 ////////////////////////////////////////////////////////////////////// /////////
 ///////////////////                                     /////////////// ////////
@@ -119,23 +100,16 @@ public:
     dlibGlobalSetting(){}
     ~dlibGlobalSetting(){}
 
-    void setFaceDetInfo(std::vector<detInfo_t> det_info);
-    void setEyeDetInfo(std::vector<detInfo_t> det_info);
-    void setIrisDetInfo(std::vector<irisDetInfo_t> det_info);
-    void setPyramidLevel(bool flag);
-    void setPyramidLevelValue(long start_level, long end_level);
-    void setParallelMode(bool flag);
-    void setWideSearchMode(bool flag); //true: wide search, false : narrow search
+    void setEyeDetInfo(std::vector<faceEyeInfo_t> faceEyeInfo);
+    void setFaceDetInfo(std::vector<faceEyeInfo_t> faceEyeInfo);
+	void setUseLimitedLevel(bool flag);
+	void setUseParallelMode(bool flag); 
 
-    bool getParallelMode(void);
-    bool getPyramidLevel(void);
-    bool getWideSearchMode();
+	bool getUseLimitedLevel();
+	bool getUseParallelMode();
 
-    unsigned long getPyramidLevelValue();
-
-    std::vector<detInfo_t> getFaceDetInfo();
-    std::vector<detInfo_t> getEyeDetInfo();
-    std::vector<irisDetInfo_t> getIrisDetInfo();
+    std::vector<faceEyeInfo_t> getFaceDetInfo();
+    std::vector<faceEyeInfo_t> getEyeDetInfo();
 
     #if defined(FACE_RECOG_SPEED_TEST)
     unsigned int  getTotalTime(unsigned int section);

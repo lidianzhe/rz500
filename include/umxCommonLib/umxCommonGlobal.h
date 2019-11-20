@@ -101,6 +101,157 @@ namespace UMXCommon {
         std::string _message;
     };
 
+    struct UsersInfoData
+    {
+        UsersInfoData();
+        static UsersInfoData Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        int _vSize;
+        std::vector<UserInfoData> _vData;
+    };
+
+    struct UserScheduleData
+    {
+    public:
+        enum {
+            USER_SCHEDULE_TYPE_NORMAL = 0,
+            USER_SCHEDULE_TYPE_GROUP,
+            USER_SCHEDULE_TYPE_MAX
+        };
+
+        UserScheduleData();
+        UserScheduleData(const std::string id, const std::string fromTime, const std::string toTime, const int used, const int scIdx);
+        static UserScheduleData Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        std::string _userUUID;
+        std::string _fromTime;
+        std::string _toTime;
+        int _used;
+        int _scIdx;
+
+        std::string _insertTime;
+        std::string _updateTime;
+    };
+
+    struct Schedule
+    {
+    public:
+        Schedule();
+        Schedule(const int scIdx, const int siIdx, const int stIdx, const std::string scType, const std::string scCond, const int scReDay, const std::string scStartDate);
+        static Schedule Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        int _scIdx;
+        int _siIdx;
+        int _stIdx;
+        std::string _scType;
+        std::string _scCond;
+        int _scReDay;
+        std::string _scStartDate;
+
+        std::string _insertTime;
+        std::string _updateTime;
+    };
+
+    struct Schedules
+    {
+        Schedules();
+        static Schedules Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        int _vSize;
+        std::vector<Schedule> _vData;
+    };
+
+    struct ScheduleSpecialDay
+    {
+    public:
+        ScheduleSpecialDay();
+        ScheduleSpecialDay(const std::string sdType, const std::string uuid, const std::string sdDate, const int stIdx);
+        static ScheduleSpecialDay Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        std::string _sdType;
+        std::string _uuid;
+        std::string _sdDate;
+        int _stIdx;
+
+        std::string _insertTime;
+        std::string _updateTime;
+    };
+
+    struct ScheduleSpecialDays
+    {
+        ScheduleSpecialDays();
+        static ScheduleSpecialDays Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        int _vSize;
+        std::vector<ScheduleSpecialDay> _vData;
+    };
+
+    struct ScheduleTypeInfo
+    {
+    public:
+        ScheduleTypeInfo();
+        ScheduleTypeInfo(const int stiIdx, const int stIdx, const std::string stiStartTime, const std::string stiEndTime, const std::string stiType);
+        static ScheduleTypeInfo Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        int _stiIdx;
+        int _stIdx;
+        std::string _stiStartTime;
+        std::string _stiEndTime;
+        std::string _stiType;
+
+        std::string _insertTime;
+        std::string _updateTime;
+    };
+
+    struct ScheduleTypeInfos
+    {
+        ScheduleTypeInfos();
+        static ScheduleTypeInfos Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        int _vSize;
+        std::vector<ScheduleTypeInfo> _vData;
+    };
+
     struct CardInfoData
     {
         CardInfoData();
@@ -569,6 +720,12 @@ namespace UMXCommon {
         const std::string AsJSONString() const;
         const cjsonpp::JSONObject AsJSONObject() const;
 
+        static ControlData RelayParse(const std::string jsonString);
+        static ControlData RelayParse(cjsonpp::JSONObject& obj);
+
+        static ControlData OperationReqParse(const std::string jsonString);
+        static ControlData OperationReqParse(cjsonpp::JSONObject& obj);
+
         template<class T>
         static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
     public:
@@ -581,12 +738,51 @@ namespace UMXCommon {
         int _wiegandFacility;
         int _wiegandCode;
         std::string _wiegandCustom;
-        int _touchEnableStart = 0;
-        int _cameraInitPos = 0;
-        int _launcherShow = 0;
-        std::string _resultViewImgData = "";
-        int _resultViewImgWidth = 0;
-        int _resultViewImgHeight = 0;
+        int _touchEnableStart;
+        int _cameraInitPos;
+        int _launcherShow;
+        std::string _resultViewImgData;
+        int _resultViewImgWidth;
+        int _resultViewImgHeight;
+
+        int _relayType;
+        int _relayDuration;
+        int _realyState;
+
+        int _opMode;
+        std::string _opHostAddr;
+        int _opHostPort;
+        std::string _opHostUri;
+
+    };
+
+    struct ControlDatasItem
+    {
+        ControlDatasItem();
+
+        int _property;
+        std::string _value;
+        bool _visible;
+    };
+
+    struct ControlDatas
+    {
+        ControlDatas();
+        static ControlDatas Parse(const std::string jsonString);
+        static ControlDatas Parse(cjsonpp::JSONObject& obj);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        int _opMode;
+        std::string _uuid;
+        std::string _serialNo;
+        std::string _timestamp;
+        std::string _taType;
+        std::string _mealStatus;
+        std::vector<ControlDatasItem> _vData;
     };
 
     class CommonData
@@ -613,6 +809,20 @@ namespace UMXCommon {
         std::vector<FaceData> _faceDatas;
         UserInfoData _userInfoData;
         CardInfoData _cardInfoData;
+        std::vector<CardInfoData> _cardInfoDatas;
+    };
+
+    struct CardsInfoData
+    {
+        CardsInfoData();
+        static CardsInfoData Parse(const std::string jsonString);
+        const std::string AsJSONString() const;
+        const cjsonpp::JSONObject AsJSONObject() const;
+
+        template<class T>
+        static bool HasValue(cjsonpp::JSONObject& obj, const std::string& name);
+
+        std::vector<CardInfoData> _cardDatas;
     };
 }
 

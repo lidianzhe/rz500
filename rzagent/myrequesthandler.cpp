@@ -23,6 +23,22 @@ using namespace Poco;
 using namespace Net;
 using namespace cjsonpp;
 
+#include "runtime.h"
+#include "Poco/Logger.h"
+#include "Poco/FileChannel.h"
+#include "Poco/AutoPtr.h"
+#include "Poco/PatternFormatter.h"
+#include "Poco/FormattingChannel.h"
+using Poco::DirectoryIterator;
+using Poco::Path;
+using Poco::File;
+using Poco::Logger;
+using Poco::FileChannel;
+using Poco::AutoPtr;
+using Poco::PatternFormatter;
+using Poco::FormattingChannel;
+
+
 MyRequestHandler::MyRequestHandler()
 {
 
@@ -38,14 +54,23 @@ void MyRequestHandler::handleRequest(HTTPServerRequest &request, HTTPServerRespo
     //std::cout <<qPrintable(path.at(2))<<endl;
     qDebug()<<path.count();
     //post /uploadimage
+
+    Logger& m_logger = dzrun.initLog("webrequest");
+    poco_information_f1(m_logger,"web request: %s",uri.getPathAndQuery());
+
+    qDebug()<<"web request:"<< QString::fromStdString( uri.getPathAndQuery());
+
     if(path.value(1)=="uploadimage" && request.getMethod()=="POST"){
         api_UploadImages(request,response);
         return;
     }
     if(path.value(1)=="reboot" && request.getMethod()=="POST")
     {
+        poco_information(logger_handle,"api:reboot");
         system("reboot");
     }
+
+
     //get /personscount
     if(path.value(1)=="personscount" && request.getMethod()=="GET"){
         api_GetPersonsCount(request,response);
@@ -183,6 +208,8 @@ void MyRequestHandler::api_GetPersonsCount(HTTPServerRequest &request, HTTPServe
 
 void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResponse &response)
 {
+    Logger &m_logger = dzrun.initLog("webrequest");
+
     Poco::URI uri(request.getURI());
     QStringList path=QString::fromStdString(uri.getPath()).split("/");
     QStringList query=QString::fromStdString(uri.getQuery()).split("&");
@@ -204,7 +231,6 @@ void MyRequestHandler::api_GetPersons(HTTPServerRequest &request, HTTPServerResp
 
     response.setChunkedTransferEncoding(true);
     response.setContentType("application/json");
-
 
     std::vector<SubjectData> result;
     int ret=umxDB_selectIrisesByPage(dzrun.umxdb_Handle,page_no,page_count,&result);
@@ -284,8 +310,8 @@ void MyRequestHandler::api_PostPersons(HTTPServerRequest &request, HTTPServerRes
     std::vector<JSONObject> stafflist= jobj.get("staff_list").asArray<JSONObject>();
     std::cout<<"size:"<<stafflist.size()<<std::endl;
     utilsHelper *util = new utilsHelper();
-
     JSONObject objlist=cjsonpp::arrayObject();
+    //poco_information(dzrun._logger,QString("api:开始下发 %0 人到设备").arg(stafflist.size()).toStdString());
     for(int i=0;i<stafflist.size();i++){
         JSONObject objstaff= stafflist[i];
         //std::cout<<objstaff.get<string>("staff_no")<<std::endl;
@@ -342,7 +368,7 @@ void MyRequestHandler::api_PostPersons(HTTPServerRequest &request, HTTPServerRes
     obj.set("error_msg","");
     obj.set("error_staff_list",objlist);
     ostr<<obj.print();
-
+    //poco_information(dzrun._logger,QString("api:成功下发 %0 人到设备").arg(stafflist.size()).toStdString());
     response.setStatusAndReason(HTTPResponse::HTTPStatus::HTTP_CREATED);
 }
 
@@ -764,6 +790,8 @@ void MyRequestHandler::checkConnetct()
     if(!tryLock() && dzrun.lock_uid=="")
         stealLock();
 }
+
+
 
 HTTPResponse::HTTPStatus  MyRequestHandler::AddSubject(SubjectData &subject)
 {
