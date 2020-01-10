@@ -26,6 +26,7 @@ void RootHandler::handleRequest(HTTPServerRequest &request, HTTPServerResponse &
     ostr << "\"20191001\":\"add extend properties.\"\n";
     ostr << "\"20191026\":\"修正时间没有写到固件的问题.\"\n";
     ostr << "\"20191120\":\"upgrade to 0.5.12 LLSDK,添加详细的日志功能\"\n";
+    ostr << "\"20191220\":\"改为批量上传功能\"\n";
     ostr <<"}";
     ostr<<endl;
 
