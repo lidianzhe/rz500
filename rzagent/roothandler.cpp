@@ -16,7 +16,7 @@ void RootHandler::handleRequest(HTTPServerRequest &request, HTTPServerResponse &
     response.setChunkedTransferEncoding(true);
     response.setContentType("application/json");
     std::ostream& ostr = response.send();
-    ostr << "{";
+    //ostr << "{";
     ostr << "\"version\":\"19.10.26\",\n";
     ostr << "\"20180309\":\"add convertimage\",\n";
     ostr << "\"20180730\":\"fix four question\"\n";
@@ -26,8 +26,9 @@ void RootHandler::handleRequest(HTTPServerRequest &request, HTTPServerResponse &
     ostr << "\"20191001\":\"add extend properties.\"\n";
     ostr << "\"20191026\":\"修正时间没有写到固件的问题.\"\n";
     ostr << "\"20191120\":\"upgrade to 0.5.12 LLSDK,添加详细的日志功能\"\n";
-    ostr << "\"20191220\":\"改为批量上传功能\"\n";
-    ostr <<"}";
+    ostr << "\"20200110\":\"批量上传功能\"\n";
+    ostr << "\"20200207\":\"修正UID乱码上传的问题\"\n";
+    //ostr <<"}";
     ostr<<endl;
 
 }

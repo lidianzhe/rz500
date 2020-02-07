@@ -267,8 +267,14 @@ void StatusForm::syncToServer()
         ss.clear();
         ss<<"[";
         for(LogEntry log:logs){
+            std::string uuid="";
+            if(log.GetInfo().find("{")==string::npos && log.GetInfo().find("[")==string::npos && log.GetInfo().find("}")==string::npos && log.GetInfo().find("]")==string::npos)
+            {
+                uuid=log.GetUserUUID();
+            }
+
             ss<<"\n{\"pId\":"<<0<<",\"deviceSN\":"<<"\""<<m_DeviceSN<<"\",\"id\":"<<log.GetId()<<",";
-            ss<<"\"eventType\":\""<<log.GetEventType()<<"\",\"timeStamp\":\""<<log.GetTimestamp()<<"\",\"userUID\":\""<<log.GetUserUUID()<<"\",";
+            ss<<"\"eventType\":\""<<log.GetEventType()<<"\",\"timeStamp\":\""<<log.GetTimestamp()<<"\",\"userUID\":\""<<uuid<<"\",";
             ss<<"\"info\":\""<<log.GetInfo()<<"\",\"additionalData\":\""<<log.GetAdditionalData()<<"\",\"imageData\":";
             if(m_configRequestImage == 0 )
                 ss<<"\"\"";
