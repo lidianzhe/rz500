@@ -71,7 +71,10 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     readConfig();
 
     // umxAlgoLib
-    int ret = umxAlgo_create(&_gUmxAlgoHandle, m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
+    int ret=  umxAlgo_create(&_gUmxAlgoHandle, m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV, UMXALGO_FACE_NORMAL);
+
+    //int ret = umxAlgo_create(&_gUmxAlgoHandle, m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
+
     //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_OPENCV);
     //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEUROTECH_VERILOOK_LITHUANIA);
     //int ret = umxAlgo_create(&_gUmxAlgoHandle, _logger.get("umxAlgoLib"), m_config, UMXALGO_IRIS_DELTAID_ACTIVEIRIS_USA, UMXALGO_FACE_NEC_NEOFACE_JAPAN);
@@ -95,6 +98,15 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     dzrun.umxalgo_Handle = _gUmxAlgoHandle;
     dzrun.umxdb_Handle = _umxDBHandle;
 
+    m_utilsHelper = new utilsHelper();
+    _rs232 = new CDeviceRs232();
+    umxPeriDev_setupRs232(9600);
+
+    //rs232Write("123",0);
+    _rs485 = new CDeviceRs485();
+    umxPeriDev_setupRs485(9600);
+    //rs485Write("123",0);
+
     //test
     //m_utils->algotest();
     //m_utils->algotest2("/home/root/right_vista.bmp","4","algovista");
@@ -103,8 +115,8 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
     m_serverThread = new ServerThread(this);
     m_serverThread->start();
-    if(m_useServer)
-    {
+//    if(m_useServer)
+//    {
         m_timeTimer = new QTimer(this);
         connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
         m_timeTimer->setInterval(1000*60);
@@ -112,9 +124,9 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
         m_syncTimer = new QTimer(this);
         connect(m_syncTimer,SIGNAL(timeout()),this,SLOT(syncToServer()));
-        m_syncTimer->setInterval(1000*(m_checkAvailable==1?1:5));
+        m_syncTimer->setInterval(1000*((m_checkAvailable || m_rs232)==1?1:3));
         m_syncTimer->start();
-    }
+//    }
 
 }
 
@@ -141,9 +153,19 @@ void StatusForm::readConfig()
     m_useServer=m_config->getInt("rzagent.server.useserver",0);
     m_configRequestImage = m_config->getInt("rzagent.json.requestimage",0);
     m_checkAvailable = m_config->getInt("rzagent.setup.checkAvailable",0);
+
+    m_cmdHead=m_config->getString("rzagent.rs.cmdhead","");
+    m_cmdEnd=m_config->getString("rzagent.rs.cmdend","");
+    m_rsEncode=m_config->getInt("rzagent.rs.encode",0); //0 ascii 1 hex 2 ten
+    m_rs232=m_config->getInt("rzagent.rs.rs232",0);
+    m_rs485=m_config->getInt("rzagent.rs.rs485",0);
+
+
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
     m_client->setServer(m_config->getString("launcher.network.server.serverip","118.31.22.44")+":"+m_config->getString("launcher.network.server.port","8080"));
     m_client->setPath(m_config->getString("launcher.network.server.syncuri","/api/"));
+
+
 
 }
 
@@ -172,16 +194,10 @@ void StatusForm::syncToServer()
     m_syncTimer->stop();
 
     Logger& m_logger=dzrun.initLog("sync");
-    std::cout << "----begin call syncToServer----"<<endl;
+    //std::cout << "----begin call syncToServer----"<<endl;
     //poco_information(m_logger,"----begin call syncToServer----");
-    std::cout << "runing syncToServer Interval = "<<m_syncTimer->interval()<<endl;
+    //std::cout << "runing syncToServer Interval = "<<m_syncTimer->interval()<<endl;
 
-    m_uploadingFail = false;
-
-    if(m_useServer!=1 )
-    {
-        return;
-    }
     std::string strJson;
     std::vector<LogEntry> logs;
     logs.clear();
@@ -198,7 +214,7 @@ void StatusForm::syncToServer()
             QDateTime t1 = QDateTime::fromString(QString::fromStdString(logNew.GetTimestamp()),"yyyy-MM-ddThh:mm:ssZ");
             QDateTime t2 = QDateTime::currentDateTime();
             qint64 msecs = t1.msecsTo(t2);
-            if((logNew.GetUserUUID()=="") || (msecs>5000)){
+            if((logNew.GetUserUUID()=="") || (msecs>2000)){
                 logs.clear();
                 isNew=false;
                 ret = umxDB_selectLogEntryByPage(_umxDBHandle,1,20,"asc",&logs);
@@ -211,19 +227,35 @@ void StatusForm::syncToServer()
                 QDateTime t1 = QDateTime::fromString(QString::fromStdString(logNew.GetTimestamp()),"yyyy-MM-ddThh:mm:ssZ");
                 QDateTime t2 = QDateTime::currentDateTime();
                 qint64 msecs = t1.msecsTo(t2);
-                if(logNew.GetUserUUID()=="" || msecs>5000){
+                if(logNew.GetUserUUID()=="" || msecs>2000){
                     isNew=false;
                 }
-            }else //count==0
+            }else //count==0 返回
             {
                 isNew=false;
+                m_syncTimer->start();
+                return;
             }
         }
     }
     catch(Poco::Exception &e){
         poco_warning(m_logger," selectlog fail:"+e.message());
     }
+    //----发送串口指令
+    if((m_rs232 || m_rs485)&& isNew){
+        string uuid=logNew.GetUserUUID();
+        int pid=logNew.GetId();
+        if(pid!=m_lastpid && logNew.GetEventType()=="Recognition"){
+            if(m_rs232)
+                rs232Write(logNew.GetUserUUID(),m_rsEncode);
+            if(m_rs485)
+                rs485Write(logNew.GetUserUUID(),m_rsEncode);
+            m_lastpid=pid;
+        }
+    }
 
+    //----
+    //----
     bool availbale = true;
     //----二次验证
     if(m_checkAvailable && isNew)
@@ -232,7 +264,7 @@ void StatusForm::syncToServer()
         //如果没查到则显示
         LogEntry newlog=logs[0];
              std::cout<<          newlog.GetUserUUID()<<std::endl;
-        std::string strAvailable =m_client->getAvailable(newlog.GetUserUUID());
+        std::string strAvailable =m_client->getAvailable(newlog.GetUserUUID(),m_DeviceSN);
         std::cout<<"getAvailable="<<strAvailable<<std::endl;
         if(strAvailable=="1")
         {
@@ -261,8 +293,20 @@ void StatusForm::syncToServer()
         }
     }
     //----结束二次验证
+    //如果没设置云上传，返回
+    if(m_useServer!=1 )
+    {
+        m_syncTimer->start();
+        return;
+    }
+    //如果上传失败过，等待时间计时器同步后再尝试
+    if(!m_allowtryupload){
+        m_syncTimer->start();
+        return ;
+    }
     if (availbale && ret == UMXDB_SUCCESS &&logs.size()>0)
     {
+        std::cout << "----begin try upload data...----"<<endl;
         std::stringstream ss;
         ss.clear();
         ss<<"[";
@@ -322,7 +366,8 @@ void StatusForm::syncToServer()
             std::cout<<"上传失败，待syncTime调用后，再次尝试连接。"<<std::endl;
             //poco_warning(m_logger,"SyncToServer:上传失败，待syncTime调用后，再次尝试连接。");
             ui->infoText->setText("bad request or not found....");
-            m_uploadingFail = true;
+            m_allowtryupload=false;
+            m_syncTimer->start();
             return;
         }
 
@@ -349,9 +394,91 @@ void StatusForm::syncTime()
         system(strTime.c_str());
         system("hwclock -w");
     }
+    //重新激活上传尝试
+    if(m_allowtryupload==false){
+        m_allowtryupload=true;
+    }
     m_timeTimer->start();
-    //重新激活同步计时器
-    if(m_uploadingFail)
-        m_syncTimer->start();
     std::cout<<"call syncTime end"<<std::endl;
+}
+
+void StatusForm::rs232Write(string uuid,int rsEncode)
+{
+    QString cmdHead=QString::fromStdString(m_cmdHead);
+    QString cmdEnd=QString::fromStdString(m_cmdEnd);
+    int formattype=10 ;
+    bool hexencode=0 ;
+    switch (rsEncode) {
+    case 1: //hex
+        formattype=16;
+        hexencode=1; //原样传出
+        break;
+    case 2: //10进制 hex传
+        formattype=10;
+        hexencode=1; //原样传出
+    default: //0 10进制 ascii传
+        formattype=10;
+        hexencode=0;
+        break;
+    }
+    //int id= std::stoi(uuid,nullptr,10);
+
+    QString strId=QString::fromStdString(uuid);
+    strId = QString::number(strId.toLong(),formattype);
+    std::cout << "write to rs232: "<<strId.toStdString()<<std::endl;
+
+    QByteArray baHead= QByteArray::fromHex(cmdHead.toLatin1());
+    QByteArray baEnd= QByteArray::fromHex(cmdEnd.toLatin1());
+    QByteArray baId;
+    if(hexencode){
+        baId= QByteArray::fromHex(strId.toLatin1());
+    }else
+    {
+        baId= strId.toLatin1();
+    }
+    QByteArray cmd;
+    cmd.append(baHead);
+    cmd.append(baId);
+    cmd.append(baEnd);
+    _rs232->write(cmd);
+}
+void StatusForm::rs485Write(string uuid,int rsEncode)
+{
+    QString cmdHead=QString::fromStdString(m_cmdHead);
+    QString cmdEnd=QString::fromStdString(m_cmdEnd);
+    int formattype=10 ;
+    bool hexencode=0 ;
+    switch (rsEncode) {
+    case 1: //hex
+        formattype=16;
+        hexencode=1; //原样传出
+        break;
+    case 2: //10进制 hex传
+        formattype=10;
+        hexencode=1; //原样传出
+    default: //0 10进制 ascii传
+        formattype=10;
+        hexencode=0;
+        break;
+    }
+    //int id= std::stoi(uuid,nullptr,10);
+
+    QString strId=QString::fromStdString(uuid);
+    strId = QString::number(strId.toLong(),formattype);
+    std::cout << "write to rs485: "<<strId.toStdString()<<std::endl;
+
+    QByteArray baHead= QByteArray::fromHex(cmdHead.toLatin1());
+    QByteArray baEnd= QByteArray::fromHex(cmdEnd.toLatin1());
+    QByteArray baId;
+    if(hexencode){
+        baId= QByteArray::fromHex(strId.toLatin1());
+    }else
+    {
+        baId= strId.toLatin1();
+    }
+    QByteArray cmd;
+    cmd.append(baHead);
+    cmd.append(baId);
+    cmd.append(baEnd);
+    _rs485->write(cmd);
 }

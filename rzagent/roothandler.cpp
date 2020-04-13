@@ -28,6 +28,7 @@ void RootHandler::handleRequest(HTTPServerRequest &request, HTTPServerResponse &
     ostr << "\"20191120\":\"upgrade to 0.5.12 LLSDK,添加详细的日志功能\"\n";
     ostr << "\"20200110\":\"批量上传功能\"\n";
     ostr << "\"20200207\":\"修正UID乱码上传的问题\"\n";
+    ostr << "\"20200411\":\"增加串口输出的功能\"\n";
     //ostr <<"}";
     ostr<<endl;
 

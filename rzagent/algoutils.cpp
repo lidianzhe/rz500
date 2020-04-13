@@ -230,6 +230,7 @@ int AlgoUtils::getTemplateString(const string &base64Input, string &base64Output
     QByteArray qa64 = strContent.toLatin1();
     QByteArray qa = QByteArray::fromBase64(qa64);
     img.loadFromData(qa);
+    img.save("/home/root/test.bmp");
     //int retGetEnroll = algo->getEnrollTemplate(&img2, irisGetEnrolTemplateOutput);
 
     UMXALGO_IRIS_GET_ENROL_TEMPLATE_OUTPUT irisTemplateOutput;

@@ -22,6 +22,9 @@ public:
     //static AlgoUtils* m_agloUtils;
     std::string toBase64 (const std::string &source);
     std::string fromBase64 (const std::string &source);
+    QByteArray QString2Hex(QString str);
+private:
+    char ConvertHexChar(char ch);
 };
 
 #endif // UTILSHELPER_H

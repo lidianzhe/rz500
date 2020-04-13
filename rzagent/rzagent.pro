@@ -85,7 +85,9 @@ SOURCES += main.cpp\
     myrequesthandlerfactory.cpp \
     serverthread.cpp \
     runtime.cpp \
-    entities.cpp
+    entities.cpp \
+    CDeviceRs232.cpp \
+    CDeviceRs485.cpp
 
 HEADERS  += mainwindow.h \
     logentity.h \
@@ -99,7 +101,9 @@ HEADERS  += mainwindow.h \
     myrequesthandlerfactory.h \
     serverthread.h \
     runtime.h \
-    entities.h
+    entities.h \
+    CDeviceRs232.h \
+    CDeviceRs485.h
 
 FORMS    += mainwindow.ui \
     statusform.ui
