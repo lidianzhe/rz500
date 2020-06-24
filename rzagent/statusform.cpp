@@ -265,7 +265,7 @@ void StatusForm::syncToServer()
         LogEntry newlog=logs[0];
              std::cout<<          newlog.GetUserUUID()<<std::endl;
         std::string strAvailable =m_client->getAvailable(newlog.GetUserUUID(),m_DeviceSN);
-        std::cout<<"getAvailable="<<strAvailable<<std::endl;
+        std::cout<<"getAvailable="<<strAvailable<<"SN="<<m_DeviceSN<<std::endl;
         if(strAvailable=="1")
         {
                     std::cout<<"setRelay=1"<<std::endl;
