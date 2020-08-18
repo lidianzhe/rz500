@@ -115,18 +115,18 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
     m_serverThread = new ServerThread(this);
     m_serverThread->start();
-//    if(m_useServer)
-//    {
-        m_timeTimer = new QTimer(this);
-        connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
-        m_timeTimer->setInterval(1000*60);
-        m_timeTimer->start();
+    //    if(m_useServer)
+    //    {
+    m_timeTimer = new QTimer(this);
+    connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
+    m_timeTimer->setInterval(1000*60);
+    m_timeTimer->start();
 
-        m_syncTimer = new QTimer(this);
-        connect(m_syncTimer,SIGNAL(timeout()),this,SLOT(syncToServer()));
-        m_syncTimer->setInterval(1000*((m_checkAvailable || m_rs232)==1?1:3));
-        m_syncTimer->start();
-//    }
+    m_syncTimer = new QTimer(this);
+    connect(m_syncTimer,SIGNAL(timeout()),this,SLOT(syncToServer()));
+    m_syncTimer->setInterval(1000*((m_checkAvailable || m_rs232 || m_rs485 || m_dynamicWg)==1?1:3));
+    m_syncTimer->start();
+    //    }
 
 }
 
@@ -159,7 +159,7 @@ void StatusForm::readConfig()
     m_rsEncode=m_config->getInt("rzagent.rs.encode",0); //0 ascii 1 hex 2 ten
     m_rs232=m_config->getInt("rzagent.rs.rs232",0);
     m_rs485=m_config->getInt("rzagent.rs.rs485",0);
-
+    m_dynamicWg=m_config->getInt("rzagent.wg.dynamic",0);
 
     //std::cout<<"write serialnumber:"<<m_config->getString("umx.device.serialnumber")<<std::endl;
     m_client->setServer(m_config->getString("launcher.network.server.serverip","118.31.22.44")+":"+m_config->getString("launcher.network.server.port","8080"));
@@ -241,58 +241,78 @@ void StatusForm::syncToServer()
     catch(Poco::Exception &e){
         poco_warning(m_logger," selectlog fail:"+e.message());
     }
-    //----发送串口指令
-    if((m_rs232 || m_rs485)&& isNew){
-        string uuid=logNew.GetUserUUID();
-        int pid=logNew.GetId();
-        if(pid!=m_lastpid && logNew.GetEventType()=="Recognition"){
+
+    bool availbale = true; //default不需要二次验证，是有效的
+
+    //新记录并且识别类型并且不等同最后处理的记录，才执行串口或韦根发送或二次验证，避免多次执行
+    int pid=logNew.GetId();
+    if(isNew && pid!=m_lastpid && logNew.GetEventType()=="Recognition"){
+        //----发送串口指令
+        if((m_rs232 || m_rs485)&& isNew){
             if(m_rs232)
                 rs232Write(logNew.GetUserUUID(),m_rsEncode);
             if(m_rs485)
                 rs485Write(logNew.GetUserUUID(),m_rsEncode);
-            m_lastpid=pid;
         }
-    }
+        //----end rs232
 
-    //----
-    //----
-    bool availbale = true;
-    //----二次验证
-    if(m_checkAvailable && isNew)
-    {
-        std::cout<<"call getAvailable api"<<std::endl;
-        //如果没查到则显示
-        LogEntry newlog=logs[0];
-             std::cout<<          newlog.GetUserUUID()<<std::endl;
-        std::string strAvailable =m_client->getAvailable(newlog.GetUserUUID(),m_DeviceSN);
-        std::cout<<"getAvailable="<<strAvailable<<std::endl;
-        if(strAvailable=="1")
-        {
-                    std::cout<<"setRelay=1"<<std::endl;
-            umxPeriDev_setRelay(1);
-            sleep(1);
-            umxPeriDev_setRelay(0);
-        }
-        else
-        {
-            try{
-                std::cout<<"remove log Id="<<newlog.GetId()<<std::endl;
-                bool isimage=true;
-                ret = umxDB_deleteLogEntryById(_umxDBHandle, newlog.GetId(),&isimage);
-            }
-            catch(Poco::Exception &e){
-                poco_warning(m_logger,"remove log fail:"+e.message());
-            }
+        //--begin 双韦根
+        if(m_dynamicWg && isNew){
+            //        QString strid=QString::fromStdString(logNew.GetUserUUID());
+            //        bool isNumber=false;
+            //        int uid= strid.toInt(&isNumber); //先得到用户Id
+            int uid = std::stoi(logNew.GetUserUUID());
 
-            umxPeriDev_setLedIndicatorBrightness(255,0,0);
-            ui->infoText->setText(QString("Can't Find Location CARD"));
-            sleep(1);
-            system("aplay /usr/local/share/CMITECH/sound/cn/unauthorized.wav");
-            umxPeriDev_setLedIndicatorBrightness(0,0,0);
-            availbale=false;
+            if(logNew.GetEventType()=="Recognition"){
+                string info=logNew.GetInfo();
+                if(info.substr(0,2)=="In")
+                    uid=uid+10000;
+                if(info.substr(0,3)=="Out")
+                    uid=uid+20000;
+                wgWrite(uid);
+            }
         }
-    }
-    //----结束二次验证
+        //--end 双韦根
+        //----二次验证
+        if(m_checkAvailable && isNew)
+        {
+            std::cout<<"call getAvailable api"<<std::endl;
+            //如果没查到则显示
+            LogEntry newlog=logs[0];
+            std::cout<<          newlog.GetUserUUID()<<std::endl;
+            std::string strAvailable =m_client->getAvailable(newlog.GetUserUUID(),m_DeviceSN);
+            std::cout<<"getAvailable="<<strAvailable<<std::endl;
+            if(strAvailable=="1")
+            {
+                std::cout<<"setRelay=1"<<std::endl;
+                umxPeriDev_setRelay(1);
+                sleep(1);
+                umxPeriDev_setRelay(0);
+            }
+            else
+            {
+                try{
+                    std::cout<<"remove log Id="<<newlog.GetId()<<std::endl;
+                    bool isimage=true;
+                    ret = umxDB_deleteLogEntryById(_umxDBHandle, newlog.GetId(),&isimage);
+                }
+                catch(Poco::Exception &e){
+                    poco_warning(m_logger,"remove log fail:"+e.message());
+                }
+
+                umxPeriDev_setLedIndicatorBrightness(255,0,0);
+                ui->infoText->setText(QString("Can't Find Location CARD"));
+                sleep(1);
+                system("aplay /usr/local/share/CMITECH/sound/cn/unauthorized.wav");
+                umxPeriDev_setLedIndicatorBrightness(0,0,0);
+                availbale=false;
+            }
+        }
+        //----结束二次验证
+
+        m_lastpid=pid;
+    } //end if isnew
+
     //如果没设置云上传，返回
     if(m_useServer!=1 )
     {
@@ -481,4 +501,20 @@ void StatusForm::rs485Write(string uuid,int rsEncode)
     cmd.append(baId);
     cmd.append(baEnd);
     _rs485->write(cmd);
+}
+
+void StatusForm::wgWrite(int uid)
+{
+    //uid=10;
+    //set wiegand 26
+    umxPeriDev_setWiegandConfig(26, 80, 500,26, 80, 500);
+
+    string i=std::to_string(uid);
+    umxPeriDev_writeWiegandData(i.c_str(),i.length()); //output 1579008
+
+    //int base=16
+    QString strHexId= QString::number(uid,16);
+    QByteArray baId_hex=QByteArray::fromHex(strHexId.toLatin1());
+    umxPeriDev_writeWiegandData(baId_hex,baId_hex.length()); //output 10485760
+
 }

@@ -51,8 +51,10 @@ public:
         int m_checkAvailable=0;
         int m_rs232=0;
         int m_rs485=0;
+        int m_dynamicWg=0; //输出双韦根，用于吊蓝之类的应用
         bool m_allowtryupload=true;
         int m_lastpid=0;
+
     //返回设备是否为调试模式
     int getDebugMode(){return m_debugMode || m_showMessage;}
 
@@ -101,6 +103,8 @@ private:
 
     void rs232Write(string uuid, int rsEncode); //encodeType 0=ascii 1=hex 2=ten
     void rs485Write(string uuid, int rsEncode);
+
+    void wgWrite(int uid);
 };
 
 #endif // STATUSFORM_H
