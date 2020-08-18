@@ -271,6 +271,7 @@ void StatusForm::syncToServer()
                     uid=uid+20000;
                 wgWrite(uid);
             }
+
         }
         //--end 双韦根
         //----二次验证
