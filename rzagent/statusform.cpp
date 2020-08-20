@@ -15,6 +15,7 @@ using Poco::PatternFormatter;
 using Poco::AutoPtr;
 using Poco::Data::BLOBInputStream;
 using Poco::StreamCopier;
+#include <stdio.h>
 #include <QByteArray>
 #include <QTimer>
 #include <QDateTime>
@@ -506,16 +507,55 @@ void StatusForm::rs485Write(string uuid,int rsEncode)
 
 void StatusForm::wgWrite(int uid)
 {
-    //uid=10;
+    //uid=2;
     //set wiegand 26
     umxPeriDev_setWiegandConfig(26, 80, 500,26, 80, 500);
+    // Below is direct sending 26bits including decimal 10 from total 4bytes (32bits) but if parity bits are necessary
+    //p0000000 00000000 00000101 0p000000
+    //00000000 00000000 00000010 10000000
+    unsigned char buf[4], writeData[4];
+    bool isOdd=false;
+    int n=uid/2;
+    isOdd=(uid&1);
+    if(isOdd)
+    {
+        n=(uid-1)/2;
+    }else
+    {
+        n=uid/2;
+    }
 
-    string i=std::to_string(uid);
-    umxPeriDev_writeWiegandData(i.c_str(),i.length()); //output 1579008
-
-    //int base=16
-    QString strHexId= QString::number(uid,16);
+    QString strHexId= QString::number(n,16);
     QByteArray baId_hex=QByteArray::fromHex(strHexId.toLatin1());
-    umxPeriDev_writeWiegandData(baId_hex,baId_hex.length()); //output 10485760
+
+//    std::cout << "hexid= "<<strHexId.toStdString()<<std::endl;
+//    cout << "balen= "<<baId_hex.length()<<endl;
+
+    buf[0] = 0x00;
+    buf[1] = 0x00;
+    buf[2] = 0x00;
+    buf[3] = 0x80;
+
+    int len=baId_hex.length()-1;
+    for(int i=2;i>0;i--){
+        buf[i]=len>=0?baId_hex.at(len--):0x00;
+    }
+    buf[3]=isOdd?0x80:0x00; //对应教验位，x80时 值加1
+
+    // Wiegand bits swap,反转存储example: 10000101->10100001
+    for(int i=0; i<4; i++)
+    {
+        writeData[i] = 0;
+        writeData[i] |= ((buf[i] & 0x01) ? 0x1 : 0x0) << 7;
+        writeData[i] |= ((buf[i] & 0x02) ? 0x1 : 0x0) << 6;
+        writeData[i] |= ((buf[i] & 0x04) ? 0x1 : 0x0) << 5;
+        writeData[i] |= ((buf[i] & 0x08) ? 0x1 : 0x0) << 4;
+        writeData[i] |= ((buf[i] & 0x10) ? 0x1 : 0x0) << 3;
+        writeData[i] |= ((buf[i] & 0x20) ? 0x1 : 0x0) << 2;
+        writeData[i] |= ((buf[i] & 0x40) ? 0x1 : 0x0) << 1;
+        writeData[i] |= ((buf[i] & 0x80) ? 0x1 : 0x0) << 0;
+    }
+
+    umxPeriDev_writeWiegandData((const char *)writeData, 4);
 
 }

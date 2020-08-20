@@ -105,6 +105,7 @@ private:
     void rs485Write(string uuid, int rsEncode);
 
     void wgWrite(int uid);
+
 };
 
 #endif // STATUSFORM_H
