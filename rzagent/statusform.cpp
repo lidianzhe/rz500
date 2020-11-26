@@ -116,8 +116,7 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
 
     m_serverThread = new ServerThread(this);
     m_serverThread->start();
-    //    if(m_useServer)
-    //    {
+
     m_timeTimer = new QTimer(this);
     connect(m_timeTimer,SIGNAL(timeout()),this,SLOT(syncTime()));
     m_timeTimer->setInterval(1000*60);
@@ -127,7 +126,8 @@ StatusForm::StatusForm(QStackedWidget *pQStackedWidget,QWidget *parent) :
     connect(m_syncTimer,SIGNAL(timeout()),this,SLOT(syncToServer()));
     m_syncTimer->setInterval(1000*((m_checkAvailable || m_rs232 || m_rs485 || m_dynamicWg)==1?1:3));
     m_syncTimer->start();
-    //    }
+    //
+    syncTime();
 
 }
 
@@ -412,8 +412,17 @@ void StatusForm::syncTime()
     std::string strTime= m_client->getDatetime();
     if(strTime!="")
     {
+        //"yyyy-mm-dd hh:mm:ss"
+        QString t=QString::fromStdString(strTime);
+        QString nt=QString("%1-%2-%3 %4").arg(t.mid(6,4), t.left(2),t.mid(3,2),t.right(8));
+        string strcmd="date -s \""+nt.toStdString()+"\"";
+        std::cout << "date2:"<<strcmd<< endl;
+        system(strcmd.c_str());
+        //"mm/dd/yyyy hh:mm:ss"
         strTime = "date -s \""+strTime+"\"";
+        std::cout << "date:"<<strTime<< endl;
         system(strTime.c_str());
+
         system("hwclock -w");
     }
     //重新激活上传尝试
