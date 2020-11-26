@@ -29,7 +29,7 @@ void RootHandler::handleRequest(HTTPServerRequest &request, HTTPServerResponse &
     ostr << "\"20200207\":\"修正UID乱码上传的问题\"\n";
     ostr << "\"20200411\":\"增加串口输出的功能\"\n";
     ostr << "\"20200820\":\"增加动态韦根输出功能（用于煤矿吊篮筐应用）\"\n";
-    ostr << "\"20200820\":\"修正时间更新方法，适应不同硬件\"\n";
+    ostr << "\"20201126\":\"修正时间更新方法，适应不同硬件\"\n";
     //ostr <<"}";
     ostr<<endl;
 
